@@ -16,7 +16,7 @@ def lambda_handler(event, context):
     
     try:
         job = event.get('CodePipeline.job')
-        if job
+        if job:
             for artifact in job["data"]["inputArtifacts"]:
                 if artifact["name"] == "MyAppBuild":
                     location = artifact["location"]["s3Location"]
@@ -35,7 +35,8 @@ def lambda_handler(event, context):
         with zipfile.ZipFile(portfolio_zip) as myzip:
             for nm in myzip.namelist():
                 obj = myzip.open(nm)
-                portfolio_bucket.upload_fileobj(obj, nm)
+                mime_type = mimetypes.guess_type(nm)[0]
+                portfolio_bucket.upload_fileobj(obj, nm, ExtraArgs={'ContentType': str(mime_type)})
                 portfolio_bucket.Object(nm).Acl().put(ACL='public-read')
         print "Job done!"
         topic.publish(Subject="Portfolio Deployed", Message="Portfolio deployed successfully")
