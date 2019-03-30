@@ -24,12 +24,20 @@
   background-color: rgb(52, 152, 219);
 }
 
-.color--skyBlue {
-  color: rgb(52, 152, 219);
+.background--black {
+  background-color: black;
+}
+
+.background--white {
+  background-color: white;
+}
+
+.color--white {
+  color: white;
 }
 
 .color--cloud {
-  color: rgb(236, 240, 241);
+  color: black;
 }
 
 .color--grey {
@@ -41,7 +49,19 @@
 }
 
 .section__example {
-  background-color: rgb(44, 62, 80);
+  background-color: white;
+}
+
+#suncorp {
+  margin-top: 13%;
+}
+
+#cognizant {
+  margin-top: 28%;
+}
+
+#myob {
+  margin-top: 24%;
 }
 
 /*
@@ -57,6 +77,7 @@ html {
 body {
   font-family: 'Cardo', serif;
   margin: 0;
+  background-color: black;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -138,10 +159,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .section__exampleTitle{
   margin-top: -32%;
-  font-size: 2.8rem;
+  font-size: 2.4rem;
   text-align: center;
-  text-transform: uppercase;
-  width: 53%;
+  text-transform: capitalize;
+  width: 77%;
+  color: black;
+  display: none;
 }
 
 .section__exampleImage {
@@ -207,26 +230,29 @@ h1, h2, h3, h4, h5, h6 {
   top: 5rem;
   font-size: 4rem;
   z-index: 1;
-  curson: pointer;
+  cursor: pointer;
 }
 
 .modal__text {
   position: absolute;
   top: 0;
   left: 0;
-  font-size: 2.4rem;
+  font-size: 2.1rem;
   padding: 2rem;
   width: 66%;
 }
 
 .modal__link {
-  background-color: white;
+  background-color: black;
   border-radius: 4px;
   padding: 0.4rem 1rem;
-  text-transform: uppercase;
+  text-transform: capitalize;
   text-decoration: none;
 }
 
 .modal__image {
-  opacity: 0.2;
+  width: 24%;
+  margin-left: 69%;
+  margin-top: 7%;
+  height: 23%;
 }
