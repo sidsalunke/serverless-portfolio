@@ -21,7 +21,9 @@
   "homepage": "https://github.com/sidsalunke/serverless-portfolio#readme",
   "dependencies": {
     "react": "16.2.0",
-    "react-dom": "16.2.0"
+    "react-dom": "16.2.0",
+    "react-horizontal-timeline": "1.5.3",
+    "react-scripts": "1.1.4"
   },
   "devDependencies": {
     "babel-core": "6.26.0",

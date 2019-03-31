@@ -1,5 +1,6 @@
 import React from 'react';
 import ExampleWorkModal from './example-work-modal';
+import Timeline from './timeline';
 
 class ExampleWork extends React.Component {
   constructor(props) {
@@ -38,7 +39,7 @@ class ExampleWork extends React.Component {
               openModal={this.openModal}/>
           )
         }) }
-
+        <Timeline />
       </section>
 
       <ExampleWorkModal example={this.state.selectedExample}

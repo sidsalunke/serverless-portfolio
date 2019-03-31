@@ -115,7 +115,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .section--description {
-  font-size: 2.8rem;
+  font-size: 2.7rem;
   padding-left: 3.5rem;
   padding-right: 3.5rem;
 }
@@ -255,4 +255,10 @@ h1, h2, h3, h4, h5, h6 {
   margin-left: 69%;
   margin-top: 7%;
   height: 23%;
+}
+
+.App {
+  font-family: 'Cardo', serif;
+  text-align: center;
+  color: white;
 }
