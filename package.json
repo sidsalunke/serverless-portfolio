@@ -4,8 +4,8 @@
   "description": "My Portfolio",
   "main": "index.js",
   "scripts": {
-    "test": "jest --testEnvironment node",
-    "test-watch": "jest --watch --testEnvironment node",
+    "test": "jest --testEnvironment jsdom",
+    "test-watch": "jest --watch --testEnvironment jsdom",
     "webpack": "webpack",
     "webpack-watch": "webpack --watch"
   },
