@@ -24,6 +24,7 @@ const myWork = [
     }
   },
 ];
+
 describe("ExampleWork component", () => {
   let component = shallow(<ExampleWork work={myWork}/>);
 

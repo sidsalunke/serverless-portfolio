@@ -16,6 +16,7 @@ class ExampleWork extends React.Component {
   };
 
   openModal(evt, example) {
+    document.body.classList.add('modal--open');
     this.setState({
       'modalOpen': true,
       'selectedExample': example,
@@ -23,6 +24,7 @@ class ExampleWork extends React.Component {
   };
 
   closeModal(evt) {
+    document.body.classList.remove('modal--open');
     this.setState({
       'modalOpen': false,
     });
