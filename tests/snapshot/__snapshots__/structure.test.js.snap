@@ -1,0 +1,344 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`experience list matches snapshot 1`] = `
+"
+
+      <!-- Emirates Group — current role, no expand -->
+      <article class="exp__card" style="--company-color:#C60C30" aria-label="Principal Quality Engineer at Emirates Group">
+        <div class="exp__header">
+          <div class="exp__header-left">
+            <div class="exp__domain">New Loyalty Platform</div>
+            <div class="exp__role">Principal Quality Engineer</div>
+            <div class="exp__company-row">
+              <span class="exp__company">Emirates Group</span>
+              <span class="exp__sep" aria-hidden="true">·</span>
+              <span class="exp__location"><svg width="13" height="13" aria-hidden="true"><use href="#i-map-pin"></use></svg>&nbsp;Dubai, UAE</span>
+            </div>
+          </div>
+          <div class="exp__header-right">
+            <span class="exp__dates">2025 – Present</span>
+          </div>
+        </div>
+        <div class="exp__details">
+          <p class="exp__description">Emirates is one of the world’s largest airlines and a global leader in aviation, headquartered in Dubai, UAE. Emirates Group encompasses the airline and dnata, offering aviation, travel, and airport services worldwide.</p>
+          <a href="https://www.emirates.com/" class="exp__ext-link" target="_blank" rel="noopener noreferrer" aria-label="Visit Emirates Group website">
+            Visit Emirates Group&nbsp;<svg width="14" height="14" aria-hidden="true"><use href="#i-external-link"></use></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Qantas Airways -->
+      <article class="exp__card exp__card--expandable" style="--company-color:#E8002D" aria-label="Software Technical Lead at Qantas Airways">
+        <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+          <div class="exp__header-left">
+            <div class="exp__domain">Cloud Platform &amp; Digital</div>
+            <div class="exp__role">Software Technical Lead</div>
+            <div class="exp__company-row">
+              <span class="exp__company">Qantas Airways</span>
+              <span class="exp__sep" aria-hidden="true">·</span>
+              <span class="exp__location"><svg width="13" height="13" aria-hidden="true"><use href="#i-map-pin"></use></svg>&nbsp;Sydney, Australia</span>
+            </div>
+          </div>
+          <div class="exp__header-right">
+            <span class="exp__dates">2023 – 2025</span>
+            <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"></use></svg></span>
+          </div>
+        </div>
+        <div class="exp__details">
+          <p class="exp__description">Qantas Airways is Australia’s largest domestic and international airline and the country’s flag carrier, regarded as a global leader in safety and operational performance.</p>
+          <ul class="exp__bullets">
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Led a multi-disciplinary onshore team delivering automation capability across the Qantas Cloud Platform and Digital domains</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Defined and executed the Java-based API test automation strategy for cloud-native microservices; leveraged Slack and GitHub APIs to institutionalise ownership and reporting</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Designed and delivered a scalable performance testing platform using k6 on Kubernetes – sustaining 300+ RPS over 24-hour test runs without platform degradation</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Established an organisation-wide visual regression testing framework from scratch, adopted across multiple product teams</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Led vendor evaluation and RFP processes for engineering tooling; negotiated contracts resulting in measurable cost savings</li>
+          </ul>
+          <a href="https://www.qantas.com/" class="exp__ext-link" target="_blank" rel="noopener noreferrer" aria-label="Visit Qantas Airways website">
+            Visit Qantas Airways&nbsp;<svg width="14" height="14" aria-hidden="true"><use href="#i-external-link"></use></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Canva -->
+      <article class="exp__card exp__card--expandable" style="--company-color:#7D2AE8" aria-label="QA Manager at Canva">
+        <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+          <div class="exp__header-left">
+            <div class="exp__domain">Content &amp; Discovery</div>
+            <div class="exp__role">QA Manager</div>
+            <div class="exp__company-row">
+              <span class="exp__company">Canva</span>
+              <span class="exp__sep" aria-hidden="true">·</span>
+              <span class="exp__location"><svg width="13" height="13" aria-hidden="true"><use href="#i-map-pin"></use></svg>&nbsp;Sydney, Australia</span>
+            </div>
+          </div>
+          <div class="exp__header-right">
+            <span class="exp__dates">2020 – 2023</span>
+            <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"></use></svg></span>
+          </div>
+        </div>
+        <div class="exp__details">
+          <p class="exp__description">Canva is an Australian-born global graphic design platform used by millions worldwide to create presentations, marketing materials, and visual content.</p>
+          <ul class="exp__bullets">
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Drove quality transformation across the Content &amp; Discovery product group – building Java-based API test suites across a microservices architecture and establishing a shift-left culture with early defect detection</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Integrated an SEO Automation Hub into the release cycle to prevent high-severity regressions reaching production</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Architected and executed full migration of frontend integration tests from Chimp to CodeceptJS</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Served as an official Canva Coach; mentored three internal coaches, delivering 1:1s, performance reviews, and career development guidance</li>
+          </ul>
+          <a href="https://www.canva.com/" class="exp__ext-link" target="_blank" rel="noopener noreferrer" aria-label="Visit Canva website">
+            Visit Canva&nbsp;<svg width="14" height="14" aria-hidden="true"><use href="#i-external-link"></use></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- MYOB Group -->
+      <article class="exp__card exp__card--expandable" style="--company-color:#00A651" aria-label="Senior Quality Analyst at MYOB Group">
+        <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+          <div class="exp__header-left">
+            <div class="exp__domain">Online Tax</div>
+            <div class="exp__role">Senior Quality Analyst</div>
+            <div class="exp__company-row">
+              <span class="exp__company">MYOB Group</span>
+              <span class="exp__sep" aria-hidden="true">·</span>
+              <span class="exp__location"><svg width="13" height="13" aria-hidden="true"><use href="#i-map-pin"></use></svg>&nbsp;Sydney, Australia</span>
+            </div>
+          </div>
+          <div class="exp__header-right">
+            <span class="exp__dates">2017 – 2020</span>
+            <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"></use></svg></span>
+          </div>
+        </div>
+        <div class="exp__details">
+          <p class="exp__description">MYOB is Australia’s leading accounting and financial management software platform, serving SMEs and enterprise clients across Australia and New Zealand.</p>
+          <ul class="exp__bullets">
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Built automated test suites (API, Performance, UI) from scratch using Node.js across a microservices architecture; established CI/CD pipelines with Docker and Buildkite</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Co-led the QA function across 11 teams in Sydney for one of MYOB’s most complex delivery programmes – spanning accounting, payroll, and financial reporting product lines</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Recognised as a top 10% high performer (MYOB Kudos Award); won People’s Choice Award at MYOB Hackdays 2018 &amp; 2019</li>
+          </ul>
+          <a href="https://www.myob.com/au" class="exp__ext-link" target="_blank" rel="noopener noreferrer" aria-label="Visit MYOB Group website">
+            Visit MYOB Group&nbsp;<svg width="14" height="14" aria-hidden="true"><use href="#i-external-link"></use></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Suncorp Group -->
+      <article class="exp__card exp__card--expandable" style="--company-color:#F5A623" aria-label="Software Test Engineer at Suncorp Group">
+        <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+          <div class="exp__header-left">
+            <div class="exp__domain">Digital Banking &amp; Insurance</div>
+            <div class="exp__role">Software Test Engineer</div>
+            <div class="exp__company-row">
+              <span class="exp__company">Suncorp Group</span>
+              <span class="exp__sep" aria-hidden="true">·</span>
+              <span class="exp__location"><svg width="13" height="13" aria-hidden="true"><use href="#i-map-pin"></use></svg>&nbsp;Sydney, Australia</span>
+            </div>
+          </div>
+          <div class="exp__header-right">
+            <span class="exp__dates">2015 – 2017</span>
+            <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"></use></svg></span>
+          </div>
+        </div>
+        <div class="exp__details">
+          <p class="exp__description">Suncorp Group is one of Australia’s largest financial services groups, operating across banking, insurance, and wealth management brands in Australia and New Zealand.</p>
+          <ul class="exp__bullets">
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Delivered test automation across digital banking and insurance products using Java and Selenium within a highly regulated financial services environment</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Gained hands-on exposure to engineering practices, risk controls, and governance frameworks specific to banking and insurance product delivery</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Mentored junior engineers and university students; conducted manual exploratory and functional testing across digital product releases</li>
+          </ul>
+          <a href="https://www.suncorp.com.au/" class="exp__ext-link" target="_blank" rel="noopener noreferrer" aria-label="Visit Suncorp Group website">
+            Visit Suncorp Group&nbsp;<svg width="14" height="14" aria-hidden="true"><use href="#i-external-link"></use></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Cognizant -->
+      <article class="exp__card exp__card--expandable" style="--company-color:#1363A4" aria-label="Programmer at Cognizant">
+        <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+          <div class="exp__header-left">
+            <div class="exp__domain">Credit Suisse Account</div>
+            <div class="exp__role">Programmer</div>
+            <div class="exp__company-row">
+              <span class="exp__company">Cognizant</span>
+              <span class="exp__sep" aria-hidden="true">·</span>
+              <span class="exp__location"><svg width="13" height="13" aria-hidden="true"><use href="#i-map-pin"></use></svg>&nbsp;Pune, India</span>
+            </div>
+          </div>
+          <div class="exp__header-right">
+            <span class="exp__dates">2013 – 2015</span>
+            <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"></use></svg></span>
+          </div>
+        </div>
+        <div class="exp__details">
+          <p class="exp__description">Cognizant Technology Solutions is an American multinational IT corporation. Worked on the Credit Suisse account delivering quality engineering services within a global investment banking client engagement.</p>
+          <ul class="exp__bullets">
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Delivered automation using HP QTP and LoadRunner within a financial services (Credit Suisse) environment – early exposure to banking-grade quality standards, stakeholder governance, and regulatory compliance</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Managed stakeholder reporting and daily communication across project teams</li>
+          </ul>
+          <a href="https://www.cognizant.com/" class="exp__ext-link" target="_blank" rel="noopener noreferrer" aria-label="Visit Cognizant website">
+            Visit Cognizant&nbsp;<svg width="14" height="14" aria-hidden="true"><use href="#i-external-link"></use></svg>
+          </a>
+        </div>
+      </article>
+
+    "
+`;
+
+exports[`footer matches snapshot 1`] = `
+"
+  <div class="container footer__inner">
+    <div class="footer__socials">
+      <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="LinkedIn">
+        <svg width="20" height="20" aria-hidden="true"><use href="#i-linkedin"></use></svg>
+      </a>
+      <a href="https://github.com/sidsalunke" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="GitHub">
+        <svg width="20" height="20" aria-hidden="true"><use href="#i-github"></use></svg>
+      </a>
+    </div>
+    <p class="footer__name">Siddharth Salunke</p>
+    <p class="footer__copy">© <span id="footer-year"></span> · Built with HTML, CSS &amp; Vanilla JS</p>
+  </div>
+"
+`;
+
+exports[`hero section matches snapshot 1`] = `
+"
+    <div class="hero__badge">
+      <svg width="14" height="14" aria-hidden="true"><use href="#i-map-pin"></use></svg>
+      Dubai, UAE&nbsp;·&nbsp;Australian Citizen
+    </div>
+
+    <h1 class="hero__name">Siddharth Salunke</h1>
+    <p class="hero__role">Principal Quality Engineer</p>
+    <p class="hero__tagline">Building and scaling enterprise-grade test platforms, infrastructure, and quality engineering capabilities</p>
+
+    <div class="hero__ctas">
+      <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="btn btn--primary">
+        <svg width="18" height="18" aria-hidden="true"><use href="#i-linkedin"></use></svg> LinkedIn
+      </a>
+      <a href="https://github.com/sidsalunke" target="_blank" rel="noopener noreferrer" class="btn btn--ghost">
+        <svg width="18" height="18" aria-hidden="true"><use href="#i-github"></use></svg> GitHub
+      </a>
+    </div>
+
+    <div class="hero__stats" role="list">
+      <div class="hero__stat" role="listitem">
+        <div class="hero__stat-value">13+</div>
+        <div class="hero__stat-label">Years Experience</div>
+      </div>
+      <div class="hero__stat" role="listitem">
+        <div class="hero__stat-value">25</div>
+        <div class="hero__stat-label">Engineers Led</div>
+      </div>
+      <div class="hero__stat" role="listitem">
+        <div class="hero__stat-value">6</div>
+        <div class="hero__stat-label">Companies</div>
+      </div>
+    </div>
+  "
+`;
+
+exports[`navigation links match snapshot 1`] = `
+"
+  <a href="#hero" class="nav__logo">SS</a>
+
+  <ul class="nav__links" id="nav-links" role="list">
+    <li><a href="#about" class="nav__link">About</a></li>
+    <li><a href="#experience" class="nav__link">Experience</a></li>
+    <li><a href="#skills" class="nav__link">Skills</a></li>
+    <li>
+      <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="nav__cta btn btn--primary">
+        Connect&nbsp;<svg width="16" height="16" aria-hidden="true"><use href="#i-linkedin"></use></svg>
+      </a>
+    </li>
+  </ul>
+
+  <button class="nav__hamburger" id="nav-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+"
+`;
+
+exports[`skills grid matches snapshot 1`] = `
+"
+
+      <div class="skills__group">
+        <div class="skills__group-header">
+          <svg width="18" height="18" class="skills__icon" aria-hidden="true"><use href="#i-code"></use></svg>
+          <h3 class="skills__category">Languages</h3>
+        </div>
+        <div class="skills__tags" role="list">
+          <span class="skills__tag" role="listitem">Python</span>
+          <span class="skills__tag" role="listitem">Java</span>
+          <span class="skills__tag" role="listitem">TypeScript</span>
+          <span class="skills__tag" role="listitem">Node.js</span>
+          <span class="skills__tag" role="listitem">Bash</span>
+        </div>
+      </div>
+
+      <div class="skills__group">
+        <div class="skills__group-header">
+          <svg width="18" height="18" class="skills__icon" aria-hidden="true"><use href="#i-flask"></use></svg>
+          <h3 class="skills__category">Test Automation</h3>
+        </div>
+        <div class="skills__tags" role="list">
+          <span class="skills__tag" role="listitem">Playwright</span>
+          <span class="skills__tag" role="listitem">Cypress</span>
+          <span class="skills__tag" role="listitem">Selenium</span>
+          <span class="skills__tag" role="listitem">WebdriverIO</span>
+          <span class="skills__tag" role="listitem">RestAssured</span>
+          <span class="skills__tag" role="listitem">Pytest</span>
+          <span class="skills__tag" role="listitem">Jest</span>
+        </div>
+      </div>
+
+      <div class="skills__group">
+        <div class="skills__group-header">
+          <svg width="18" height="18" class="skills__icon" aria-hidden="true"><use href="#i-gauge"></use></svg>
+          <h3 class="skills__category">Performance Testing</h3>
+        </div>
+        <div class="skills__tags" role="list">
+          <span class="skills__tag" role="listitem">k6</span>
+          <span class="skills__tag" role="listitem">Artillery</span>
+          <span class="skills__tag" role="listitem">JMeter</span>
+        </div>
+      </div>
+
+      <div class="skills__group">
+        <div class="skills__group-header">
+          <svg width="18" height="18" class="skills__icon" aria-hidden="true"><use href="#i-cloud"></use></svg>
+          <h3 class="skills__category">Cloud &amp; DevOps</h3>
+        </div>
+        <div class="skills__tags" role="list">
+          <span class="skills__tag" role="listitem">AWS</span>
+          <span class="skills__tag" role="listitem">Docker</span>
+          <span class="skills__tag" role="listitem">Kubernetes</span>
+          <span class="skills__tag" role="listitem">GitHub Actions</span>
+          <span class="skills__tag" role="listitem">Buildkite</span>
+          <span class="skills__tag" role="listitem">GitLab CI</span>
+        </div>
+      </div>
+
+      <div class="skills__group">
+        <div class="skills__group-header">
+          <svg width="18" height="18" class="skills__icon" aria-hidden="true"><use href="#i-eye"></use></svg>
+          <h3 class="skills__category">Observability</h3>
+        </div>
+        <div class="skills__tags" role="list">
+          <span class="skills__tag" role="listitem">Splunk</span>
+          <span class="skills__tag" role="listitem">Sumo Logic</span>
+          <span class="skills__tag" role="listitem">Dynatrace</span>
+        </div>
+      </div>
+
+      <div class="skills__group">
+        <div class="skills__group-header">
+          <svg width="18" height="18" class="skills__icon" aria-hidden="true"><use href="#i-bot"></use></svg>
+          <h3 class="skills__category">AI Tooling</h3>
+        </div>
+        <div class="skills__tags" role="list">
+          <span class="skills__tag" role="listitem">Claude (Anthropic)</span>
+          <span class="skills__tag" role="listitem">GenAI-assisted SDLC</span>
+        </div>
+      </div>
+
+    "
+`;
