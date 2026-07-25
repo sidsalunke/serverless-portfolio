@@ -11,20 +11,28 @@ jobs:
     name: Deploy to S3 + CloudFront invalidation
     runs-on: ubuntu-latest
 
-    # Required for OIDC token exchange with AWS.
-    # id-token: write  → GitHub generates a JWT for this job
-    # contents: read   → checkout action reads the repo
     permissions:
       id-token: write
       contents: read
 
+    # Expose the pre-deploy commit SHA so the rollback job can restore it
+    # if the live E2E tests fail.
+    outputs:
+      previous-sha: ${{ steps.prev-sha.outputs.sha }}
+      invalidation-id: ${{ steps.invalidation.outputs.id }}
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # need HEAD and HEAD~1 for rollback
 
-      # OIDC authentication — no long-lived access keys stored anywhere.
-      # GitHub generates a short-lived JWT; AWS exchanges it for temporary
-      # credentials scoped to the deploy role (defined in infra/main.tf).
-      # The role trust policy restricts this to master branch pushes only.
+      # Record the commit that is currently live before we overwrite it.
+      # If E2E fails after deploy, the rollback job checks out this SHA
+      # and re-syncs it to S3, restoring the last known-good state.
+      - name: Record pre-deploy commit SHA
+        id: prev-sha
+        run: echo "sha=$(git rev-parse HEAD~1)" >> $GITHUB_OUTPUT
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
@@ -40,25 +48,31 @@ jobs:
             --include "images/*" \
             --delete
         # Note: --acl public-read is intentionally omitted.
-        # The S3 bucket is private; CloudFront OAC (defined in infra/main.tf)
-        # is the only permitted reader.  Public S3 URLs return 403.
+        # CloudFront OAC (configured in the console, codified in infra/main.tf)
+        # is the only permitted reader. Public S3 URLs return 403.
 
-      # Purge the CloudFront cache so the new files are served immediately.
-      # Without this, CloudFront would serve stale content for up to 24 hours
-      # (the default TTL set in infra/main.tf).
+      # Capture the invalidation ID so we can wait for it to finish before
+      # running E2E tests. Without waiting, tests may hit stale CDN cache
+      # and pass against old content, making the canary check meaningless.
       - name: Invalidate CloudFront cache
+        id: invalidation
         run: |
-          aws cloudfront create-invalidation \
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
             --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+          echo "id=$INVALIDATION_ID" >> $GITHUB_OUTPUT
 
-  # ── Job 2: generate and upload SBOM ─────────────────────────────────────
-  #
-  # A Software Bill of Materials lists every dependency (direct + transitive)
-  # with its exact version and known licence.  Generating it on every deploy
-  # gives a point-in-time snapshot of the supply chain for audit and
-  # compliance purposes.  The SBOM is uploaded as a workflow artefact and
-  # retained for 90 days.
+      # Poll until CloudFront confirms the invalidation is complete (~1-3 min).
+      # Only then is the new content guaranteed to be live globally.
+      - name: Wait for CloudFront invalidation to complete
+        run: |
+          aws cloudfront wait invalidation-completed \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --id ${{ steps.invalidation.outputs.id }}
+
+  # ── Job 2: generate and upload SBOM (runs in parallel with deploy) ───────
   sbom:
     name: Generate SBOM (CycloneDX)
     runs-on: ubuntu-latest
@@ -74,9 +88,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # @cyclonedx/cyclonedx-npm generates a CycloneDX SBOM in JSON format.
-      # CycloneDX is the OWASP-backed standard supported by most security
-      # platforms (Dependency-Track, GUAC, GitHub Dependency Graph, etc.).
       - name: Install CycloneDX CLI
         run: npm install -g @cyclonedx/cyclonedx-npm
 
@@ -91,10 +102,10 @@ jobs:
           retention-days: 90
 
   # ── Job 3: E2E smoke tests against the live site ────────────────────────
-  # 'needs: deploy' means this job only starts after aws s3 sync AND the
-  # CloudFront invalidation complete.  Files are live before this job begins.
+  # Runs only after deploy completes AND the CloudFront invalidation is done,
+  # so tests always exercise the freshly deployed content — not stale cache.
   e2e-live:
-    name: E2E on live site
+    name: E2E smoke tests — live site
     needs: deploy
     runs-on: ubuntu-latest
 
@@ -116,10 +127,11 @@ jobs:
         run: npx playwright test --project=chromium
         env:
           BASE_URL: https://portfolio.sidsalunke.info
-        # BASE_URL being set tells playwright.config.js to skip webServer
-        # and point all page.goto('/') calls at the live domain.
-        # Includes security.spec.js which verifies CSP and security headers
-        # are served correctly through the CloudFront distribution.
+        # BASE_URL tells playwright.config.js to skip the local dev server
+        # and run all tests against the live CloudFront distribution.
+        # Includes security.spec.js which verifies that the CSP and security
+        # headers are being served correctly through CloudFront — not just
+        # present in the HTML meta tags.
 
       - name: Upload report on failure
         uses: actions/upload-artifact@v4
@@ -128,3 +140,64 @@ jobs:
           name: e2e-live-report
           path: playwright-report/
           retention-days: 14
+
+  # ── Job 4: rollback if E2E tests failed ─────────────────────────────────
+  #
+  # This is the canary gate. If live E2E tests catch a regression, this job
+  # automatically restores the previous known-good commit to S3 and
+  # invalidates the CDN — users see the old version within ~1-3 minutes.
+  #
+  # Flow:
+  #   deploy (records HEAD~1 SHA) ──► e2e-live ──► (pass) done
+  #                                              └──► (fail) rollback ──► re-deploy HEAD~1
+  rollback:
+    name: Rollback to previous commit
+    needs: [deploy, e2e-live]
+    if: needs.e2e-live.result == 'failure'
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      # Check out the commit that was live before this deploy.
+      # git rev-parse HEAD~1 in the deploy job captured this SHA.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.deploy.outputs.previous-sha }}
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Restore previous version to S3
+        run: |
+          aws s3 sync . s3://portfolio.sidsalunke.info \
+            --exclude "*" \
+            --include "index.html" \
+            --include "styles/*" \
+            --include "js/app.js" \
+            --include "images/*" \
+            --delete
+
+      - name: Invalidate CloudFront after rollback
+        run: |
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+          aws cloudfront wait invalidation-completed \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --id $INVALIDATION_ID
+
+      # Exit non-zero so the overall workflow is marked as failed.
+      # This surfaces the regression clearly in GitHub — the deploy
+      # job shows green (it deployed successfully) but the workflow
+      # is red because the canary caught a problem.
+      - name: Fail workflow to signal bad deployment was rolled back
+        run: |
+          echo "::error::Live E2E tests failed. Rolled back to commit ${{ needs.deploy.outputs.previous-sha }}. Check the e2e-live-report artefact for details."
+          exit 1
