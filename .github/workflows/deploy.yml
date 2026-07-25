@@ -3,6 +3,7 @@ name: Deploy & Verify
 on:
   push:
     branches: [master]
+  workflow_dispatch:  # allows manual triggering from the Actions tab
 
 jobs:
   # ── Job 1: push files to S3 ─────────────────────────────────────────────
