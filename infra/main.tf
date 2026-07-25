@@ -370,6 +370,7 @@ data "aws_iam_policy_document" "github_actions_deploy" {
 
     actions = [
       "cloudfront:CreateInvalidation",
+      "cloudfront:GetInvalidation",  # required for `aws cloudfront wait invalidation-completed`
     ]
 
     resources = [aws_cloudfront_distribution.site.arn]
