@@ -71,7 +71,7 @@ function initPortfolio() {
         if (!isOpen) {
           panel.hidden = false;
           node.setAttribute('aria-expanded', 'true');
-          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          if (panel.scrollIntoView) { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
         }
       }
       node.addEventListener('click', togglePanel);

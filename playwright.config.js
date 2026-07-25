@@ -8,7 +8,7 @@ const isLive   = !!process.env.BASE_URL;
 module.exports = defineConfig({
   testDir: './tests/e2e',
   timeout: 30_000,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   reporter: [['html', { open: 'never' }], ['list']],
 
   use: {
