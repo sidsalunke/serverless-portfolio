@@ -43,6 +43,18 @@ beforeEach(() => {
   initPortfolio();
 });
 
+// ── Font activation ────────────────────────────────────────────
+describe('Font activation', () => {
+  test('sets rel="stylesheet" on #google-fonts link when present', () => {
+    document.body.innerHTML =
+      '<link id="google-fonts" rel="preload">' + document.body.innerHTML;
+    jest.resetModules();
+    ({ initPortfolio } = require('../../js/app.js'));
+    initPortfolio();
+    expect(document.getElementById('google-fonts').getAttribute('rel')).toBe('stylesheet');
+  });
+});
+
 // ── Footer year ────────────────────────────────────────────────
 describe('Footer year', () => {
   test('sets #footer-year to the current year', () => {
@@ -91,6 +103,23 @@ describe('Hamburger menu', () => {
   });
 });
 
+// ── Nav scroll ─────────────────────────────────────────────────
+describe('Nav scroll behaviour', () => {
+  test('adds nav--scrolled class when scrolled past 30px', () => {
+    Object.defineProperty(window, 'scrollY', { value: 31, configurable: true });
+    window.dispatchEvent(new Event('scroll'));
+    expect(document.getElementById('main-nav').classList).toContain('nav--scrolled');
+  });
+
+  test('removes nav--scrolled class when back at top', () => {
+    Object.defineProperty(window, 'scrollY', { value: 31, configurable: true });
+    window.dispatchEvent(new Event('scroll'));
+    Object.defineProperty(window, 'scrollY', { value: 0, configurable: true });
+    window.dispatchEvent(new Event('scroll'));
+    expect(document.getElementById('main-nav').classList).not.toContain('nav--scrolled');
+  });
+});
+
 // ── Experience accordion ───────────────────────────────────────
 describe('Experience accordion', () => {
   test('expands a card on click', () => {
@@ -127,5 +156,11 @@ describe('Experience accordion', () => {
     const header = document.querySelector('.exp__header');
     header.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     expect(document.querySelector('.exp__card').classList).toContain('exp__card--expanded');
+  });
+
+  test('other keys do not toggle the card', () => {
+    const header = document.querySelector('.exp__header');
+    header.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    expect(document.querySelector('.exp__card').classList).not.toContain('exp__card--expanded');
   });
 });
