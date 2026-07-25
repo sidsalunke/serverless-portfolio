@@ -7,7 +7,7 @@ exports[`experience list matches snapshot 1`] = `
       <article class="exp__card" style="--company-color:#C60C30" aria-label="Principal Quality Engineer at Emirates Group">
         <div class="exp__header">
           <div class="exp__header-left">
-            <div class="exp__domain">New Loyalty Platform</div>
+            <div class="exp__domain">New Loyalty Program</div>
             <div class="exp__role">Principal Quality Engineer</div>
             <div class="exp__company-row">
               <span class="exp__company">Emirates Group</span>
@@ -207,8 +207,8 @@ exports[`hero section matches snapshot 1`] = `
     </div>
 
     <h1 class="hero__name">Siddharth Salunke</h1>
-    <p class="hero__role">Principal Quality Engineer</p>
-    <p class="hero__tagline">Building and scaling enterprise-grade test platforms, infrastructure, and quality engineering capabilities</p>
+    <p class="hero__role">Principal Engineer · Platform Engineering &amp; Developer Enablement</p>
+    <p class="hero__tagline">Building engineering platforms that accelerate delivery — leading teams that scale quality as a system-wide capability, not a bottleneck</p>
 
     <div class="hero__ctas">
       <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="btn btn--primary">
@@ -244,6 +244,7 @@ exports[`navigation links match snapshot 1`] = `
     <li><a href="#about" class="nav__link">About</a></li>
     <li><a href="#experience" class="nav__link">Experience</a></li>
     <li><a href="#skills" class="nav__link">Skills</a></li>
+    <li><a href="ai-engineering.html" class="nav__link">AI Engineering</a></li>
     <li><a href="testing.html" class="nav__link">Quality Suite</a></li>
     <li>
       <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="nav__cta btn btn--primary">
@@ -268,14 +269,16 @@ exports[`skills grid matches snapshot 1`] = `
         </div>
         <div class="skills__tags" role="list">
           <span class="skills__tag" role="listitem">Claude &amp; Claude Code</span>
-          <span class="skills__tag" role="listitem">ChatGPT</span>
-          <span class="skills__tag" role="listitem">Cursor</span>
-          <span class="skills__tag" role="listitem">GitHub Copilot</span>
           <span class="skills__tag" role="listitem">GitLab Duo</span>
+          <span class="skills__tag" role="listitem">ChatGPT</span>
           <span class="skills__tag" role="listitem">Microsoft Copilot</span>
           <span class="skills__tag" role="listitem">MCP</span>
           <span class="skills__tag" role="listitem">AI Agents</span>
         </div>
+        <p class="skills__group-note">
+          Deterministic tasks get automation rules; ambiguous ones get Claude. See
+          <a href="ai-engineering.html">AI Engineering</a> for the workflow, guardrails, and tools shipped with it.
+        </p>
       </div>
 
       <div class="skills__group">

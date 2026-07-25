@@ -19,13 +19,18 @@ const path = require('path');
 // jest-environment-jsdom provides DOMParser as a global — no import needed.
 // Do NOT require('jsdom') directly; it conflicts with the test environment.
 
-const CANONICAL_URL = 'https://portfolio.sidsalunke.info';
+const CANONICAL_URL    = 'https://portfolio.sidsalunke.info';
+const AI_CANONICAL_URL = 'https://portfolio.sidsalunke.info/ai-engineering.html';
 
 let doc;
+let aiDoc;
 
 beforeAll(() => {
   const html = fs.readFileSync(path.join(__dirname, '../../index.html'), 'utf8');
   doc = new DOMParser().parseFromString(html, 'text/html');
+
+  const aiHtml = fs.readFileSync(path.join(__dirname, '../../ai-engineering.html'), 'utf8');
+  aiDoc = new DOMParser().parseFromString(aiHtml, 'text/html');
 });
 
 // ── Primary SEO tags ─────────────────────────────────────────────────────────
@@ -218,5 +223,137 @@ describe('Document structure (SEO signals)', () => {
 
   test('<html> has lang attribute', () => {
     expect(doc.documentElement.hasAttribute('lang')).toBe(true);
+  });
+});
+
+// ── ai-engineering.html ───────────────────────────────────────────────────────
+
+describe('AI Engineering page — Primary SEO', () => {
+  test('<title> is present and includes the person name', () => {
+    expect(aiDoc.title.trim().length).toBeGreaterThan(10);
+    expect(aiDoc.title).toMatch(/Siddharth Salunke/i);
+  });
+
+  test('meta description is between 50 and 160 characters', () => {
+    const content = aiDoc.querySelector('meta[name="description"]').getAttribute('content');
+    expect(content.length).toBeGreaterThanOrEqual(50);
+    expect(content.length).toBeLessThanOrEqual(160);
+  });
+
+  test('meta description mentions AI/Claude', () => {
+    const content = aiDoc.querySelector('meta[name="description"]').getAttribute('content').toLowerCase();
+    expect(content).toMatch(/claude|ai tools/);
+  });
+
+  test('robots meta tag allows indexing and following', () => {
+    const content = aiDoc.querySelector('meta[name="robots"]').getAttribute('content');
+    expect(content).toMatch(/index/);
+    expect(content).toMatch(/follow/);
+  });
+
+  test('canonical link points to the ai-engineering page', () => {
+    const href = aiDoc.querySelector('link[rel="canonical"]').getAttribute('href');
+    expect(href).toBe(AI_CANONICAL_URL);
+  });
+
+  test('<html> has lang attribute', () => {
+    expect(aiDoc.documentElement.hasAttribute('lang')).toBe(true);
+  });
+});
+
+describe('AI Engineering page — Open Graph', () => {
+  function og(prop) {
+    return aiDoc.querySelector(`meta[property="og:${prop}"]`);
+  }
+
+  test('og:type is "website"', () => {
+    expect(og('type').getAttribute('content')).toBe('website');
+  });
+
+  test('og:url matches canonical', () => {
+    expect(og('url').getAttribute('content')).toBe(AI_CANONICAL_URL);
+  });
+
+  test('og:title is present and non-empty', () => {
+    expect(og('title').getAttribute('content').length).toBeGreaterThan(5);
+  });
+
+  test('og:description is present (40+ chars)', () => {
+    expect(og('description').getAttribute('content').length).toBeGreaterThanOrEqual(40);
+  });
+
+  test('og:image is present and is an absolute URL', () => {
+    expect(og('image').getAttribute('content')).toMatch(/^https?:\/\//);
+  });
+});
+
+describe('AI Engineering page — Twitter Card', () => {
+  function tw(name) {
+    return aiDoc.querySelector(`meta[name="twitter:${name}"]`);
+  }
+
+  test('twitter:card is present', () => {
+    expect(['summary', 'summary_large_image']).toContain(tw('card').getAttribute('content'));
+  });
+
+  test('twitter:title is present', () => {
+    expect(tw('title').getAttribute('content').length).toBeGreaterThan(5);
+  });
+
+  test('twitter:description is present (40+ chars)', () => {
+    expect(tw('description').getAttribute('content').length).toBeGreaterThanOrEqual(40);
+  });
+});
+
+describe('AI Engineering page — JSON-LD structured data', () => {
+  let schema;
+
+  beforeAll(() => {
+    const el = aiDoc.querySelector('script[type="application/ld+json"]');
+    expect(el).not.toBeNull();
+    schema = JSON.parse(el.textContent);
+  });
+
+  test('@context is schema.org', () => {
+    expect(schema['@context']).toBe('https://schema.org');
+  });
+
+  test('@type is WebPage', () => {
+    expect(schema['@type']).toBe('WebPage');
+  });
+
+  test('url matches canonical', () => {
+    expect(schema.url).toBe(AI_CANONICAL_URL);
+  });
+
+  test('isPartOf references the portfolio website', () => {
+    expect(schema.isPartOf).toBeDefined();
+    expect(schema.isPartOf['@type']).toBe('WebSite');
+  });
+
+  test('author is the Person', () => {
+    expect(schema.author).toBeDefined();
+    expect(schema.author['@type']).toBe('Person');
+    expect(schema.author.name).toBe('Siddharth Salunke');
+  });
+
+  test('JSON-LD is valid JSON (no parse errors)', () => {
+    expect(typeof schema).toBe('object');
+  });
+});
+
+describe('AI Engineering page — Document structure (SEO signals)', () => {
+  test('exactly one <h1> on the page', () => {
+    expect(aiDoc.querySelectorAll('h1').length).toBe(1);
+  });
+
+  test('all <img> elements have non-empty alt text', () => {
+    aiDoc.querySelectorAll('img').forEach(img => {
+      expect(img.getAttribute('alt') || '').not.toBe('');
+    });
+  });
+
+  test('no <title> tag appears more than once', () => {
+    expect(aiDoc.querySelectorAll('title').length).toBe(1);
   });
 });
