@@ -16,7 +16,7 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'json-summary', 'lcov', 'html'],
   collectCoverageFrom: ['js/app.js'],
-  coverageThresholds: {
+  coverageThreshold: {
     global: {
       lines:      80,
       statements: 80,
