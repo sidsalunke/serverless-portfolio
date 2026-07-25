@@ -3,6 +3,11 @@ name: Deploy & Verify
 on:
   push:
     branches: [master]
+    # Don't trigger a full deploy just because the snapshot update workflow
+    # committed refreshed PNG baselines to master. Badge commits are already
+    # guarded by [skip ci]; snapshots are guarded by paths-ignore here.
+    paths-ignore:
+      - 'tests/e2e/visual.spec.js-snapshots/**'
   workflow_dispatch:  # allows manual triggering from the Actions tab
 
 jobs:
