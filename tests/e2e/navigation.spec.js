@@ -8,7 +8,7 @@ test.describe('Navigation', () => {
   test('displays hero name and role', async ({ page }) => {
     await expect(page.locator('h1.hero__name')).toBeVisible();
     await expect(page.locator('h1.hero__name')).toHaveText('Siddharth Salunke');
-    await expect(page.locator('p.hero__role')).toContainText('Principal Quality Engineer');
+    await expect(page.locator('p.hero__role')).toContainText('Principal Engineer');
   });
 
   test('nav contains expected section links', async ({ page }) => {
@@ -29,7 +29,7 @@ test.describe('Navigation', () => {
   });
 
   test('all section headings are present', async ({ page }) => {
-    const headings = ['Engineering quality at scale.', "Where I\u2019ve worked.", 'What I work with.'];
+    const headings = ['Platform leadership, through a quality lens.', "Where I\u2019ve worked.", 'What I work with.'];
     for (const text of headings) {
       await expect(page.locator(`h2:has-text("${text}")`)).toBeAttached();
     }
