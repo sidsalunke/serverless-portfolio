@@ -1,0 +1,129 @@
+name: Deploy & Verify
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  # ── Job 1: push files to S3 ─────────────────────────────────────────────
+  deploy:
+    name: Deploy to S3 + CloudFront invalidation
+    runs-on: ubuntu-latest
+
+    # Required for OIDC token exchange with AWS.
+    # id-token: write  → GitHub generates a JWT for this job
+    # contents: read   → checkout action reads the repo
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # OIDC authentication — no long-lived access keys stored anywhere.
+      # GitHub generates a short-lived JWT; AWS exchanges it for temporary
+      # credentials scoped to the deploy role (defined in infra/main.tf).
+      # The role trust policy restricts this to master branch pushes only.
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Sync static files to S3
+        run: |
+          aws s3 sync . s3://portfolio.sidsalunke.info \
+            --exclude "*" \
+            --include "index.html" \
+            --include "styles/*" \
+            --include "js/app.js" \
+            --include "images/*" \
+            --delete
+        # Note: --acl public-read is intentionally omitted.
+        # The S3 bucket is private; CloudFront OAC (defined in infra/main.tf)
+        # is the only permitted reader.  Public S3 URLs return 403.
+
+      # Purge the CloudFront cache so the new files are served immediately.
+      # Without this, CloudFront would serve stale content for up to 24 hours
+      # (the default TTL set in infra/main.tf).
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
+
+  # ── Job 2: generate and upload SBOM ─────────────────────────────────────
+  #
+  # A Software Bill of Materials lists every dependency (direct + transitive)
+  # with its exact version and known licence.  Generating it on every deploy
+  # gives a point-in-time snapshot of the supply chain for audit and
+  # compliance purposes.  The SBOM is uploaded as a workflow artefact and
+  # retained for 90 days.
+  sbom:
+    name: Generate SBOM (CycloneDX)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      # @cyclonedx/cyclonedx-npm generates a CycloneDX SBOM in JSON format.
+      # CycloneDX is the OWASP-backed standard supported by most security
+      # platforms (Dependency-Track, GUAC, GitHub Dependency Graph, etc.).
+      - name: Install CycloneDX CLI
+        run: npm install -g @cyclonedx/cyclonedx-npm
+
+      - name: Generate SBOM
+        run: cyclonedx-npm --output-format JSON --output-file sbom.json
+
+      - name: Upload SBOM artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: sbom.json
+          retention-days: 90
+
+  # ── Job 3: E2E smoke tests against the live site ────────────────────────
+  # 'needs: deploy' means this job only starts after aws s3 sync AND the
+  # CloudFront invalidation complete.  Files are live before this job begins.
+  e2e-live:
+    name: E2E on live site
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E smoke tests — live site
+        run: npx playwright test --project=chromium
+        env:
+          BASE_URL: https://portfolio.sidsalunke.info
+        # BASE_URL being set tells playwright.config.js to skip webServer
+        # and point all page.goto('/') calls at the live domain.
+        # Includes security.spec.js which verifies CSP and security headers
+        # are served correctly through the CloudFront distribution.
+
+      - name: Upload report on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-live-report
+          path: playwright-report/
+          retention-days: 14

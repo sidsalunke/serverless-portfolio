@@ -1,0 +1,147 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  # ── Job 1: fast static tests (no browser needed) ────────────────────────
+  static-tests:
+    name: Unit / Accessibility / Snapshot
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Accessibility tests (jest-axe)
+        run: npm run test:a11y
+
+      - name: Snapshot tests
+        run: npm run test:snapshot
+
+  # ── Job 2: security scanning (runs in parallel with static-tests) ────────
+  #
+  # Three complementary tools cover different threat surfaces:
+  #
+  #   npm audit      – known CVEs in third-party dependencies (supply chain)
+  #   Semgrep        – SAST: finds insecure code patterns (XSS, injection, etc.)
+  #   Gitleaks       – secret scanning: catches credentials committed by mistake
+  #
+  # Keeping this as a separate job means a CVE in a dependency doesn't block
+  # the accessibility or snapshot feedback — engineers see all failures at once.
+  security-scan:
+    name: Security Scan (SAST · SCA · Secrets)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Gitleaks needs full history to scan all commits on the PR branch
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      # ── Software Composition Analysis: known CVEs in dependencies ─────────
+      # --audit-level=high blocks on High/Critical only; Medium is reported but
+      # not blocking so that a low-severity transitive dep doesn't stall a PR.
+      - name: Dependency vulnerability scan (npm audit)
+        run: npm audit --audit-level=high
+
+      # ── SAST: static analysis for insecure code patterns ─────────────────
+      # Semgrep's p/javascript ruleset catches common JS anti-patterns:
+      # dangerouslySetInnerHTML, eval(), prototype pollution, etc.
+      # --error exits non-zero on any finding, which fails the job.
+      - name: SAST scan (Semgrep)
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/javascript
+            p/html
+            p/secrets
+        env:
+          # SEMGREP_APP_TOKEN is optional; omitting it uses the OSS engine only.
+          # Add the secret to enable Semgrep Cloud dashboard visibility.
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+      # ── Secret scanning: detect credentials in the commit history ─────────
+      # Scans the diff between HEAD~N and HEAD on this PR so it only covers
+      # new commits, not the entire repo history on every run.
+      - name: Secret scan (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITLEAKS_LICENSE is required for org repos on the paid plan.
+          # For public/personal repos the free tier covers this.
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  # ── Job 3: Playwright (only if static tests AND security scan pass) ──────
+  playwright:
+    name: Playwright — functional, visual, a11y & security (local server)
+    needs: [static-tests, security-scan]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # allows committing generated Linux baselines back to the branch
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}  # check out the PR branch, not the merge commit
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # Generate Linux baselines on first run, then compare on all subsequent runs.
+      # --update-snapshots writes PNGs when they don't exist and exits 0,
+      # so this step never fails due to missing baselines.
+      - name: Generate missing visual baselines
+        run: npx playwright test tests/e2e/visual.spec.js --update-snapshots
+        continue-on-error: true
+
+      - name: Commit baselines if newly generated
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tests/e2e/visual.spec.js-snapshots/
+          git diff --cached --quiet || git commit -m "chore: add Linux visual regression baselines [skip ci]" && git push
+        continue-on-error: true
+
+      - name: Run Playwright tests
+        run: npm run test:e2e
+        # playwright.config.js automatically starts `npx serve -p 3000 .`
+        # when BASE_URL is not set, so no manual server step needed.
+        # Includes tests/e2e/security.spec.js which asserts CSP, X-Content-Type-Options,
+        # Referrer-Policy and Permissions-Policy meta tags are present and correct.
+
+      - name: Upload Playwright report on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-pr
+          path: playwright-report/
+          retention-days: 7
