@@ -13,6 +13,7 @@ expect.extend(toHaveNoViolations);
 
 const html        = fs.readFileSync(path.join(__dirname, '../../index.html'),   'utf8');
 const testingHtml = fs.readFileSync(path.join(__dirname, '../../testing.html'), 'utf8');
+const aiHtml       = fs.readFileSync(path.join(__dirname, '../../ai-engineering.html'), 'utf8');
 
 test('index.html has no WCAG 2.1 AA accessibility violations', async () => {
   // jest-axe accepts a raw HTML string and runs axe against it
@@ -88,4 +89,21 @@ test('testing.html all panels are hidden on load', () => {
   panels.forEach(panel => {
     expect(panel.hidden).toBe(true);
   });
+});
+
+// ── ai-engineering.html ────────────────────────────────────────
+
+test('ai-engineering.html has no WCAG 2.1 AA accessibility violations', async () => {
+  const results = await axe(aiHtml, {
+    runOnly: {
+      type: 'tag',
+      values: ['wcag2a', 'wcag2aa'],
+    },
+  });
+  expect(results).toHaveNoViolations();
+}, 15_000);
+
+test('ai-engineering.html has a single h1', () => {
+  document.documentElement.innerHTML = aiHtml;
+  expect(document.querySelectorAll('h1').length).toBe(1);
 });

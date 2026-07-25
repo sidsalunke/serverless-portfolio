@@ -365,6 +365,8 @@ button { font-family: inherit; }
   letter-spacing: 0.1rem;
 }
 
+.hero__stat--center { text-align: center; }
+
 .hero__scroll {
   position: absolute;
   bottom: 3.2rem;
@@ -452,6 +454,15 @@ button { font-family: inherit; }
 }
 .about__link i { color: var(--accent); }
 .about__link:hover { color: var(--text-1); }
+
+.about__inline-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+  transition: color var(--transition);
+}
+.about__inline-link:hover { color: var(--text-1); }
 
 /* ============================================================
    EXPERIENCE
@@ -692,6 +703,15 @@ button { font-family: inherit; }
   border-color: rgba(129, 140, 248, 0.4);
   color: var(--text-1);
 }
+
+.skills__group-note {
+  font-size: 1.3rem;
+  color: var(--text-3);
+  line-height: 1.55;
+  margin-top: 1.6rem;
+}
+.skills__group-note a { color: var(--accent); font-weight: 600; }
+.skills__group-note a:hover { color: var(--text-1); }
 
 /* ============================================================
    FOOTER
