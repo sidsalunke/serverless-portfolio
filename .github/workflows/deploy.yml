@@ -47,7 +47,7 @@ jobs:
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
-            --include "index.html" \
+            --include "*.html" \
             --include "styles/*" \
             --include "js/app.js" \
             --include "images/*" \
@@ -181,7 +181,7 @@ jobs:
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
-            --include "index.html" \
+            --include "*.html" \
             --include "styles/*" \
             --include "js/app.js" \
             --include "images/*" \
