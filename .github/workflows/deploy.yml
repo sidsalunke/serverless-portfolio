@@ -282,9 +282,11 @@ jobs:
           # Stash the freshly generated SVGs before switching branches
           cp badges/*.svg /tmp/
 
-          # Switch to the badges orphan branch
+          # Switch to the badges orphan branch.
+          # Use -B with explicit origin/badges to avoid ambiguity between the
+          # local badges/ directory (just created) and the remote branch name.
           git fetch origin badges
-          git checkout badges
+          git checkout -B badges origin/badges
 
           # Copy in the new SVGs
           cp /tmp/*.svg badges/
