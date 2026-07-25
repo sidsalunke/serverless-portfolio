@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ── Primary SEO ──────────────────────────────────────────────────────── -->
+  <title>Quality Suite &ndash; Siddharth Salunke</title>
+  <meta name="description" content="A showcase of the full automated test suite for this portfolio site — unit, accessibility, security, visual regression, E2E and Lighthouse CI — built by Siddharth Salunke.">
+  <meta name="author" content="Siddharth Salunke">
+  <meta name="robots" content="noindex, follow">
+
+  <!-- ── CSP (same policy as index.html) ──────────────────────────────────── -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none';
+                 script-src 'self';
+                 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                 font-src https://fonts.gstatic.com;
+                 img-src 'self' data:;
+                 connect-src 'none';
+                 base-uri 'self';
+                 form-action 'none'">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
+
+  <!-- ── Fonts ─────────────────────────────────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link id="google-fonts" rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" as="style">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"></noscript>
+
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+<!-- SVG icon sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/>
+    <circle cx="12" cy="10" r="3"/>
+  </symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m6 9 6 6 6-6"/>
+  </symbol>
+  <symbol id="i-external-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15 3h6v6"/><path d="M10 14 21 3"/>
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+  </symbol>
+  <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>
+  </symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/>
+    <path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>
+  </symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>
+  </symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+  </symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+    <circle cx="12" cy="12" r="3"/>
+  </symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 8V4H8"/>
+    <rect width="16" height="12" x="4" y="8" rx="2"/>
+    <path d="M2 14h2"/><path d="M20 14h2"/>
+    <path d="M15 13v2"/><path d="M9 13v2"/>
+  </symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+  </symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+    <path d="m9 11 3 3L22 4"/>
+  </symbol>
+  <symbol id="i-rotate-ccw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+    <path d="M3 3v5h5"/>
+  </symbol>
+  <symbol id="i-bar-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" x2="12" y1="20" y2="10"/>
+    <line x1="18" x2="18" y1="20" y2="4"/>
+    <line x1="6" x2="6" y1="20" y2="16"/>
+  </symbol>
+  <symbol id="i-linkedin" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+  </symbol>
+  <symbol id="i-github" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+  </symbol>
+</svg>
+
+<!-- ============================================================ NAV -->
+<nav class="nav" id="main-nav" role="navigation" aria-label="Main navigation">
+  <a href="index.html" class="nav__logo">SS</a>
+
+  <ul class="nav__links" id="nav-links" role="list">
+    <li><a href="index.html#about"      class="nav__link">About</a></li>
+    <li><a href="index.html#experience" class="nav__link">Experience</a></li>
+    <li><a href="index.html#skills"     class="nav__link">Skills</a></li>
+    <li><a href="testing.html" class="nav__link" aria-current="page">Quality Suite</a></li>
+    <li>
+      <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="nav__cta btn btn--primary">
+        Connect&nbsp;<svg width="16" height="16" aria-hidden="true"><use href="#i-linkedin"/></svg>
+      </a>
+    </li>
+  </ul>
+
+  <button class="nav__hamburger" id="nav-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ============================================================ HERO -->
+<section class="section tq-hero" aria-labelledby="tq-hero-heading">
+  <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
+  <div class="hero__orb hero__orb--2" aria-hidden="true"></div>
+  <div class="hero__orb hero__orb--3" aria-hidden="true"></div>
+
+  <div class="container">
+    <p class="section__label">
+      <svg width="14" height="14" aria-hidden="true"><use href="#i-flask"/></svg>
+      &nbsp;Quality Engineering
+    </p>
+    <h1 id="tq-hero-heading" class="tq-hero__title">Quality Suite</h1>
+    <p class="tq-hero__sub">
+      Every commit to this portfolio passes a layered automated quality gate — unit tests,
+      accessibility audits, security scans, visual regression, and live E2E smoke tests —
+      all running in CI with zero manual steps.
+    </p>
+
+    <div class="tq-hero__stats" role="list">
+      <div class="hero__stat" role="listitem">
+        <div class="hero__stat-value">120+</div>
+        <div class="hero__stat-label">Tests</div>
+      </div>
+      <div class="hero__stat" role="listitem">
+        <div class="hero__stat-value">3</div>
+        <div class="hero__stat-label">Parallel CI Jobs</div>
+      </div>
+      <div class="hero__stat hero__stat--highlight" role="listitem">
+        <div class="hero__stat-value">100%</div>
+        <div class="hero__stat-label">Accessibility</div>
+      </div>
+      <div class="hero__stat hero__stat--highlight" role="listitem">
+        <div class="hero__stat-value">100</div>
+        <div class="hero__stat-label">SEO Score</div>
+      </div>
+      <div class="hero__stat hero__stat--highlight" role="listitem">
+        <div class="hero__stat-value">90+</div>
+        <div class="hero__stat-label">Performance</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ PIPELINE -->
+<section class="section tq-pipeline-section" aria-labelledby="pipeline-heading">
+  <div class="container">
+    <p class="section__label">CI / CD Flow</p>
+    <h2 id="pipeline-heading" class="section__heading">From commit to live.</h2>
+
+    <div class="tq-pipeline" role="list" aria-label="CI/CD pipeline stages">
+
+      <!-- Node: Code Push -->
+      <div class="tq-pipeline__node" role="listitem">
+        <div class="tq-pipeline__node-icon" aria-hidden="true">
+          <svg width="22" height="22"><use href="#i-code"/></svg>
+        </div>
+        <span class="tq-pipeline__node-label">Code Push</span>
+        <span class="tq-pipeline__node-sub">git push to master</span>
+      </div>
+
+      <div class="tq-pipeline__arrow" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <!-- Node: PR Checks (clickable) -->
+      <div class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable"
+           role="button" tabindex="0" aria-expanded="false" data-panel="panel-pr-checks">
+        <div class="tq-pipeline__node-icon" aria-hidden="true">
+          <svg width="22" height="22"><use href="#i-flask"/></svg>
+        </div>
+        <span class="tq-pipeline__node-label">PR Checks</span>
+        <span class="tq-pipeline__node-sub">3 parallel jobs</span>
+        <span class="tq-pipeline__node-hint" aria-hidden="true">tap to explore</span>
+      </div>
+
+      <div class="tq-pipeline__arrow" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <!-- Node: Merge -->
+      <div class="tq-pipeline__node" role="listitem">
+        <div class="tq-pipeline__node-icon" aria-hidden="true">
+          <svg width="22" height="22"><use href="#i-check-circle"/></svg>
+        </div>
+        <span class="tq-pipeline__node-label">Merge</span>
+        <span class="tq-pipeline__node-sub">gate passed</span>
+      </div>
+
+      <div class="tq-pipeline__arrow" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <!-- Node: Deploy (clickable) -->
+      <div class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable"
+           role="button" tabindex="0" aria-expanded="false" data-panel="panel-deploy">
+        <div class="tq-pipeline__node-icon" aria-hidden="true">
+          <svg width="22" height="22"><use href="#i-cloud"/></svg>
+        </div>
+        <span class="tq-pipeline__node-label">Deploy</span>
+        <span class="tq-pipeline__node-sub">S3 + CloudFront</span>
+        <span class="tq-pipeline__node-hint" aria-hidden="true">tap to explore</span>
+      </div>
+
+      <div class="tq-pipeline__arrow" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <!-- Node: Live Verify (clickable) -->
+      <div class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable"
+           role="button" tabindex="0" aria-expanded="false" data-panel="panel-live-verify">
+        <div class="tq-pipeline__node-icon" aria-hidden="true">
+          <svg width="22" height="22"><use href="#i-eye"/></svg>
+        </div>
+        <span class="tq-pipeline__node-label">Live Verify</span>
+        <span class="tq-pipeline__node-sub">post-deploy</span>
+        <span class="tq-pipeline__node-hint" aria-hidden="true">tap to explore</span>
+      </div>
+
+    </div><!-- /.tq-pipeline -->
+
+    <!-- ── Expandable panels ── -->
+    <div class="tq-pipeline__panels">
+
+      <!-- Panel: PR Checks -->
+      <div id="panel-pr-checks" class="tq-panel" hidden>
+        <p class="tq-panel__title">PR Checks &mdash; 3 parallel jobs</p>
+        <div class="tq-panel__grid">
+
+          <div>
+            <div class="tq-panel__col-header" style="--col-color: var(--accent)">
+              <svg width="16" height="16"><use href="#i-flask"/></svg>
+              <span class="tq-panel__col-name">Static Tests</span>
+              <span class="tq-panel__col-note">Jest</span>
+            </div>
+            <ul class="tq-panel__list">
+              <li class="tq-panel__item">Unit tests</li>
+              <li class="tq-panel__item">SEO unit tests</li>
+              <li class="tq-panel__item">Accessibility (jest-axe)</li>
+              <li class="tq-panel__item">Visual snapshots</li>
+              <li class="tq-panel__item">Coverage threshold gate</li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="tq-panel__col-header" style="--col-color: #f59e0b">
+              <svg width="16" height="16"><use href="#i-shield"/></svg>
+              <span class="tq-panel__col-name">Security Scan</span>
+              <span class="tq-panel__col-note">3 scan types</span>
+            </div>
+            <ul class="tq-panel__list">
+              <li class="tq-panel__item">npm audit (SCA)</li>
+              <li class="tq-panel__item">Semgrep SAST</li>
+              <li class="tq-panel__item">Gitleaks secrets detection</li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="tq-panel__col-header" style="--col-color: #38bdf8">
+              <svg width="16" height="16"><use href="#i-eye"/></svg>
+              <span class="tq-panel__col-name">Playwright E2E</span>
+              <span class="tq-panel__col-note">local server</span>
+            </div>
+            <ul class="tq-panel__list">
+              <li class="tq-panel__item">Functional flows</li>
+              <li class="tq-panel__item">Visual regression</li>
+              <li class="tq-panel__item">Accessibility</li>
+              <li class="tq-panel__item">Security headers</li>
+              <li class="tq-panel__item">SEO checks</li>
+            </ul>
+          </div>
+
+        </div>
+      </div><!-- /#panel-pr-checks -->
+
+      <!-- Panel: Deploy -->
+      <div id="panel-deploy" class="tq-panel" hidden>
+        <p class="tq-panel__title">Deploy &mdash; AWS infrastructure</p>
+        <div class="tq-panel__grid tq-panel__grid--2">
+
+          <div>
+            <div class="tq-panel__col-header" style="--col-color: #f59e0b">
+              <svg width="16" height="16"><use href="#i-cloud"/></svg>
+              <span class="tq-panel__col-name">AWS Stack</span>
+            </div>
+            <ul class="tq-panel__list">
+              <li class="tq-panel__item">S3 static hosting (OAC — no public access)</li>
+              <li class="tq-panel__item">CloudFront CDN with custom security headers</li>
+              <li class="tq-panel__item">OIDC role assumption — no stored credentials</li>
+              <li class="tq-panel__item">CloudFront cache invalidation after each sync</li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="tq-panel__col-header" style="--col-color: var(--accent)">
+              <svg width="16" height="16"><use href="#i-code"/></svg>
+              <span class="tq-panel__col-name">Infrastructure as Code</span>
+            </div>
+            <ul class="tq-panel__list">
+              <li class="tq-panel__item">Terraform manages all AWS resources</li>
+              <li class="tq-panel__item">S3 bucket, CloudFront distribution, IAM roles</li>
+              <li class="tq-panel__item">Pre-deploy SHA captured for rollback</li>
+              <li class="tq-panel__item">SBOM generated on every deploy</li>
+            </ul>
+          </div>
+
+        </div>
+      </div><!-- /#panel-deploy -->
+
+      <!-- Panel: Live Verify -->
+      <div id="panel-live-verify" class="tq-panel" hidden>
+        <p class="tq-panel__title">Live Verify &mdash; post-deploy quality gate</p>
+        <div class="tq-panel__grid tq-panel__grid--2">
+
+          <div>
+            <div class="tq-panel__col-header" style="--col-color: #38bdf8">
+              <svg width="16" height="16"><use href="#i-eye"/></svg>
+              <span class="tq-panel__col-name">Live E2E + Lighthouse</span>
+            </div>
+            <ul class="tq-panel__list">
+              <li class="tq-panel__item">Full Playwright suite against live CloudFront URL</li>
+              <li class="tq-panel__item">CSP and security header validation on real responses</li>
+              <li class="tq-panel__item">Lighthouse CI with enforced score thresholds</li>
+              <li class="tq-panel__item">3 Lighthouse runs averaged for stable results</li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="tq-panel__col-header" style="--col-color: #34d399">
+              <svg width="16" height="16"><use href="#i-rotate-ccw"/></svg>
+              <span class="tq-panel__col-name">Auto-Rollback</span>
+            </div>
+            <ul class="tq-panel__list">
+              <li class="tq-panel__item">If E2E fails, previous commit auto-restored to S3</li>
+              <li class="tq-panel__item">CloudFront invalidated — users see old version in minutes</li>
+              <li class="tq-panel__item">Workflow marked failed to surface the regression clearly</li>
+              <li class="tq-panel__item">Coverage and Lighthouse badges updated on success only</li>
+            </ul>
+          </div>
+
+        </div>
+      </div><!-- /#panel-live-verify -->
+
+    </div><!-- /.tq-pipeline__panels -->
+  </div>
+</section>
+
+<!-- ============================================================ STAGE 01: PR CHECKS -->
+<section class="section tq-stage" aria-labelledby="stage-pr-heading">
+  <div class="container">
+    <div class="tq-stage__header">
+      <span class="tq-stage__label">Stage 01</span>
+      <h2 id="stage-pr-heading" class="section__heading">PR checks.</h2>
+      <p class="tq-stage__sub">
+        Three jobs run in parallel on every pull request. All must pass before merge is permitted.
+      </p>
+    </div>
+
+    <!-- Job: Static Tests -->
+    <div class="tq-job" style="--job-color: var(--accent)">
+      <div class="tq-job__header">
+        <div class="tq-job__meta">
+          <div class="tq-job__title">Static Tests</div>
+          <div class="tq-job__subtitle">Jest &middot; unit, accessibility, snapshots, coverage</div>
+        </div>
+        <span class="tq-job__count">60 tests + coverage</span>
+      </div>
+
+      <div class="tq-job__cards">
+
+        <!-- Unit tests -->
+        <div class="tq-card" style="--card-color: var(--accent)">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-code"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Unit Tests</div>
+              <div class="tq-card__tool">Jest</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">DOM-based tests covering nav interactions, accordion behaviour, scroll events, and portfolio JavaScript logic.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">jsdom</span>
+            <span class="tq-card__tag">DOM events</span>
+            <span class="tq-card__tag">user flows</span>
+          </div>
+        </div>
+
+        <!-- SEO unit tests -->
+        <div class="tq-card" style="--card-color: #38bdf8">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-eye"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">SEO Unit Tests</div>
+              <div class="tq-card__tool">Jest</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">Validates meta tags, Open Graph properties, Twitter card markup, JSON-LD schema, and canonical URLs are correct and present.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">meta tags</span>
+            <span class="tq-card__tag">Open Graph</span>
+            <span class="tq-card__tag">JSON-LD</span>
+          </div>
+        </div>
+
+        <!-- Accessibility -->
+        <div class="tq-card" style="--card-color: #34d399">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-check-circle"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Accessibility</div>
+              <div class="tq-card__tool">jest-axe</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">Automated WCAG 2.1 audits run against every major component via axe-core — catches missing labels, contrast issues, and ARIA violations.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">WCAG 2.1</span>
+            <span class="tq-card__tag">axe-core</span>
+            <span class="tq-card__tag">ARIA</span>
+          </div>
+        </div>
+
+        <!-- Visual snapshots -->
+        <div class="tq-card" style="--card-color: #f59e0b">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-eye"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Visual Snapshots</div>
+              <div class="tq-card__tool">Jest snapshots</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">HTML snapshot tests catch unexpected structural changes to key components — diff surfaced in CI on mismatch.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">HTML structure</span>
+            <span class="tq-card__tag">diff on fail</span>
+          </div>
+        </div>
+
+        <!-- Coverage threshold -->
+        <div class="tq-card" style="--card-color: #a78bfa">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-gauge"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Coverage Gate</div>
+              <div class="tq-card__tool">Jest --coverage</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">Enforces minimum branch, statement, function, and line coverage thresholds — build fails if coverage drops below the configured floor.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">branch</span>
+            <span class="tq-card__tag">statement</span>
+            <span class="tq-card__tag">function</span>
+          </div>
+        </div>
+
+      </div><!-- /.tq-job__cards -->
+    </div><!-- /.tq-job Static Tests -->
+
+    <!-- Job: Security Scan -->
+    <div class="tq-job" style="--job-color: #f59e0b">
+      <div class="tq-job__header">
+        <div class="tq-job__meta">
+          <div class="tq-job__title">Security Scan</div>
+          <div class="tq-job__subtitle">npm audit · Semgrep · Gitleaks</div>
+        </div>
+        <span class="tq-job__count">3 scan types</span>
+      </div>
+
+      <div class="tq-job__cards tq-job__cards--two-col">
+
+        <!-- SCA -->
+        <div class="tq-card" style="--card-color: #f59e0b">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-shield"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Dependency Audit</div>
+              <div class="tq-card__tool">npm audit · SCA</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">Scans all npm dependencies against the Node Security Advisory database — fails on high or critical severity CVEs.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">CVE scan</span>
+            <span class="tq-card__tag">supply chain</span>
+          </div>
+        </div>
+
+        <!-- SAST -->
+        <div class="tq-card" style="--card-color: #f87171">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-code"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Static Analysis</div>
+              <div class="tq-card__tool">Semgrep · SAST</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">Pattern-based static analysis detects XSS, injection vulnerabilities, and insecure coding patterns in HTML, CSS, and JavaScript source.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">XSS</span>
+            <span class="tq-card__tag">injection</span>
+            <span class="tq-card__tag">OWASP</span>
+          </div>
+        </div>
+
+        <!-- Secrets -->
+        <div class="tq-card" style="--card-color: #f43f5e">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-shield"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Secrets Detection</div>
+              <div class="tq-card__tool">Gitleaks</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">Scans the full git history for accidentally committed API keys, tokens, and credentials — blocks the PR before they reach master.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">API keys</span>
+            <span class="tq-card__tag">git history</span>
+            <span class="tq-card__tag">tokens</span>
+          </div>
+        </div>
+
+      </div><!-- /.tq-job__cards -->
+    </div><!-- /.tq-job Security -->
+
+    <!-- Job: Playwright E2E -->
+    <div class="tq-job" style="--job-color: #38bdf8">
+      <div class="tq-job__header">
+        <div class="tq-job__meta">
+          <div class="tq-job__title">Playwright E2E</div>
+          <div class="tq-job__subtitle">Playwright · runs against local dev server</div>
+        </div>
+        <span class="tq-job__count">57 tests</span>
+      </div>
+
+      <div class="tq-job__cards">
+
+        <!-- Functional -->
+        <div class="tq-card" style="--card-color: #38bdf8">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-check-circle"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Functional</div>
+              <div class="tq-card__tool">Playwright</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">End-to-end user journey tests covering navigation, accordion interactions, mobile hamburger menu, and scroll behaviour.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">user flows</span>
+            <span class="tq-card__tag">cross-browser</span>
+          </div>
+        </div>
+
+        <!-- Visual regression -->
+        <div class="tq-card" style="--card-color: #a78bfa">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-eye"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Visual Regression</div>
+              <div class="tq-card__tool">Playwright screenshots</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">Pixel-diff comparisons against committed PNG baselines — catches unintended layout shifts, font changes, and CSS regressions.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">pixel diff</span>
+            <span class="tq-card__tag">PNG baselines</span>
+          </div>
+        </div>
+
+        <!-- Accessibility E2E -->
+        <div class="tq-card" style="--card-color: #34d399">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-check-circle"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Accessibility</div>
+              <div class="tq-card__tool">Playwright + axe</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">Full-page axe-core audits run in a real browser context — validates the rendered DOM including dynamic state changes.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">WCAG 2.1</span>
+            <span class="tq-card__tag">rendered DOM</span>
+          </div>
+        </div>
+
+        <!-- Security headers -->
+        <div class="tq-card" style="--card-color: #f59e0b">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-shield"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">Security Headers</div>
+              <div class="tq-card__tool">Playwright</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">Asserts CSP, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy headers are present and correctly valued on every response.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">CSP</span>
+            <span class="tq-card__tag">response headers</span>
+          </div>
+        </div>
+
+        <!-- SEO E2E -->
+        <div class="tq-card" style="--card-color: #38bdf8">
+          <div class="tq-card__header">
+            <div class="tq-card__icon" aria-hidden="true">
+              <svg width="18" height="18"><use href="#i-eye"/></svg>
+            </div>
+            <div>
+              <div class="tq-card__name">SEO</div>
+              <div class="tq-card__tool">Playwright</div>
+            </div>
+          </div>
+          <p class="tq-card__desc">Validates title, description, canonical, Open Graph, Twitter Card, and JSON-LD schema in the live rendered page.</p>
+          <div class="tq-card__tags">
+            <span class="tq-card__tag">meta tags</span>
+            <span class="tq-card__tag">structured data</span>
+          </div>
+        </div>
+
+      </div><!-- /.tq-job__cards -->
+    </div><!-- /.tq-job Playwright -->
+
+  </div>
+</section>
+
+<!-- ============================================================ STAGE 02: POST-DEPLOY -->
+<section class="section tq-stage tq-stage--deploy" aria-labelledby="stage-deploy-heading">
+  <div class="container">
+    <div class="tq-stage__header" style="--stage-accent: #38bdf8">
+      <span class="tq-stage__label">Stage 02</span>
+      <h2 id="stage-deploy-heading" class="section__heading">Post-deployment.</h2>
+      <p class="tq-stage__sub">
+        After the site goes live, a second quality gate runs against the real CloudFront distribution —
+        with automatic rollback if anything regresses.
+      </p>
+    </div>
+
+    <div class="tq-deploy-grid">
+
+      <!-- Live E2E -->
+      <div class="tq-deploy-card" style="--card-color: #38bdf8">
+        <div class="tq-card__header">
+          <div class="tq-card__icon" aria-hidden="true">
+            <svg width="20" height="20"><use href="#i-eye"/></svg>
+          </div>
+          <div>
+            <div class="tq-card__name">Live E2E Smoke Tests</div>
+          </div>
+        </div>
+        <p class="tq-card__desc">The full Playwright suite re-runs against the live CloudFront URL after each deploy. The pipeline waits for the CDN invalidation to complete first — ensuring tests always exercise the freshly deployed content, not stale cache.</p>
+        <div class="tq-card__tags">
+          <span class="tq-card__tag">Playwright</span>
+          <span class="tq-card__tag">CloudFront</span>
+          <span class="tq-card__tag">post-deploy gate</span>
+        </div>
+      </div>
+
+      <!-- Lighthouse CI -->
+      <div class="tq-deploy-card" style="--card-color: #f59e0b">
+        <div class="tq-card__header">
+          <div class="tq-card__icon" aria-hidden="true">
+            <svg width="20" height="20"><use href="#i-gauge"/></svg>
+          </div>
+          <div>
+            <div class="tq-card__name">Lighthouse CI</div>
+          </div>
+        </div>
+        <p class="tq-card__desc">Three Lighthouse runs are averaged against enforced score thresholds: Performance &ge;90, Accessibility 100, Best Practices 100, SEO 100. Results feed the metric badges committed back to the repo.</p>
+        <div class="tq-deploy-card__badge">
+          <svg width="14" height="14"><use href="#i-gauge"/></svg>
+          Perf 90+ &middot; A11y 100 &middot; SEO 100
+        </div>
+        <div class="tq-card__tags" style="margin-top:1.2rem">
+          <span class="tq-card__tag">lhci autorun</span>
+          <span class="tq-card__tag">score thresholds</span>
+        </div>
+      </div>
+
+      <!-- Auto-Rollback -->
+      <div class="tq-deploy-card" style="--card-color: #f43f5e">
+        <div class="tq-card__header">
+          <div class="tq-card__icon" aria-hidden="true">
+            <svg width="20" height="20"><use href="#i-rotate-ccw"/></svg>
+          </div>
+          <div>
+            <div class="tq-card__name">Auto-Rollback</div>
+          </div>
+        </div>
+        <p class="tq-card__desc">If live E2E tests fail, a rollback job automatically restores the previous commit to S3 and invalidates the CDN — users see the last known-good version within minutes, with no manual intervention.</p>
+        <div class="tq-card__tags">
+          <span class="tq-card__tag">canary gate</span>
+          <span class="tq-card__tag">S3 restore</span>
+          <span class="tq-card__tag">zero-touch</span>
+        </div>
+      </div>
+
+      <!-- Metric Badges -->
+      <div class="tq-deploy-card" style="--card-color: #34d399">
+        <div class="tq-card__header">
+          <div class="tq-card__icon" aria-hidden="true">
+            <svg width="20" height="20"><use href="#i-bar-chart"/></svg>
+          </div>
+          <div>
+            <div class="tq-card__name">Metric Badges</div>
+          </div>
+        </div>
+        <p class="tq-card__desc">Coverage and Lighthouse score badges are generated as SVGs and committed back to master with <code>[skip ci]</code> on every successful deploy. No third-party badge services — everything self-hosted.</p>
+        <div class="tq-card__tags">
+          <span class="tq-card__tag">SVG badges</span>
+          <span class="tq-card__tag">badge-maker</span>
+          <span class="tq-card__tag">self-hosted</span>
+        </div>
+      </div>
+
+    </div><!-- /.tq-deploy-grid -->
+  </div>
+</section>
+
+<!-- ============================================================ FOOTER -->
+<footer class="footer" role="contentinfo">
+  <div class="container footer__inner">
+    <div class="footer__socials">
+      <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="LinkedIn">
+        <svg width="20" height="20" aria-hidden="true"><use href="#i-linkedin"/></svg>
+      </a>
+      <a href="https://github.com/sidsalunke" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="GitHub">
+        <svg width="20" height="20" aria-hidden="true"><use href="#i-github"/></svg>
+      </a>
+    </div>
+    <p class="footer__name">Siddharth Salunke</p>
+    <p class="footer__copy">&copy; <span id="footer-year"></span> &middot; Built with HTML, CSS &amp; Vanilla JS</p>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>

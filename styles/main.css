@@ -840,3 +840,647 @@ button { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ============================================================
+   TESTING PAGE  (all classes prefixed tq-)
+   ============================================================ */
+
+/* ── Hero ──────────────────────────────────────────────────── */
+.tq-hero {
+  position: relative;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--bg-0);
+  padding: calc(var(--nav-h) + 4rem) 2.4rem 8rem;
+}
+
+.tq-hero__content {
+  position: relative;
+  z-index: 1;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.tq-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1.4rem;
+  background: rgba(129, 140, 248, 0.1);
+  border: 1px solid rgba(129, 140, 248, 0.22);
+  border-radius: 10rem;
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.03rem;
+  margin-bottom: 2.8rem;
+}
+
+.tq-hero__title {
+  font-size: clamp(3.6rem, 7vw, 6.4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 40%, var(--accent) 72%, var(--accent-2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 2rem;
+}
+
+.tq-hero__sub {
+  font-size: clamp(1.4rem, 2vw, 1.75rem);
+  color: var(--text-3);
+  max-width: 72rem;
+  line-height: 1.65;
+  margin-bottom: 4rem;
+}
+
+.tq-hero__stats {
+  display: flex;
+  gap: 4.8rem;
+  padding-top: 4rem;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+/* ── Pipeline ──────────────────────────────────────────────── */
+.tq-pipeline-section {
+  background: linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 100%);
+  padding-top: 0;
+}
+
+.tq-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0 0 2rem;
+  overflow-x: auto;
+  padding: 2rem 0 3rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tq-pipeline__node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  flex-shrink: 0;
+}
+
+.tq-pipeline__node-icon {
+  width: 5.6rem;
+  height: 5.6rem;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition), color var(--transition);
+}
+
+.tq-pipeline__node--active .tq-pipeline__node-icon {
+  border-color: rgba(129, 140, 248, 0.5);
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+}
+
+.tq-pipeline__node-label {
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+  color: var(--text-3);
+  text-align: center;
+}
+
+.tq-pipeline__node--active .tq-pipeline__node-label {
+  color: var(--accent);
+}
+
+.tq-pipeline__node-sub {
+  font-size: 1.1rem;
+  color: var(--text-4);
+  text-align: center;
+  max-width: 8rem;
+  line-height: 1.4;
+}
+
+.tq-pipeline__arrow {
+  flex: 1;
+  min-width: 3rem;
+  max-width: 8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-4);
+  position: relative;
+  padding: 0 0.4rem;
+  margin-bottom: 2.8rem;
+}
+
+.tq-pipeline__arrow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 1.8rem;
+  height: 1px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+/* ── Stage layout ──────────────────────────────────────────── */
+.tq-stage {
+  background: var(--bg-1);
+}
+
+.tq-stage--deploy {
+  background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+}
+
+.tq-stage__header {
+  margin-bottom: 5.6rem;
+}
+
+.tq-stage__label {
+  display: inline-block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.2rem;
+  text-transform: uppercase;
+  color: var(--stage-accent, var(--accent));
+  margin-bottom: 1.2rem;
+  border-left: 3px solid var(--stage-accent, var(--accent));
+  padding-left: 1.2rem;
+}
+
+.tq-stage__sub {
+  font-size: 1.7rem;
+  color: var(--text-3);
+  max-width: 72rem;
+  line-height: 1.65;
+  margin-top: 1.6rem;
+}
+
+/* ── Job blocks ────────────────────────────────────────────── */
+.tq-job {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 3.2rem;
+  margin-bottom: 3.2rem;
+  border-left: 4px solid var(--job-color, var(--accent));
+}
+
+.tq-job__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 3.2rem;
+  flex-wrap: wrap;
+}
+
+.tq-job__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.tq-job__title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.tq-job__subtitle {
+  font-size: 1.35rem;
+  color: var(--text-3);
+  margin-top: 0.4rem;
+}
+
+.tq-job__count {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 1.2rem;
+  border-radius: 10rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.tq-job__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30rem, 1fr));
+  gap: 1.6rem;
+}
+
+.tq-job__cards--two-col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* ── Individual test cards ─────────────────────────────────── */
+.tq-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2.4rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.tq-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--card-color, var(--accent));
+}
+
+.tq-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.tq-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+  margin-bottom: 1.6rem;
+}
+
+.tq-card__icon {
+  width: 3.6rem;
+  height: 3.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  color: var(--card-color, var(--accent));
+}
+
+.tq-card__name {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-1);
+  line-height: 1.25;
+}
+
+.tq-card__tool {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-4);
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06rem;
+}
+
+.tq-card__desc {
+  font-size: 1.45rem;
+  color: var(--text-3);
+  line-height: 1.65;
+  margin-bottom: 1.6rem;
+}
+
+.tq-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.tq-card__tag {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  background: rgba(129, 140, 248, 0.08);
+  border: 1px solid rgba(129, 140, 248, 0.18);
+  border-radius: 10rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: background var(--transition), color var(--transition);
+}
+
+.tq-card__tag:hover {
+  background: rgba(129, 140, 248, 0.18);
+  color: var(--text-1);
+}
+
+.tq-card__count {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--card-color, var(--accent));
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10rem;
+  padding: 0.2rem 0.8rem;
+  white-space: nowrap;
+}
+
+/* ── Deploy grid ───────────────────────────────────────────── */
+.tq-deploy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.tq-deploy-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2.8rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.tq-deploy-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--card-color, var(--accent));
+}
+
+.tq-deploy-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.tq-deploy-card .tq-card__header {
+  margin-bottom: 1.6rem;
+}
+
+.tq-deploy-card .tq-card__desc {
+  flex: 1;
+}
+
+.tq-deploy-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding: 0.5rem 1.2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 10rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--card-color, var(--accent));
+  align-self: flex-start;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .tq-job__cards--two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .tq-pipeline {
+    flex-direction: column;
+    gap: 1.2rem;
+    align-items: center;
+  }
+
+  .tq-pipeline__arrow {
+    transform: rotate(90deg);
+    min-width: unset;
+    width: 3rem;
+    height: 3rem;
+    flex: unset;
+    margin-bottom: 0;
+  }
+
+  .tq-pipeline__arrow::before {
+    top: 50%;
+    bottom: auto;
+    left: 0;
+    right: 1.8rem;
+    height: 1px;
+    width: auto;
+  }
+
+  .tq-deploy-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tq-job__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .tq-job__cards--two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .tq-hero__stats {
+    gap: 3.2rem;
+  }
+
+  .tq-stage__header {
+    margin-bottom: 4rem;
+  }
+}
+
+/* ── Skills teaser link (index.html) ──────────────────────────── */
+.skills__teaser {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 3.2rem;
+  padding: 1.6rem 2rem;
+  background: rgba(129, 140, 248, 0.05);
+  border: 1px solid rgba(129, 140, 248, 0.15);
+  border-radius: var(--radius-md);
+  font-size: 1.45rem;
+  color: var(--text-3);
+  line-height: 1.55;
+  flex-wrap: wrap;
+}
+.skills__teaser svg { color: var(--accent); flex-shrink: 0; }
+.skills__teaser-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--accent);
+  font-weight: 600;
+  transition: color var(--transition), gap var(--transition);
+}
+.skills__teaser-link:hover { color: var(--accent-2); gap: 0.6rem; }
+
+/* ── Pipeline: clickable nodes ────────────────────────────────── */
+.tq-pipeline__node--clickable {
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  padding: 0.4rem;
+  margin: -0.4rem;
+  transition: background var(--transition);
+}
+.tq-pipeline__node--clickable:hover { background: rgba(129, 140, 248, 0.06); }
+.tq-pipeline__node--clickable:hover .tq-pipeline__node-icon,
+.tq-pipeline__node--clickable[aria-expanded="true"] .tq-pipeline__node-icon {
+  border-color: rgba(129, 140, 248, 0.6);
+  background: rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 24px rgba(99, 102, 241, 0.3);
+  color: var(--accent);
+}
+.tq-pipeline__node-hint {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+  color: var(--text-4);
+  transition: color var(--transition);
+}
+.tq-pipeline__node--clickable:hover .tq-pipeline__node-hint,
+.tq-pipeline__node--clickable[aria-expanded="true"] .tq-pipeline__node-hint {
+  color: var(--accent);
+}
+.tq-pipeline__node--clickable[aria-expanded="true"] .tq-pipeline__node-icon {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+/* ── Pipeline panels ──────────────────────────────────────────── */
+.tq-pipeline__panels { margin-top: 0; }
+
+.tq-panel {
+  margin-top: 2.8rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius-xl);
+  padding: 3.2rem;
+  animation: tqPanelIn 0.22s ease;
+}
+.tq-panel[hidden] { display: none; }
+
+@keyframes tqPanelIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tq-panel__title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16rem;
+  color: var(--text-4);
+  margin-bottom: 2.8rem;
+}
+
+.tq-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.4rem;
+}
+.tq-panel__grid--2 { grid-template-columns: repeat(2, 1fr); }
+
+.tq-panel__col-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.8rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--col-color, var(--accent));
+}
+.tq-panel__col-name {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--text-1);
+  flex: 1;
+}
+.tq-panel__col-note {
+  font-size: 1.15rem;
+  color: var(--text-4);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tq-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  list-style: none;
+}
+.tq-panel__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.2rem;
+  font-size: 1.4rem;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+.tq-panel__item::before {
+  content: '–';
+  color: var(--text-4);
+  flex-shrink: 0;
+}
+.tq-panel__item-tool {
+  font-size: 1.2rem;
+  color: var(--text-4);
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Panel responsive */
+@media (max-width: 900px) {
+  .tq-panel__grid     { grid-template-columns: 1fr; }
+  .tq-panel__grid--2  { grid-template-columns: 1fr; }
+}
+
+/* ── Stats: left-align to match page title + green highlight ────────────────── */
+.tq-hero__stats {
+  justify-content: flex-start;
+}
+.hero__stat--highlight .hero__stat-value {
+  color: #34d399;
+  text-shadow: 0 0 22px rgba(52, 211, 153, 0.4);
+}
+.hero__stat--highlight .hero__stat-label {
+  color: #34d399;
+  opacity: 0.75;
+}
+
+/* ── Panel: left-align bullet items, drop space-between ──────── */
+.tq-panel__item {
+  justify-content: flex-start;
+}
+
+/* ── Pipeline: stronger active/expanded node state ───────────── */
+.tq-pipeline__node--clickable[aria-expanded="true"] {
+  background: rgba(99, 102, 241, 0.1);
+  outline: 1px solid rgba(129, 140, 248, 0.4);
+  outline-offset: 4px;
+  border-radius: var(--radius-lg);
+}
+.tq-pipeline__node--clickable[aria-expanded="true"] .tq-pipeline__node-label {
+  color: var(--accent);
+}
+.tq-pipeline__node--clickable[aria-expanded="true"] .tq-pipeline__node-hint {
+  color: var(--accent);
+  opacity: 0.8;
+}

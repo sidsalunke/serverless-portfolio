@@ -54,6 +54,33 @@ function initPortfolio() {
     });
   }
 
+  /* ── Pipeline: interactive nodes (testing.html) ── */
+  var pipelineNodes = document.querySelectorAll('.tq-pipeline__node--clickable');
+  if (pipelineNodes.length) {
+    pipelineNodes.forEach(function (node) {
+      function togglePanel() {
+        var panelId = node.getAttribute('data-panel');
+        var panel   = document.getElementById(panelId);
+        if (!panel) return;
+        var isOpen = !panel.hidden;
+
+        // collapse all panels and reset all nodes
+        document.querySelectorAll('.tq-panel').forEach(function (p) { p.hidden = true; });
+        pipelineNodes.forEach(function (n) { n.setAttribute('aria-expanded', 'false'); });
+
+        if (!isOpen) {
+          panel.hidden = false;
+          node.setAttribute('aria-expanded', 'true');
+          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+      node.addEventListener('click', togglePanel);
+      node.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePanel(); }
+      });
+    });
+  }
+
   /* ── Experience: accordion ── */
   document.querySelectorAll('.exp__card--expandable').forEach(function (card) {
     var header  = card.querySelector('.exp__header');
