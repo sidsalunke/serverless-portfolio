@@ -120,6 +120,95 @@ describe('Nav scroll behaviour', () => {
   });
 });
 
+// ── Pipeline panel toggle (testing.html) ──────────────────────
+const PIPELINE_DOM = `
+  <span id="footer-year"></span>
+  <nav id="main-nav" class="nav"></nav>
+  <button id="nav-hamburger" aria-expanded="false"><span></span><span></span><span></span></button>
+  <ul id="nav-links" class="nav__links"></ul>
+  <div class="tq-pipeline__node tq-pipeline__node--clickable"
+       role="button" tabindex="0" aria-expanded="false" data-panel="panel-pr-checks">
+    <span class="tq-pipeline__node-label">PR Checks</span>
+  </div>
+  <div class="tq-pipeline__node tq-pipeline__node--clickable"
+       role="button" tabindex="0" aria-expanded="false" data-panel="panel-deploy">
+    <span class="tq-pipeline__node-label">Deploy</span>
+  </div>
+  <div class="tq-pipeline__node tq-pipeline__node--clickable"
+       role="button" tabindex="0" aria-expanded="false" data-panel="panel-live-verify">
+    <span class="tq-pipeline__node-label">Live Verify</span>
+  </div>
+  <div id="panel-pr-checks"   class="tq-panel" hidden></div>
+  <div id="panel-deploy"      class="tq-panel" hidden></div>
+  <div id="panel-live-verify" class="tq-panel" hidden></div>
+`;
+
+describe('Pipeline panel toggle', () => {
+  beforeEach(() => {
+    document.body.innerHTML = PIPELINE_DOM;
+    initPortfolio();
+  });
+
+  test('clicking a node reveals its panel', () => {
+    document.querySelectorAll('.tq-pipeline__node--clickable')[0].click();
+    expect(document.getElementById('panel-pr-checks').hidden).toBe(false);
+  });
+
+  test('clicking the same node again hides the panel', () => {
+    const node = document.querySelectorAll('.tq-pipeline__node--clickable')[0];
+    node.click();
+    node.click();
+    expect(document.getElementById('panel-pr-checks').hidden).toBe(true);
+  });
+
+  test('clicking a node sets aria-expanded="true"', () => {
+    const node = document.querySelectorAll('.tq-pipeline__node--clickable')[0];
+    node.click();
+    expect(node.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  test('clicking same node resets aria-expanded to "false"', () => {
+    const node = document.querySelectorAll('.tq-pipeline__node--clickable')[0];
+    node.click();
+    node.click();
+    expect(node.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  test('clicking a different node closes the first panel and opens the second', () => {
+    const [node0, node1] = document.querySelectorAll('.tq-pipeline__node--clickable');
+    node0.click();
+    node1.click();
+    expect(document.getElementById('panel-pr-checks').hidden).toBe(true);
+    expect(document.getElementById('panel-deploy').hidden).toBe(false);
+    expect(node0.getAttribute('aria-expanded')).toBe('false');
+    expect(node1.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  test('only one panel is open at a time', () => {
+    document.querySelectorAll('.tq-pipeline__node--clickable').forEach(n => n.click());
+    const openPanels = document.querySelectorAll('.tq-panel:not([hidden])');
+    expect(openPanels.length).toBe(1);
+  });
+
+  test('Enter key opens a panel', () => {
+    const node = document.querySelectorAll('.tq-pipeline__node--clickable')[0];
+    node.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(document.getElementById('panel-pr-checks').hidden).toBe(false);
+  });
+
+  test('Space key opens a panel', () => {
+    const node = document.querySelectorAll('.tq-pipeline__node--clickable')[0];
+    node.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    expect(document.getElementById('panel-pr-checks').hidden).toBe(false);
+  });
+
+  test('other keys do not open a panel', () => {
+    const node = document.querySelectorAll('.tq-pipeline__node--clickable')[0];
+    node.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    expect(document.getElementById('panel-pr-checks').hidden).toBe(true);
+  });
+});
+
 // ── Experience accordion ───────────────────────────────────────
 describe('Experience accordion', () => {
   test('expands a card on click', () => {
