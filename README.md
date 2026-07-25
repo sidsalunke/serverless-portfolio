@@ -2,11 +2,11 @@
 
 [![Deploy & Verify](https://github.com/sidsalunke/serverless-portfolio/actions/workflows/deploy.yml/badge.svg)](https://github.com/sidsalunke/serverless-portfolio/actions/workflows/deploy.yml)
 [![PR Checks](https://github.com/sidsalunke/serverless-portfolio/actions/workflows/pr.yml/badge.svg)](https://github.com/sidsalunke/serverless-portfolio/actions/workflows/pr.yml)
-![Coverage](badges/coverage.svg)
-![Lighthouse Performance](badges/lh-performance.svg)
-![Lighthouse Accessibility](badges/lh-accessibility.svg)
-![Lighthouse Best Practices](badges/lh-best-practices.svg)
-![Lighthouse SEO](badges/lh-seo.svg)
+![Coverage](https://raw.githubusercontent.com/sidsalunke/serverless-portfolio/badges/badges/coverage.svg)
+![Lighthouse Performance](https://raw.githubusercontent.com/sidsalunke/serverless-portfolio/badges/badges/lh-performance.svg)
+![Lighthouse Accessibility](https://raw.githubusercontent.com/sidsalunke/serverless-portfolio/badges/badges/lh-accessibility.svg)
+![Lighthouse Best Practices](https://raw.githubusercontent.com/sidsalunke/serverless-portfolio/badges/badges/lh-best-practices.svg)
+![Lighthouse SEO](https://raw.githubusercontent.com/sidsalunke/serverless-portfolio/badges/badges/lh-seo.svg)
 
 Personal portfolio site for [portfolio.sidsalunke.info](https://portfolio.sidsalunke.info).
 
