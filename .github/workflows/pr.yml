@@ -7,8 +7,13 @@ on:
 jobs:
   # ── Job 1: fast static tests (no browser needed) ────────────────────────
   static-tests:
-    name: Unit / Accessibility / Snapshot
+    name: Unit / Accessibility / Snapshot / Coverage
     runs-on: ubuntu-latest
+
+    # Needed so the job can post a coverage table as a PR comment
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +34,75 @@ jobs:
 
       - name: Snapshot tests
         run: npm run test:snapshot
+
+      # Run unit tests again with --coverage to produce coverage-summary.json.
+      # Jest caches results so this is fast; the coverage pass is the extra work.
+      - name: Coverage (unit tests)
+        run: npm run test:coverage
+
+      # Upload the full HTML coverage report as a workflow artifact so reviewers
+      # can drill into uncovered lines directly from the PR checks tab.
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-pr-${{ github.event.pull_request.number }}
+          path: coverage/
+          retention-days: 14
+
+      # Post a concise coverage table to the PR as a comment.
+      # jq extracts lines/statements/functions/branches from the json-summary.
+      # The comment is updated on subsequent pushes (find-comment + upsert).
+      - name: Post coverage comment to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = JSON.parse(
+              fs.readFileSync('coverage/coverage-summary.json', 'utf8')
+            ).total;
+
+            const fmt = (obj) =>
+              `${obj.pct}% (${obj.covered}/${obj.total})`;
+
+            const body = [
+              '## Coverage report',
+              '',
+              '| Metric | Coverage |',
+              '|--------|----------|',
+              `| Lines      | ${fmt(summary.lines)}      |`,
+              `| Statements | ${fmt(summary.statements)} |`,
+              `| Functions  | ${fmt(summary.functions)}  |`,
+              `| Branches   | ${fmt(summary.branches)}   |`,
+              '',
+              `Full HTML report uploaded as artifact \`coverage-report-pr-${{ github.event.pull_request.number }}\`.`,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.startsWith('## Coverage report')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner:      context.repo.owner,
+                repo:       context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
 
   # ── Job 2: security scanning (runs in parallel with static-tests) ────────
   #

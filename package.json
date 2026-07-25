@@ -3,13 +3,15 @@
   "version": "3.0.0",
   "description": "Siddharth Salunke – Professional Portfolio",
   "scripts": {
-    "start":            "npx serve -p 3000 .",
-    "test":             "jest",
-    "test:unit":        "jest tests/unit",
-    "test:a11y":        "jest tests/a11y",
-    "test:snapshot":    "jest tests/snapshot",
-    "test:e2e":         "playwright test",
-    "test:e2e:live":    "cross-env BASE_URL=https://portfolio.sidsalunke.info playwright test --project=chromium"
+    "start": "npx serve -p 3000 .",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:a11y": "jest tests/a11y",
+    "test:snapshot": "jest tests/snapshot",
+    "test:e2e": "playwright test",
+    "test:e2e:live":  "cross-env BASE_URL=https://portfolio.sidsalunke.info playwright test --project=chromium",
+    "test:coverage":  "jest tests/unit --coverage",
+    "generate-badges": "node scripts/generate-badges.js"
   },
   "repository": {
     "type": "git",
@@ -21,11 +23,12 @@
     "brace-expansion": "5.0.8"
   },
   "devDependencies": {
-    "cross-env":              "^7.0.3",
-    "jest":                   "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
-    "jest-axe":               "^9.0.0",
-    "@playwright/test":       "^1.48.0",
-    "@axe-core/playwright":   "^4.10.0"
+    "@axe-core/playwright": "^4.10.0",
+    "@playwright/test": "^1.48.0",
+    "badge-maker": "^6.0.0",
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "jest-axe": "^9.0.0",
+    "jest-environment-jsdom": "^29.7.0"
   }
 }

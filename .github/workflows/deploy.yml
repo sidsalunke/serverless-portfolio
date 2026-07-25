@@ -201,3 +201,80 @@ jobs:
         run: |
           echo "::error::Live E2E tests failed. Rolled back to commit ${{ needs.deploy.outputs.previous-sha }}. Check the e2e-live-report artefact for details."
           exit 1
+
+  # ── Job 5: update metric badges and commit to master ────────────────────
+  #
+  # Runs only after live E2E tests pass (i.e., the deploy is confirmed good).
+  # Generates fresh SVG badges for test coverage and Lighthouse scores,
+  # then commits them directly to master with [skip ci] so the commit does
+  # not trigger another deploy loop.
+  #
+  # Why commit badges to the repo rather than use a third-party service:
+  #   - shields.io / codecov require an account and a public token
+  #   - badge-maker generates identical SVGs with no external dependency
+  #   - The badge files are committed so they render in the README on GitHub
+  #     without a request to an external CDN
+  update-badges:
+    name: Update metric badges
+    needs: e2e-live
+    if: needs.e2e-live.result == 'success'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # needed to push the badge commit
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Fetch full history so the [skip ci] commit lands on master correctly
+          ref: master
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      # ── Coverage badges ──────────────────────────────────────────────────
+      # Re-run unit tests with coverage to get a fresh coverage-summary.json.
+      # Tests are cached by Jest; the coverage pass is the only extra cost.
+      - name: Generate coverage data
+        run: npm run test:coverage
+
+      # ── Lighthouse badges ────────────────────────────────────────────────
+      # Run Lighthouse CI against the live site (already confirmed up by e2e-live).
+      # lhci autorun writes JSON results to .lighthouseci/ which generate-badges.js reads.
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+
+      - name: Run Lighthouse CI against live site
+        run: |
+          lhci autorun \
+            --collect.url=https://portfolio.sidsalunke.info \
+            --collect.numberOfRuns=3 \
+            --upload.target=filesystem \
+            --upload.outputDir=.lighthouseci
+        continue-on-error: true
+        # continue-on-error: if Lighthouse fails (e.g. network hiccup), we still
+        # commit coverage badges. generate-badges.js emits "unknown" for missing data.
+
+      # ── Generate SVG files ───────────────────────────────────────────────
+      - name: Generate badge SVGs
+        run: npm run generate-badges
+
+      # ── Commit and push ──────────────────────────────────────────────────
+      # Only commit if any badge file actually changed (avoids empty commits
+      # when scores stay the same between deploys).
+      - name: Commit updated badges
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add badges/
+          if git diff --cached --quiet; then
+            echo "No badge changes — skipping commit."
+          else
+            git commit -m "chore: update metric badges [skip ci]"
+            git push origin master
+          fi
