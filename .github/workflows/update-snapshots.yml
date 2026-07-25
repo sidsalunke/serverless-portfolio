@@ -1,0 +1,54 @@
+name: Update Visual Snapshots
+
+# Run manually from the Actions tab to regenerate Linux baseline screenshots.
+# Typical use cases:
+#   - First-time setup (no Linux baselines exist yet)
+#   - After intentional UI changes (run this, then the updated PNGs are committed)
+#
+# After this workflow completes, pull the committed baselines locally:
+#   git pull origin <your-branch>
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to update snapshots on'
+        required: false
+        default: 'rebuild/plain-js-cicd-security'
+
+jobs:
+  update-snapshots:
+    name: Regenerate Linux visual baselines
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # needed to commit the new PNGs back to the branch
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate baselines (update-snapshots)
+        run: npx playwright test tests/e2e/visual.spec.js --update-snapshots
+        # This will fail because no baselines exist yet — that is expected.
+        # Playwright writes the actual screenshots regardless of exit code.
+        continue-on-error: true
+
+      - name: Commit updated snapshots
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tests/e2e/visual.spec.js-snapshots/
+          git diff --cached --quiet || git commit -m "chore: update Linux visual regression baselines [skip ci]"
+          git push
