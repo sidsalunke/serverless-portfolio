@@ -1,5 +1,13 @@
 # Siddharth Salunke — Portfolio
 
+[![Deploy & Verify](https://github.com/sidsalunke/serverless-portfolio/actions/workflows/deploy.yml/badge.svg)](https://github.com/sidsalunke/serverless-portfolio/actions/workflows/deploy.yml)
+[![PR Checks](https://github.com/sidsalunke/serverless-portfolio/actions/workflows/pr.yml/badge.svg)](https://github.com/sidsalunke/serverless-portfolio/actions/workflows/pr.yml)
+![Coverage](badges/coverage.svg)
+![Lighthouse Performance](badges/lh-performance.svg)
+![Lighthouse Accessibility](badges/lh-accessibility.svg)
+![Lighthouse Best Practices](badges/lh-best-practices.svg)
+![Lighthouse SEO](badges/lh-seo.svg)
+
 Personal portfolio site for [portfolio.sidsalunke.info](https://portfolio.sidsalunke.info).
 
 ## A note on the repo name
@@ -118,15 +126,19 @@ security-scan ─┘
 ### On merge to master (`deploy.yml`)
 
 ```
-deploy ──► e2e-live
-sbom (parallel with deploy)
+deploy ──► e2e-live ──► (pass) update-badges
+sbom (parallel with deploy)   └──► (fail) rollback
 ```
 
-**`deploy`** — syncs static files to S3, then invalidates the CloudFront cache. Files are live the moment the invalidation completes.
+**`deploy`** — syncs static files to S3, then invalidates the CloudFront cache. Waits for the invalidation to complete before allowing E2E to proceed (so tests always hit fresh content, not stale CDN cache).
 
 **`sbom`** — generates a CycloneDX JSON Software Bill of Materials via `@cyclonedx/cyclonedx-npm`, uploaded as a workflow artifact (retained 90 days).
 
-**`e2e-live`** — runs the Playwright suite against `https://portfolio.sidsalunke.info` to verify the live deployment.
+**`e2e-live`** — runs the Playwright suite against `https://portfolio.sidsalunke.info` to verify the live deployment. Acts as the canary gate.
+
+**`rollback`** — triggered only if `e2e-live` fails. Checks out the `HEAD~1` SHA captured before deploy, re-syncs S3, and re-invalidates CloudFront — reverting users to the previous version within ~1–3 minutes. Exits non-zero so the workflow is visibly red.
+
+**`update-badges`** — triggered only if `e2e-live` succeeds. Runs unit tests with coverage, then runs Lighthouse CI (3 runs) against the live site, generates SVG badges via `badge-maker`, and commits them to master with `[skip ci]`.
 
 ### Authentication
 
@@ -172,6 +184,9 @@ npm test
 npm run test:unit
 npm run test:a11y
 npm run test:snapshot
+
+# Unit tests with coverage report (outputs to coverage/)
+npm run test:coverage
 
 # Playwright (spins up local server automatically)
 npm run test:e2e
