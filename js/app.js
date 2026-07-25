@@ -89,6 +89,7 @@ function initPortfolio() {
 
 // Browser: auto-init (no module system)
 // Jest/Node: export for tests to call manually
+/* istanbul ignore next */
 if (typeof module === 'undefined') {
   initPortfolio();
 } else {

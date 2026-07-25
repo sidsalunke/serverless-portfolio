@@ -1,32 +1,49 @@
 name: Update Visual Snapshots
 
-# Run manually from the Actions tab to regenerate Linux baseline screenshots.
-# Typical use cases:
-#   - First-time setup (no Linux baselines exist yet)
-#   - After intentional UI changes (run this, then the updated PNGs are committed)
+# Two ways to trigger this workflow:
 #
-# After this workflow completes, pull the committed baselines locally:
-#   git pull origin <your-branch>
+#   1. Add the label "update-snapshots" to any open PR.
+#      The workflow runs on the PR's head branch, commits updated PNGs, then
+#      removes the label so a second push doesn't re-trigger it.
+#      The new commit (without [skip ci]) causes PR checks to re-run automatically.
+#
+#   2. Manually from the Actions tab (workflow_dispatch).
+#      Defaults to the current branch; override via the branch input if needed.
+#
 on:
+  pull_request:
+    types: [labeled]
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to update snapshots on'
+        description: 'Branch to update snapshots on (defaults to current branch)'
         required: false
-        default: 'rebuild/plain-js-cicd-security'
+        default: ''
 
 jobs:
   update-snapshots:
     name: Regenerate Linux visual baselines
+    # For the label trigger, only run when the specific label is added.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.label.name == 'update-snapshots'
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write  # needed to commit the new PNGs back to the branch
+      contents: write        # commit updated PNGs back to the branch
+      pull-requests: write   # remove the label after running (label trigger only)
 
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch || github.ref }}
+          # label trigger: use the PR head branch
+          # workflow_dispatch: use the input branch, or fall back to the triggering ref
+          ref: >-
+            ${{
+              github.event_name == 'pull_request'
+                && github.event.pull_request.head.ref
+                || (github.event.inputs.branch != '' && github.event.inputs.branch || github.ref)
+            }}
 
       - uses: actions/setup-node@v4
         with:
@@ -39,10 +56,10 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Generate baselines (update-snapshots)
+      - name: Regenerate visual baselines
         run: npx playwright test tests/e2e/visual.spec.js --update-snapshots
-        # This will fail because no baselines exist yet — that is expected.
-        # Playwright writes the actual screenshots regardless of exit code.
+        # Playwright writes new PNGs regardless of whether old baselines existed,
+        # so exit code 1 (no prior baseline) is expected on first run.
         continue-on-error: true
 
       - name: Commit updated snapshots
@@ -50,5 +67,29 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add tests/e2e/visual.spec.js-snapshots/
-          git diff --cached --quiet || git commit -m "chore: update Linux visual regression baselines [skip ci]"
-          git push
+          if git diff --cached --quiet; then
+            echo "No snapshot changes — nothing to commit."
+          else
+            git commit -m "chore: update Linux visual regression baselines"
+            git push
+          fi
+        # No [skip ci] — the new commit must trigger PR checks to re-run so
+        # the visual tests can verify the updated baselines pass cleanly.
+        # deploy.yml uses paths-ignore on the snapshots directory so this
+        # commit does not trigger a production deploy.
+
+      # Remove the label so it can be re-applied to trigger another update
+      # if needed, and to keep the PR label list tidy.
+      - name: Remove update-snapshots label
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.removeLabel({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              name: 'update-snapshots',
+            }).catch(() => {
+              // Label may have already been removed; ignore the error.
+            });
