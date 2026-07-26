@@ -178,8 +178,9 @@ button { font-family: inherit; }
   font-size: 1.45rem;
   font-weight: 500;
   color: var(--text-2);
-  transition: color var(--transition);
+  transition: color var(--transition), background var(--transition);
   position: relative;
+  -webkit-tap-highlight-color: transparent;
 }
 .nav__link::after {
   content: '';
@@ -192,6 +193,7 @@ button { font-family: inherit; }
 }
 .nav__link:hover { color: var(--text-1); }
 .nav__link:hover::after { width: 100%; }
+.nav__link:active { color: var(--accent); }
 
 .nav__cta {
   font-size: 1.35rem;
@@ -208,6 +210,9 @@ button { font-family: inherit; }
   cursor: pointer;
   padding: 4px;
   z-index: 1001;
+  border-radius: var(--radius-sm);
+  transition: transform var(--transition), background var(--transition);
+  -webkit-tap-highlight-color: transparent;
 }
 .nav__hamburger span {
   display: block;
@@ -215,8 +220,13 @@ button { font-family: inherit; }
   height: 2px;
   background: var(--text-1);
   border-radius: 2px;
-  transition: transform var(--transition), opacity var(--transition);
+  transition: transform var(--transition), opacity var(--transition), background var(--transition);
 }
+.nav__hamburger:active {
+  transform: scale(0.9);
+  background: rgba(129, 140, 248, 0.12);
+}
+.nav__hamburger:active span { background: var(--accent); }
 .nav__hamburger--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .nav__hamburger--open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .nav__hamburger--open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
@@ -469,6 +479,11 @@ button { font-family: inherit; }
    ============================================================ */
 .section--experience { background: var(--bg-1); }
 
+/* ============================================================
+   EDUCATION
+   ============================================================ */
+.section--education { background: var(--bg-1); }
+
 .exp__list {
   display: flex;
   flex-direction: column;
@@ -589,6 +604,12 @@ button { font-family: inherit; }
   transition: max-height 0.42s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .exp__details--open { max-height: 80rem; }
+
+/* Non-expandable cards (no chevron, e.g. current role, education) show details unconditionally */
+.exp__card:not(.exp__card--expandable) .exp__details {
+  max-height: none;
+  overflow: visible;
+}
 
 .exp__description {
   font-size: 1.6rem;
@@ -805,7 +826,14 @@ button { font-family: inherit; }
     z-index: 1000;
   }
   .nav__links--open { transform: translateX(0); }
-  .nav__link { font-size: 2rem; }
+  .nav__link {
+    font-size: 2rem;
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    margin: 0 -0.8rem;
+    border-radius: var(--radius-sm);
+  }
+  .nav__link:active { background: rgba(129, 140, 248, 0.12); }
   .nav__cta { align-self: flex-start; }
 
   /* Hero */
@@ -1326,9 +1354,6 @@ button { font-family: inherit; }
 
 /* ── Skills teaser link (index.html) ──────────────────────────── */
 .skills__teaser {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
   margin-top: 3.2rem;
   padding: 1.6rem 2rem;
   background: rgba(129, 140, 248, 0.05);
@@ -1337,18 +1362,17 @@ button { font-family: inherit; }
   font-size: 1.45rem;
   color: var(--text-3);
   line-height: 1.55;
-  flex-wrap: wrap;
 }
-.skills__teaser svg { color: var(--accent); flex-shrink: 0; }
+.skills__teaser svg { color: var(--accent); vertical-align: -2px; margin-right: 0.4rem; }
 .skills__teaser-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
   color: var(--accent);
   font-weight: 600;
-  transition: color var(--transition), gap var(--transition);
+  transition: color var(--transition);
+  white-space: nowrap;
 }
-.skills__teaser-link:hover { color: var(--accent-2); gap: 0.6rem; }
+.skills__teaser-link svg { margin-right: 0; margin-left: 0.3rem; transition: margin-left var(--transition); }
+.skills__teaser-link:hover { color: var(--accent-2); }
+.skills__teaser-link:hover svg { margin-left: 0.5rem; }
 
 /* ── Pipeline: clickable nodes ────────────────────────────────── */
 .tq-pipeline__node--clickable {

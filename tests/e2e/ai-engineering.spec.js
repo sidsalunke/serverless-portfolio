@@ -22,8 +22,8 @@ test.describe('AI Engineering page', () => {
     await expect(page.locator('.nav__link[aria-current="page"]')).toHaveText('AI Engineering');
   });
 
-  test('nav logo links back to index.html', async ({ page }) => {
-    await expect(page.locator('.nav__logo')).toHaveAttribute('href', 'index.html');
+  test('nav logo links back to the homepage', async ({ page }) => {
+    await expect(page.locator('.nav__logo')).toHaveAttribute('href', '/');
   });
 
   test('hero displays 4 stats', async ({ page }) => {
