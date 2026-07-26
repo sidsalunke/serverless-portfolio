@@ -218,7 +218,7 @@ terraform plan
 terraform apply
 ```
 
-The S3 remote state backend (`portfolio-tfstate-sidsalunke`) and DynamoDB lock table (`portfolio-tfstate-lock`) must be created manually before the first `terraform init`.
+The S3 remote state backend (`portfolio-tfstate-sidsalunke`) must be created manually before the first `terraform init`. State locking uses native S3 conditional writes (`use_lockfile`) — no DynamoDB table required.
 
 `alert_email` has no default (a personal email shouldn't be committed to a public repo) — supply it at plan/apply time:
 

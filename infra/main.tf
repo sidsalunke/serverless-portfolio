@@ -23,7 +23,7 @@
 ###############################################################################
 
 terraform {
-  required_version = ">= 1.5"
+  required_version = ">= 1.10" # required for native S3 state locking (use_lockfile)
 
   required_providers {
     aws = {
@@ -33,13 +33,14 @@ terraform {
   }
 
   # Remote state – keeps tfstate out of the repo and enables team collaboration.
-  # Bucket and DynamoDB table must exist before first `terraform init`.
+  # Bucket must exist before first `terraform init`. State locking is handled
+  # natively by S3 conditional writes (use_lockfile) — no DynamoDB table needed.
   backend "s3" {
-    bucket         = "portfolio-tfstate-sidsalunke"
-    key            = "portfolio/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "portfolio-tfstate-lock"
-    encrypt        = true
+    bucket       = "portfolio-tfstate-sidsalunke"
+    key          = "portfolio/terraform.tfstate"
+    region       = "us-east-1"
+    use_lockfile = true
+    encrypt      = true
   }
 }
 
@@ -414,7 +415,7 @@ data "aws_iam_policy_document" "github_actions_deploy" {
 }
 
 resource "aws_iam_role_policy" "github_actions_deploy" {
-  name   = "portfolio-deploy-policy"
+  name   = "portfolio-github-actions-deployPolicy" # matches the existing live policy name
   role   = aws_iam_role.github_actions_deploy.id
   policy = data.aws_iam_policy_document.github_actions_deploy.json
 }
