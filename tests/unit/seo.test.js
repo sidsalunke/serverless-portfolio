@@ -24,6 +24,7 @@ const AI_CANONICAL_URL = 'https://portfolio.sidsalunke.info/ai-engineering.html'
 
 let doc;
 let aiDoc;
+let testingDoc;
 
 beforeAll(() => {
   const html = fs.readFileSync(path.join(__dirname, '../../index.html'), 'utf8');
@@ -31,6 +32,23 @@ beforeAll(() => {
 
   const aiHtml = fs.readFileSync(path.join(__dirname, '../../ai-engineering.html'), 'utf8');
   aiDoc = new DOMParser().parseFromString(aiHtml, 'text/html');
+
+  const testingHtml = fs.readFileSync(path.join(__dirname, '../../testing.html'), 'utf8');
+  testingDoc = new DOMParser().parseFromString(testingHtml, 'text/html');
+});
+
+// ── Favicon ──────────────────────────────────────────────────────────────────
+
+describe('Favicon', () => {
+  test.each([
+    ['index.html', () => doc],
+    ['ai-engineering.html', () => aiDoc],
+    ['testing.html', () => testingDoc],
+  ])('%s has a favicon link pointing at favicon.svg', (_name, getDoc) => {
+    const icon = getDoc().querySelector('link[rel="icon"]');
+    expect(icon).not.toBeNull();
+    expect(icon.getAttribute('href')).toBe('favicon.svg');
+  });
 });
 
 // ── Primary SEO tags ─────────────────────────────────────────────────────────

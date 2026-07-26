@@ -24,8 +24,8 @@ test.describe('Quality Suite page', () => {
     await expect(page.locator('.nav__link[aria-current="page"]')).toHaveText('Quality Suite');
   });
 
-  test('nav logo links back to index.html', async ({ page }) => {
-    await expect(page.locator('.nav__logo')).toHaveAttribute('href', 'index.html');
+  test('nav logo links back to the homepage', async ({ page }) => {
+    await expect(page.locator('.nav__logo')).toHaveAttribute('href', '/');
   });
 
   // ── Hero stats ───────────────────────────────────────────────

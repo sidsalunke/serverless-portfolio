@@ -115,6 +115,7 @@
   <link id="google-fonts" rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" as="style">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="styles/main.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 <body>
 
@@ -171,6 +172,7 @@
   <ul class="nav__links" id="nav-links" role="list">
     <li><a href="#about"      class="nav__link">About</a></li>
     <li><a href="#experience" class="nav__link">Experience</a></li>
+    <li><a href="#education"  class="nav__link">Education</a></li>
     <li><a href="#skills"     class="nav__link">Skills</a></li>
     <li><a href="ai-engineering.html" class="nav__link">AI Engineering</a></li>
     <li><a href="testing.html" class="nav__link">Quality Suite</a></li>
@@ -459,6 +461,67 @@
   </div>
 </section>
 
+<!-- ============================================================ EDUCATION -->
+<section id="education" class="section section--education" aria-labelledby="education-heading">
+  <div class="container">
+    <p class="section__label">Education</p>
+    <h2 id="education-heading" class="section__heading">Where it started.</h2>
+
+    <div class="exp__list">
+
+      <!-- Master's -->
+      <article class="exp__card" style="--company-color:#818cf8" aria-label="Master of Information Technology at University of Technology Sydney">
+        <div class="exp__header">
+          <div class="exp__header-left">
+            <div class="exp__domain">Software Development</div>
+            <div class="exp__role">Master of Information Technology</div>
+            <div class="exp__company-row">
+              <span class="exp__company">University of Technology Sydney</span>
+              <span class="exp__sep" aria-hidden="true">&middot;</span>
+              <span class="exp__location"><svg width="13" height="13" aria-hidden="true"><use href="#i-map-pin"/></svg>&nbsp;Sydney, Australia</span>
+            </div>
+          </div>
+          <div class="exp__header-right">
+            <span class="exp__dates">Feb 2015 &ndash; Nov 2016</span>
+          </div>
+        </div>
+        <div class="exp__details">
+          <p class="exp__description">GPA: 3.34</p>
+          <ul class="exp__bullets">
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Received the UTS Accomplish Award in 2015</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>One of the only international students selected into the Suncorp Internship Program, 2015&ndash;2016 batch</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Bachelor's -->
+      <article class="exp__card" style="--company-color:#a78bfa" aria-label="Bachelor of Computer Applications at MITSOM College">
+        <div class="exp__header">
+          <div class="exp__header-left">
+            <div class="exp__domain">Computer Applications</div>
+            <div class="exp__role">Bachelor of Computer Applications</div>
+            <div class="exp__company-row">
+              <span class="exp__company">MITSOM College</span>
+              <span class="exp__sep" aria-hidden="true">&middot;</span>
+              <span class="exp__location"><svg width="13" height="13" aria-hidden="true"><use href="#i-map-pin"/></svg>&nbsp;Pune, India</span>
+            </div>
+          </div>
+          <div class="exp__header-right">
+            <span class="exp__dates">Jun 2010 &ndash; Jun 2013</span>
+          </div>
+        </div>
+        <div class="exp__details">
+          <ul class="exp__bullets">
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Consistently achieved higher distinction in computer-related programming languages</li>
+            <li class="exp__bullet"><span class="exp__bullet-dot" aria-hidden="true"></span>Secured campus placement into Cognizant as part of the degree, launching a professional IT career</li>
+          </ul>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
 <!-- ============================================================ SKILLS -->
 <section id="skills" class="section section--skills" aria-labelledby="skills-heading">
   <div class="container">
@@ -559,8 +622,7 @@
 
     <p class="skills__teaser">
       <svg width="15" height="15" aria-hidden="true"><use href="#i-flask"/></svg>
-      Want to see these tools in action? The full test suite for this site &mdash; unit, visual regression, accessibility, security and more &mdash;
-      is documented in the <a href="testing.html" class="skills__teaser-link">Quality Suite&nbsp;<svg width="13" height="13" aria-hidden="true"><use href="#i-external-link"/></svg></a>.
+      Want to see these tools in action? Unit, visual regression, accessibility, and security tests are all documented in the <a href="testing.html" class="skills__teaser-link">Quality Suite&nbsp;<svg width="13" height="13" aria-hidden="true"><use href="#i-external-link"/></svg></a>.
     </p>
   </div>
 </section>

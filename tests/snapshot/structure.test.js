@@ -26,7 +26,11 @@ test('hero section matches snapshot', () => {
 });
 
 test('experience list matches snapshot', () => {
-  expect(document.querySelector('.exp__list').innerHTML).toMatchSnapshot();
+  expect(document.querySelector('#experience .exp__list').innerHTML).toMatchSnapshot();
+});
+
+test('education list matches snapshot', () => {
+  expect(document.querySelector('#education .exp__list').innerHTML).toMatchSnapshot();
 });
 
 test('skills grid matches snapshot', () => {
@@ -38,7 +42,11 @@ test('footer matches snapshot', () => {
 });
 
 test('number of experience cards stays at 6', () => {
-  expect(document.querySelectorAll('.exp__card').length).toBe(6);
+  expect(document.querySelectorAll('#experience .exp__card').length).toBe(6);
+});
+
+test('number of education cards stays at 2', () => {
+  expect(document.querySelectorAll('#education .exp__card').length).toBe(2);
 });
 
 test('number of skill groups stays at 6', () => {
