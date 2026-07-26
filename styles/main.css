@@ -1354,9 +1354,6 @@ button { font-family: inherit; }
 
 /* ── Skills teaser link (index.html) ──────────────────────────── */
 .skills__teaser {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
   margin-top: 3.2rem;
   padding: 1.6rem 2rem;
   background: rgba(129, 140, 248, 0.05);
@@ -1365,18 +1362,17 @@ button { font-family: inherit; }
   font-size: 1.45rem;
   color: var(--text-3);
   line-height: 1.55;
-  flex-wrap: wrap;
 }
-.skills__teaser svg { color: var(--accent); flex-shrink: 0; }
+.skills__teaser svg { color: var(--accent); vertical-align: -2px; margin-right: 0.4rem; }
 .skills__teaser-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
   color: var(--accent);
   font-weight: 600;
-  transition: color var(--transition), gap var(--transition);
+  transition: color var(--transition);
+  white-space: nowrap;
 }
-.skills__teaser-link:hover { color: var(--accent-2); gap: 0.6rem; }
+.skills__teaser-link svg { margin-right: 0; margin-left: 0.3rem; transition: margin-left var(--transition); }
+.skills__teaser-link:hover { color: var(--accent-2); }
+.skills__teaser-link:hover svg { margin-left: 0.5rem; }
 
 /* ── Pipeline: clickable nodes ────────────────────────────────── */
 .tq-pipeline__node--clickable {
