@@ -156,6 +156,8 @@ GitHub Actions authenticates to AWS via **OIDC** — no long-lived access keys s
 - **Security headers policy** — enforced at the CDN edge on every response: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, strict CSP.
 - **GitHub OIDC provider** — registered once per AWS account; enables keyless authentication from GitHub Actions.
 - **IAM deploy role** — least-privilege, trusted only by this repo's master branch via OIDC.
+- **S3 lifecycle rule** — expires noncurrent object versions after 30 days, so versioning (enabled for rollback safety) doesn't accumulate indefinitely across deploys.
+- **Monitoring & cost guardrails** — an SNS topic + email subscription, a CloudFront 5xx-error-rate alarm (real origin/server errors only, not routine 4xx noise), and an AWS Budget alert. These replace what used to be manually created, un-tracked console resources.
 
 ---
 
@@ -216,7 +218,16 @@ terraform plan
 terraform apply
 ```
 
-The S3 remote state backend (`portfolio-tfstate-sidsalunke`) and DynamoDB lock table (`portfolio-tfstate-lock`) must be created manually before the first `terraform init`.
+The S3 remote state backend (`portfolio-tfstate-sidsalunke`) must be created manually before the first `terraform init`. State locking uses native S3 conditional writes (`use_lockfile`) — no DynamoDB table required.
+
+`alert_email` has no default (a personal email shouldn't be committed to a public repo) — supply it at plan/apply time:
+
+```bash
+terraform apply -var="alert_email=you@example.com"
+# or: export TF_VAR_alert_email=you@example.com
+```
+
+AWS will send a subscription-confirmation email to that address after the first apply — the SNS subscription (and therefore all alarm/budget notifications) won't actually deliver anything until that confirmation link is clicked.
 
 ### Required GitHub Actions secrets
 
