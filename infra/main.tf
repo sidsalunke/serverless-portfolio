@@ -80,6 +80,20 @@ variable "github_repo" {
   default     = "sidsalunke/serverless-portfolio"
 }
 
+# No default on purpose — a personal email shouldn't be committed to a public
+# repo. Supply at apply time: `terraform apply -var="alert_email=you@example.com"`
+# or `export TF_VAR_alert_email=you@example.com`.
+variable "alert_email" {
+  description = "Email address for AWS Budget and CloudWatch alarm notifications"
+  type        = string
+}
+
+variable "monthly_budget_limit_usd" {
+  description = "Monthly cost budget threshold in USD. This site is fully static (S3 + CloudFront), so realistic spend is a few cents/month — this threshold exists to catch anomalies, not normal usage."
+  type        = string
+  default     = "5"
+}
+
 ###############################################################################
 # S3 – origin bucket (private)
 ###############################################################################
@@ -120,6 +134,28 @@ resource "aws_s3_bucket_versioning" "site" {
   bucket = aws_s3_bucket.site.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+# Versioning alone keeps every previous object version forever. Costs are
+# tiny for a small static site, but with deploys on every merge this grows
+# unbounded over years — expire old versions instead of accumulating them.
+resource "aws_s3_bucket_lifecycle_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  rule {
+    id     = "expire-noncurrent-versions"
+    status = "Enabled"
+
+    filter {}
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
   }
 }
 
@@ -381,6 +417,98 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
   name   = "portfolio-deploy-policy"
   role   = aws_iam_role.github_actions_deploy.id
   policy = data.aws_iam_policy_document.github_actions_deploy.json
+}
+
+###############################################################################
+# Monitoring & Cost Guardrails
+#
+# Replaces what used to be manually created, un-tracked console clicks (an
+# old CloudFront "recommended alarm" and nothing at all for cost) with
+# equivalents managed here as code:
+#
+#   - SNS topic + email subscription: notification target for the alarm and
+#     the budget below.
+#   - CloudFront 5xx error rate alarm: scoped to *5xx* only (real
+#     origin/server errors) rather than "Total Error Rate", which also
+#     counts ordinary 4xx noise — missing favicons, bot path-scanning for
+#     /.env or /wp-login.php, etc. That noise is exactly what caused false
+#     alarms from the old alarm on a low-traffic static site.
+#   - AWS Budget: this site is fully static (S3 + CloudFront) and should
+#     cost cents/month. A low threshold here exists to catch real anomalies
+#     (traffic spike, misconfiguration) — not to track normal usage.
+###############################################################################
+
+resource "aws_sns_topic" "alerts" {
+  provider = aws.us_east_1
+  name     = "portfolio-alerts"
+
+  tags = {
+    Project   = "portfolio"
+    ManagedBy = "terraform"
+  }
+}
+
+resource "aws_sns_topic_subscription" "alerts_email" {
+  provider  = aws.us_east_1
+  topic_arn = aws_sns_topic.alerts.arn
+  protocol  = "email"
+  endpoint  = var.alert_email
+  # Subscription sits in "PendingConfirmation" until the confirmation email
+  # AWS sends to alert_email is clicked — that step can't be automated away,
+  # it's an SNS anti-abuse requirement.
+}
+
+resource "aws_cloudwatch_metric_alarm" "cloudfront_5xx" {
+  provider          = aws.us_east_1
+  alarm_name        = "portfolio-cloudfront-5xx-error-rate"
+  alarm_description = "CloudFront 5xx (origin/server) error rate is elevated for ${var.domain_name}"
+
+  namespace   = "AWS/CloudFront"
+  metric_name = "5xxErrorRate"
+  dimensions = {
+    DistributionId = aws_cloudfront_distribution.site.id
+    Region         = "Global"
+  }
+
+  statistic           = "Average"
+  period              = 300
+  evaluation_periods  = 2
+  datapoints_to_alarm = 2
+  threshold           = 5 # percent
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  treat_missing_data  = "notBreaching" # low-traffic site: no data isn't an error
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+
+  tags = {
+    Project   = "portfolio"
+    ManagedBy = "terraform"
+  }
+}
+
+resource "aws_budgets_budget" "monthly_cost" {
+  name         = "portfolio-monthly-cost-guardrail"
+  budget_type  = "COST"
+  limit_amount = var.monthly_budget_limit_usd
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [var.alert_email]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_email_addresses = [var.alert_email]
+  }
 }
 
 ###############################################################################
