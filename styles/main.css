@@ -318,7 +318,7 @@ button { font-family: inherit; }
 .hero__name {
   font-size: clamp(4rem, 8.5vw, 7.6rem);
   font-weight: 900;
-  line-height: 1.03;
+  line-height: 1.2; /* gradient-clipped text needs headroom for descenders (g/y/p/q/j) or they render blank */
   letter-spacing: -0.035em;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 40%, var(--accent) 72%, var(--accent-2) 100%);
   -webkit-background-clip: text;
@@ -930,7 +930,7 @@ button { font-family: inherit; }
 .tq-hero__title {
   font-size: clamp(3.6rem, 7vw, 6.4rem);
   font-weight: 900;
-  line-height: 1.05;
+  line-height: 1.2; /* gradient-clipped text needs headroom for descenders (g/y/p/q/j) or they render blank */
   letter-spacing: -0.035em;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 40%, var(--accent) 72%, var(--accent-2) 100%);
   -webkit-background-clip: text;
