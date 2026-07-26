@@ -12,7 +12,7 @@ test.describe('Navigation', () => {
   });
 
   test('nav contains expected section links', async ({ page }) => {
-    for (const label of ['About', 'Experience', 'Skills']) {
+    for (const label of ['About', 'Experience', 'Education', 'Skills']) {
       await expect(page.locator(`.nav__link:has-text("${label}")`)).toBeVisible();
     }
   });
@@ -29,7 +29,7 @@ test.describe('Navigation', () => {
   });
 
   test('all section headings are present', async ({ page }) => {
-    const headings = ['Platform leadership, through a quality lens.', "Where I\u2019ve worked.", 'What I work with.'];
+    const headings = ['Platform leadership, through a quality lens.', "Where I\u2019ve worked.", 'Where it started.', 'What I work with.'];
     for (const text of headings) {
       await expect(page.locator(`h2:has-text("${text}")`)).toBeAttached();
     }
