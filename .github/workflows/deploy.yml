@@ -279,8 +279,12 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Stash the freshly generated SVGs before switching branches
+          # Stash the freshly generated SVGs before switching branches, then
+          # remove them from the working tree. Without this, `git checkout`
+          # below refuses to switch branches: it won't silently overwrite
+          # the (tracked-or-not) badges/*.svg files we just regenerated.
           cp badges/*.svg /tmp/
+          rm -f badges/*.svg
 
           # Switch to the badges orphan branch.
           # Use -B with explicit origin/badges to avoid ambiguity between the

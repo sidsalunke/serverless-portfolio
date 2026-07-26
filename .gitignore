@@ -71,3 +71,9 @@ test-results/
 
 # Claude Code
 .claude/
+
+# Generated badge SVGs — committed only to the `badges` orphan branch
+# (README pulls them via raw.githubusercontent.com/.../badges/...), never
+# tracked on master. Keeping them untracked here avoids update-badges in
+# deploy.yml regenerating tracked files it then needs to branch-switch past.
+badges/*.svg

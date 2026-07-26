@@ -138,7 +138,7 @@ sbom (parallel with deploy)   └──► (fail) rollback
 
 **`rollback`** — triggered only if `e2e-live` fails. Checks out the `HEAD~1` SHA captured before deploy, re-syncs S3, and re-invalidates CloudFront — reverting users to the previous version within ~1–3 minutes. Exits non-zero so the workflow is visibly red.
 
-**`update-badges`** — triggered only if `e2e-live` succeeds. Runs unit tests with coverage, then runs Lighthouse CI (3 runs) against the live site, generates SVG badges via `badge-maker`, and commits them to master with `[skip ci]`.
+**`update-badges`** — triggered only if `e2e-live` succeeds. Runs unit tests with coverage, then runs Lighthouse CI (3 runs) against the live site, generates SVG badges via `badge-maker`, and commits them to the unprotected `badges` orphan branch with `[skip ci]` (master stays behind branch protection).
 
 ### Authentication
 
