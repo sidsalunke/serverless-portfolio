@@ -166,7 +166,13 @@ button { font-family: inherit; }
   -webkit-text-fill-color: transparent;
   background-clip: text;
   flex-shrink: 0;
+  display: inline-block;
+  transition: transform var(--transition), opacity var(--transition);
+  -webkit-tap-highlight-color: transparent;
 }
+/* transform/opacity, not color — the gradient text-fill makes a color-based
+   :active state invisible, so the tap feedback has to be geometric instead */
+.nav__logo:active { transform: scale(0.92); opacity: 0.75; }
 
 .nav__links {
   display: flex;
@@ -258,6 +264,7 @@ button { font-family: inherit; }
   border-radius: 50%;
   pointer-events: none;
   filter: blur(90px);
+  will-change: transform;
 }
 .hero__orb--1 {
   width: 65rem; height: 65rem;
@@ -840,6 +847,12 @@ button { font-family: inherit; }
   .hero__stats { gap: 3.2rem; }
   .hero__ctas  { gap: 1rem; }
   .hero .btn   { padding: 1rem 1.8rem; font-size: 1.35rem; }
+
+  /* Three continuously-animated blur(90px) layers are expensive to
+     composite on mobile GPUs, and can visibly delay input responsiveness
+     (e.g. tapping the hamburger) for the first few seconds after load —
+     purely decorative, so disable rather than tune. */
+  .hero__orb { animation: none; }
 
   /* About */
   .about__photo { width: 17rem; height: 17rem; }
