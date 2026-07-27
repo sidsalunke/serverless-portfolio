@@ -2,6 +2,13 @@
 
 function initPortfolio() {
 
+  /* ── iOS/WebKit: enable :active and :hover on tap ──
+     WebKit (Safari, and every iOS browser incl. Chrome — Apple mandates
+     WebKit under the hood there) only applies :active/:hover on touch if a
+     touchstart listener exists somewhere on the page. Without this, tap
+     feedback (hamburger, nav links, logo) silently never fires on iOS. */
+  document.body.addEventListener('touchstart', function () {}, { passive: true });
+
   /* ── Fonts: activate preloaded Google Fonts stylesheet ──
      The <link id="google-fonts"> in <head> uses rel="preload" to start the
      download without blocking render.  CSP script-src 'self' forbids inline
