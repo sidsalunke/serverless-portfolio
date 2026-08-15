@@ -119,6 +119,48 @@ function initPortfolio() {
       });
     }
   });
+
+  /* ── Scroll-reveal entrance motion ──
+     Progressive enhancement only: elements just render normally without
+     IntersectionObserver support, and reduced-motion users get the final
+     state immediately rather than a suppressed/broken animation. */
+  var revealEls = document.querySelectorAll(
+    '.section__heading, .about__photo-wrap, .about__body, .exp__card, .skills__group'
+  );
+  var prefersReducedMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (revealEls.length && 'IntersectionObserver' in window && !prefersReducedMotion) {
+    revealEls.forEach(function (el) { el.classList.add('reveal'); });
+
+    var revealObserver = new IntersectionObserver(function (entries, observer) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal--in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+    revealEls.forEach(function (el) { revealObserver.observe(el); });
+  }
+
+  /* ── Card spotlight hover ──
+     Cursor-tracked glow on experience/skills cards. Desktop-only: gated
+     behind (hover: hover) and (pointer: fine) so touch devices skip the
+     listeners entirely (no benefit there, and avoids sticky-hover states). */
+  var canHover = window.matchMedia &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (canHover) {
+    document.querySelectorAll('.exp__card, .skills__group').forEach(function (card) {
+      card.addEventListener('mousemove', function (e) {
+        var rect = card.getBoundingClientRect();
+        card.style.setProperty('--spot-x', ((e.clientX - rect.left) / rect.width * 100) + '%');
+        card.style.setProperty('--spot-y', ((e.clientY - rect.top) / rect.height * 100) + '%');
+      });
+    });
+  }
 }
 
 // Browser: auto-init (no module system)

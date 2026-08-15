@@ -255,6 +255,20 @@ button { font-family: inherit; }
   padding: calc(var(--nav-h) + 4rem) 2.4rem 8rem;
 }
 
+/* Subtle grain — breaks up the flat gradient/orb background without any
+   network request (inline SVG data URI). Static, pointer-events-none,
+   confined to this one non-scrolling section — not applied to anything
+   that repaints continuously, per the usual grain-overlay perf guidance. */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 /* Animated orbs */
 .hero__orb {
   position: absolute;
@@ -493,11 +507,19 @@ button { font-family: inherit; }
 
 .exp__card {
   position: relative;
-  background: var(--bg-card);
+  background-color: var(--bg-card);
+  background-image: none;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   transition: border-color var(--transition), box-shadow var(--transition);
+}
+/* Spotlight hover: cursor-tracked glow, --spot-x/--spot-y set by js/app.js.
+   Background-image (not a pseudo-element) so it always paints behind the
+   card's real content — no stacking-context bookkeeping needed. Desktop
+   pointer only; app.js gates this behind (hover: hover) and (pointer: fine). */
+.exp__card:hover {
+  background-image: radial-gradient(240px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(59, 130, 246, 0.1), transparent 70%);
 }
 .exp__card::before {
   content: '';
@@ -688,13 +710,17 @@ button { font-family: inherit; }
 }
 
 .skills__group {
-  background: var(--bg-card);
+  position: relative;
+  background-color: var(--bg-card);
+  background-image: none;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 2.4rem;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
+/* Spotlight hover — see .exp__card:hover for the rationale. */
 .skills__group:hover {
+  background-image: radial-gradient(240px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(59, 130, 246, 0.1), transparent 70%);
   border-color: var(--border-hover);
   box-shadow: var(--shadow-sm);
 }
@@ -897,6 +923,23 @@ button { font-family: inherit; }
   .hero__stats  { flex-direction: row; gap: 2.4rem; }
   .hero__ctas   { flex-direction: column; }
   .hero .btn    { width: 100%; justify-content: center; }
+}
+
+/* ============================================================
+   SCROLL-REVEAL ENTRANCE MOTION
+   Class applied by js/app.js via IntersectionObserver; elements start
+   hidden only when JS + the observer are available and the user hasn't
+   requested reduced motion — see app.js for the no-JS/reduced-motion
+   fallback that renders content in its final state immediately.
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal--in {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ============================================================
