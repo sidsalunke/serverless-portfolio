@@ -1,0 +1,130 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`footer matches snapshot 1`] = `
+"
+  <div class="container footer__inner">
+    <div class="footer__socials">
+      <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="LinkedIn">
+        <svg width="20" height="20" aria-hidden="true"><use href="#i-linkedin"></use></svg>
+      </a>
+      <a href="https://github.com/sidsalunke" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="GitHub">
+        <svg width="20" height="20" aria-hidden="true"><use href="#i-github"></use></svg>
+      </a>
+    </div>
+    <p class="footer__name">Siddharth Salunke</p>
+    <p class="footer__copy">© <span id="footer-year"></span> · Built with HTML, CSS &amp; Vanilla JS</p>
+  </div>
+"
+`;
+
+exports[`hero stats match snapshot 1`] = `
+"
+      <div class="hero__stat" role="listitem">
+        <div class="hero__stat-value">4</div>
+        <div class="hero__stat-label">AI Tools In Regular Use</div>
+      </div>
+      <div class="hero__stat" role="listitem">
+        <div class="hero__stat-value">2</div>
+        <div class="hero__stat-label">Tools Shipped At Work</div>
+      </div>
+      <div class="hero__stat" role="listitem">
+        <div class="hero__stat-value">2</div>
+        <div class="hero__stat-label">Personal Projects</div>
+      </div>
+      <div class="hero__stat hero__stat--highlight" role="listitem">
+        <div class="hero__stat-value">3x</div>
+        <div class="hero__stat-label">Follower Growth in 7wks</div>
+      </div>
+    "
+`;
+
+exports[`navigation links match snapshot 1`] = `
+"
+  <a href="/" class="nav__logo">SS</a>
+
+  <ul class="nav__links" id="nav-links" role="list">
+    <li><a href="index.html#about" class="nav__link">About</a></li>
+    <li><a href="index.html#experience" class="nav__link">Experience</a></li>
+    <li><a href="index.html#education" class="nav__link">Education</a></li>
+    <li><a href="index.html#skills" class="nav__link">Skills</a></li>
+    <li><a href="ai-engineering.html" class="nav__link" aria-current="page">AI Engineering</a></li>
+    <li><a href="testing.html" class="nav__link">Quality Suite</a></li>
+    <li>
+      <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="nav__cta btn btn--primary">
+        Connect&nbsp;<svg width="16" height="16" aria-hidden="true"><use href="#i-linkedin"></use></svg>
+      </a>
+    </li>
+  </ul>
+
+  <button class="nav__hamburger" id="nav-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+"
+`;
+
+exports[`workflow job cards match snapshot 1`] = `
+"
+
+      <div class="tq-card" style="--card-color: var(--accent)">
+        <div class="tq-card__header">
+          <div class="tq-card__icon" aria-hidden="true"><svg width="18" height="18"><use href="#i-bot"></use></svg></div>
+          <div>
+            <div class="tq-card__name">Claude Code</div>
+            <div class="tq-card__tool">Primary</div>
+          </div>
+        </div>
+        <p class="tq-card__desc">Production code, architecture debugging, unfamiliar codebase analysis, and building internal tools end-to-end. Reserved for work that genuinely needs judgement, not boilerplate.</p>
+        <div class="tq-card__tags">
+          <span class="tq-card__tag">architecture</span>
+          <span class="tq-card__tag">debugging</span>
+          <span class="tq-card__tag">tool building</span>
+        </div>
+      </div>
+
+      <div class="tq-card" style="--card-color: #34d399">
+        <div class="tq-card__header">
+          <div class="tq-card__icon" aria-hidden="true"><svg width="18" height="18"><use href="#i-check-circle"></use></svg></div>
+          <div>
+            <div class="tq-card__name">GitLab Duo</div>
+            <div class="tq-card__tool">Daily</div>
+          </div>
+        </div>
+        <p class="tq-card__desc">Same role as Copilot where GitLab is the platform of record — inline suggestions and CI/CD config generation.</p>
+        <div class="tq-card__tags">
+          <span class="tq-card__tag">CI/CD config</span>
+          <span class="tq-card__tag">inline suggestions</span>
+        </div>
+      </div>
+
+      <div class="tq-card" style="--card-color: #f59e0b">
+        <div class="tq-card__header">
+          <div class="tq-card__icon" aria-hidden="true"><svg width="18" height="18"><use href="#i-eye"></use></svg></div>
+          <div>
+            <div class="tq-card__name">ChatGPT &amp; Microsoft Copilot</div>
+            <div class="tq-card__tool">Ad-hoc</div>
+          </div>
+        </div>
+        <p class="tq-card__desc">Documentation drafting, explaining unfamiliar concepts, and second opinions — used alongside Claude rather than instead of it.</p>
+        <div class="tq-card__tags">
+          <span class="tq-card__tag">docs</span>
+          <span class="tq-card__tag">explanation</span>
+        </div>
+      </div>
+
+      <div class="tq-card" style="--card-color: #f43f5e">
+        <div class="tq-card__header">
+          <div class="tq-card__icon" aria-hidden="true"><svg width="18" height="18"><use href="#i-shield"></use></svg></div>
+          <div>
+            <div class="tq-card__name">MCP</div>
+            <div class="tq-card__tool">Learning</div>
+          </div>
+        </div>
+        <p class="tq-card__desc">Currently building custom MCPs to bring Jira and other internal systems directly into Claude workflows — goal is less tab-switching, faster triage.</p>
+        <div class="tq-card__tags">
+          <span class="tq-card__tag">in progress</span>
+          <span class="tq-card__tag">Jira integration</span>
+        </div>
+      </div>
+
+    "
+`;
