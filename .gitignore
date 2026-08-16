@@ -68,6 +68,17 @@ dist
 # Playwright
 playwright-report/
 test-results/
+.playwright-mcp/
+
+# Ad-hoc screenshots dropped at repo root during manual/MCP-driven browser
+# verification — never a deliverable. Anchored to root so images/**/*.png
+# (real committed assets, e.g. images/logos/) stays tracked.
+/*.png
+
+# Local Claude Code skill installs (npx skills add ...) — machine-local
+# tooling config, not meant to ship with the site.
+.agents/
+skills-lock.json
 
 # Claude Code
 .claude/
