@@ -17,13 +17,13 @@ test.describe('robots.txt and sitemap.xml are deployed', () => {
     expect(body).toMatch(/Sitemap: https:\/\/portfolio\.sidsalunke\.info\/sitemap\.xml/);
   });
 
-  test('sitemap.xml is served and lists only indexable pages', async ({ request }) => {
+  test('sitemap.xml is served and lists all indexable pages', async ({ request }) => {
     const res = await request.get('/sitemap.xml');
     expect(res.status()).toBe(200);
     const body = await res.text();
     expect(body).toMatch(/<urlset/);
     expect(body).toContain('https://portfolio.sidsalunke.info');
     expect(body).toContain('/ai-engineering.html');
-    expect(body).not.toContain('/testing.html');
+    expect(body).toContain('/testing.html');
   });
 });
