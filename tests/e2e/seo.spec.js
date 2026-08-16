@@ -258,3 +258,74 @@ test.describe('SEO — AI Engineering page', () => {
     expect(count).toBeGreaterThanOrEqual(2);
   });
 });
+
+// ── testing.html (Quality Suite) ────────────────────────────────────────────
+
+const QUALITY_CANONICAL = `${LIVE_ORIGIN}/testing.html`;
+
+test.describe('SEO — Quality Suite page', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/testing.html');
+  });
+
+  test('page title contains name and topic', async ({ page }) => {
+    const title = await page.title();
+    expect(title).toMatch(/Siddharth Salunke/i);
+    expect(title).toMatch(/Quality Suite/i);
+  });
+
+  test('meta description is present and meaningful', async ({ page }) => {
+    const content = await page.locator('meta[name="description"]').getAttribute('content');
+    expect(content).toBeTruthy();
+    expect(content.length).toBeGreaterThanOrEqual(50);
+    expect(content.length).toBeLessThanOrEqual(160);
+  });
+
+  test('canonical URL points to this page on the live domain', async ({ page }) => {
+    const href = await page.locator('link[rel="canonical"]').getAttribute('href');
+    expect(href).toBe(QUALITY_CANONICAL);
+  });
+
+  test('robots meta allows indexing', async ({ page }) => {
+    const content = await page.locator('meta[name="robots"]').getAttribute('content');
+    expect(content).toMatch(/index/);
+    expect(content).toMatch(/follow/);
+  });
+
+  test('og:url matches canonical', async ({ page }) => {
+    const content = await page.locator('meta[property="og:url"]').getAttribute('content');
+    expect(content).toBe(QUALITY_CANONICAL);
+  });
+
+  test('og:title and og:description are present', async ({ page }) => {
+    const title = await page.locator('meta[property="og:title"]').getAttribute('content');
+    const desc  = await page.locator('meta[property="og:description"]').getAttribute('content');
+    expect(title.length).toBeGreaterThan(5);
+    expect(desc.length).toBeGreaterThanOrEqual(40);
+  });
+
+  test('twitter:card is present', async ({ page }) => {
+    const content = await page.locator('meta[name="twitter:card"]').getAttribute('content');
+    expect(['summary', 'summary_large_image']).toContain(content);
+  });
+
+  test('JSON-LD script is present, valid, and matches canonical', async ({ page }) => {
+    const schema = await page.evaluate(() => {
+      const el = document.querySelector('script[type="application/ld+json"]');
+      return el ? JSON.parse(el.textContent) : null;
+    });
+    expect(schema).not.toBeNull();
+    expect(schema['@type']).toBe('WebPage');
+    expect(schema.url).toBe(QUALITY_CANONICAL);
+  });
+
+  test('exactly one <h1> on the page', async ({ page }) => {
+    const count = await page.locator('h1').count();
+    expect(count).toBe(1);
+  });
+
+  test('page has at least two <h2> section headings', async ({ page }) => {
+    const count = await page.locator('h2').count();
+    expect(count).toBeGreaterThanOrEqual(2);
+  });
+});

@@ -1255,7 +1255,7 @@ button { font-family: inherit; }
 .tq-card__tool {
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--text-4);
+  color: var(--text-3);
   margin-top: 0.2rem;
   text-transform: uppercase;
   letter-spacing: 0.06rem;
