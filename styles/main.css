@@ -10,11 +10,11 @@
   --border:        rgba(255, 255, 255, 0.07);
   --border-hover:  rgba(255, 255, 255, 0.14);
 
-  --accent:        #818cf8;
-  --accent-2:      #a78bfa;
-  --accent-3:      #38bdf8;
-  --accent-dark:   #5b5ee8;
-  --accent-glow:   rgba(99, 102, 241, 0.18);
+  --accent:        #3b82f6;
+  --accent-2:      #38bdf8;
+  --accent-3:      #22d3ee;
+  --accent-dark:   #2563eb;
+  --accent-glow:   rgba(37, 99, 235, 0.14);
 
   --text-1:  #f1f5f9;
   --text-2:  #cbd5e1;
@@ -48,7 +48,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Outfit', 'Segoe UI', system-ui, sans-serif;
   background: var(--bg-0);
   color: var(--text-1);
   line-height: 1.6;
@@ -114,13 +114,14 @@ button { font-family: inherit; }
 .btn--primary {
   background: var(--accent-dark);
   color: #fff;
-  box-shadow: 0 0 22px var(--accent-glow);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.35);
 }
 .btn--primary:hover {
   background: var(--accent);
-  box-shadow: 0 0 36px rgba(129, 140, 248, 0.4);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.45);
   transform: translateY(-2px);
 }
+.btn--primary:active { transform: translateY(0) scale(0.98); }
 
 .btn--ghost {
   background: var(--bg-card);
@@ -159,20 +160,16 @@ button { font-family: inherit; }
 
 .nav__logo {
   font-size: 2rem;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.04em;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-1);
   flex-shrink: 0;
   display: inline-block;
-  transition: transform var(--transition), opacity var(--transition);
+  transition: transform var(--transition), color var(--transition);
   -webkit-tap-highlight-color: transparent;
 }
-/* transform/opacity, not color — the gradient text-fill makes a color-based
-   :active state invisible, so the tap feedback has to be geometric instead */
-.nav__logo:active { transform: scale(0.92); opacity: 0.75; }
+.nav__logo:hover { color: var(--accent); }
+.nav__logo:active { transform: scale(0.92); color: var(--accent); }
 
 .nav__links {
   display: flex;
@@ -230,7 +227,7 @@ button { font-family: inherit; }
 }
 .nav__hamburger:active {
   transform: scale(0.9);
-  background: rgba(129, 140, 248, 0.12);
+  background: rgba(59, 130, 246, 0.12);
 }
 .nav__hamburger:active span { background: var(--accent); }
 .nav__hamburger--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -258,6 +255,20 @@ button { font-family: inherit; }
   padding: calc(var(--nav-h) + 4rem) 2.4rem 8rem;
 }
 
+/* Subtle grain — breaks up the flat gradient/orb background without any
+   network request (inline SVG data URI). Static, pointer-events-none,
+   confined to this one non-scrolling section — not applied to anything
+   that repaints continuously, per the usual grain-overlay perf guidance. */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 /* Animated orbs */
 .hero__orb {
   position: absolute;
@@ -269,13 +280,13 @@ button { font-family: inherit; }
 .hero__orb--1 {
   width: 65rem; height: 65rem;
   top: -20%; left: -15%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.28) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.28) 0%, transparent 70%);
   animation: heroOrb1 22s ease-in-out infinite;
 }
 .hero__orb--2 {
   width: 55rem; height: 55rem;
   bottom: -20%; right: -12%;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 70%);
   animation: heroOrb2 28s ease-in-out infinite;
 }
 .hero__orb--3 {
@@ -312,8 +323,8 @@ button { font-family: inherit; }
   align-items: center;
   gap: 0.6rem;
   padding: 0.6rem 1.4rem;
-  background: rgba(129, 140, 248, 0.1);
-  border: 1px solid rgba(129, 140, 248, 0.22);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.22);
   border-radius: 10rem;
   font-size: 1.3rem;
   font-weight: 500;
@@ -324,13 +335,10 @@ button { font-family: inherit; }
 
 .hero__name {
   font-size: clamp(4rem, 8.5vw, 7.6rem);
-  font-weight: 900;
-  line-height: 1.2; /* gradient-clipped text needs headroom for descenders (g/y/p/q/j) or they render blank */
+  font-weight: 800;
+  line-height: 1.05;
   letter-spacing: -0.035em;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 40%, var(--accent) 72%, var(--accent-2) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-1);
   margin-bottom: 1.6rem;
 }
 
@@ -499,11 +507,19 @@ button { font-family: inherit; }
 
 .exp__card {
   position: relative;
-  background: var(--bg-card);
+  background-color: var(--bg-card);
+  background-image: none;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   transition: border-color var(--transition), box-shadow var(--transition);
+}
+/* Spotlight hover: cursor-tracked glow, --spot-x/--spot-y set by js/app.js.
+   Background-image (not a pseudo-element) so it always paints behind the
+   card's real content — no stacking-context bookkeeping needed. Desktop
+   pointer only; app.js gates this behind (hover: hover) and (pointer: fine). */
+.exp__card:hover {
+  background-image: radial-gradient(240px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(59, 130, 246, 0.1), transparent 70%);
 }
 .exp__card::before {
   content: '';
@@ -537,9 +553,8 @@ button { font-family: inherit; }
   font-weight: 700;
   letter-spacing: 0.12rem;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-2);
   margin-bottom: 0.5rem;
-  opacity: 0.9;
 }
 
 .exp__role {
@@ -582,6 +597,24 @@ button { font-family: inherit; }
   padding: 0.4rem 1.1rem;
   border-radius: 10rem;
   border: 1px solid var(--border);
+}
+
+.exp__tenure {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.exp__logo {
+  width: 3.2rem;
+  height: 3.2rem;
+  flex-shrink: 0;
+  display: block;
+  border-radius: var(--radius-sm);
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  padding: 0.5rem;
+  object-fit: contain;
 }
 
 .exp__chevron {
@@ -677,13 +710,17 @@ button { font-family: inherit; }
 }
 
 .skills__group {
-  background: var(--bg-card);
+  position: relative;
+  background-color: var(--bg-card);
+  background-image: none;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 2.4rem;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
+/* Spotlight hover — see .exp__card:hover for the rationale. */
 .skills__group:hover {
+  background-image: radial-gradient(240px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(59, 130, 246, 0.1), transparent 70%);
   border-color: var(--border-hover);
   box-shadow: var(--shadow-sm);
 }
@@ -717,8 +754,8 @@ button { font-family: inherit; }
 .skills__tag {
   display: inline-block;
   padding: 0.5rem 1.2rem;
-  background: rgba(129, 140, 248, 0.08);
-  border: 1px solid rgba(129, 140, 248, 0.18);
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.18);
   border-radius: 10rem;
   font-size: 1.35rem;
   font-weight: 500;
@@ -727,8 +764,8 @@ button { font-family: inherit; }
   cursor: default;
 }
 .skills__tag:hover {
-  background: rgba(129, 140, 248, 0.18);
-  border-color: rgba(129, 140, 248, 0.4);
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.4);
   color: var(--text-1);
 }
 
@@ -840,7 +877,7 @@ button { font-family: inherit; }
     margin: 0 -0.8rem;
     border-radius: var(--radius-sm);
   }
-  .nav__link:active { background: rgba(129, 140, 248, 0.12); }
+  .nav__link:active { background: rgba(59, 130, 246, 0.12); }
   .nav__cta { align-self: flex-start; }
 
   /* Hero */
@@ -889,6 +926,23 @@ button { font-family: inherit; }
 }
 
 /* ============================================================
+   SCROLL-REVEAL ENTRANCE MOTION
+   Class applied by js/app.js via IntersectionObserver; elements start
+   hidden only when JS + the observer are available and the user hasn't
+   requested reduced motion — see app.js for the no-JS/reduced-motion
+   fallback that renders content in its final state immediately.
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================
    FOCUS & ACCESSIBILITY
    ============================================================ */
 :focus-visible {
@@ -930,8 +984,8 @@ button { font-family: inherit; }
   align-items: center;
   gap: 0.6rem;
   padding: 0.6rem 1.4rem;
-  background: rgba(129, 140, 248, 0.1);
-  border: 1px solid rgba(129, 140, 248, 0.22);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.22);
   border-radius: 10rem;
   font-size: 1.3rem;
   font-weight: 500;
@@ -942,13 +996,10 @@ button { font-family: inherit; }
 
 .tq-hero__title {
   font-size: clamp(3.6rem, 7vw, 6.4rem);
-  font-weight: 900;
-  line-height: 1.2; /* gradient-clipped text needs headroom for descenders (g/y/p/q/j) or they render blank */
+  font-weight: 800;
+  line-height: 1.05;
   letter-spacing: -0.035em;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 40%, var(--accent) 72%, var(--accent-2) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-1);
   margin-bottom: 2rem;
 }
 
@@ -1007,10 +1058,10 @@ button { font-family: inherit; }
 }
 
 .tq-pipeline__node--active .tq-pipeline__node-icon {
-  border-color: rgba(129, 140, 248, 0.5);
-  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(37, 99, 235, 0.1);
   color: var(--accent);
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
 }
 
 .tq-pipeline__node-label {
@@ -1226,8 +1277,8 @@ button { font-family: inherit; }
 .tq-card__tag {
   display: inline-block;
   padding: 0.3rem 0.9rem;
-  background: rgba(129, 140, 248, 0.08);
-  border: 1px solid rgba(129, 140, 248, 0.18);
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.18);
   border-radius: 10rem;
   font-size: 1.2rem;
   font-weight: 500;
@@ -1236,7 +1287,7 @@ button { font-family: inherit; }
 }
 
 .tq-card__tag:hover {
-  background: rgba(129, 140, 248, 0.18);
+  background: rgba(59, 130, 246, 0.18);
   color: var(--text-1);
 }
 
@@ -1369,8 +1420,8 @@ button { font-family: inherit; }
 .skills__teaser {
   margin-top: 3.2rem;
   padding: 1.6rem 2rem;
-  background: rgba(129, 140, 248, 0.05);
-  border: 1px solid rgba(129, 140, 248, 0.15);
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   border-radius: var(--radius-md);
   font-size: 1.45rem;
   color: var(--text-3);
@@ -1395,12 +1446,12 @@ button { font-family: inherit; }
   margin: -0.4rem;
   transition: background var(--transition);
 }
-.tq-pipeline__node--clickable:hover { background: rgba(129, 140, 248, 0.06); }
+.tq-pipeline__node--clickable:hover { background: rgba(59, 130, 246, 0.06); }
 .tq-pipeline__node--clickable:hover .tq-pipeline__node-icon,
 .tq-pipeline__node--clickable[aria-expanded="true"] .tq-pipeline__node-icon {
-  border-color: rgba(129, 140, 248, 0.6);
-  background: rgba(99, 102, 241, 0.15);
-  box-shadow: 0 0 24px rgba(99, 102, 241, 0.3);
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 24px rgba(37, 99, 235, 0.3);
   color: var(--accent);
 }
 .tq-pipeline__node-hint {
@@ -1416,7 +1467,7 @@ button { font-family: inherit; }
   color: var(--accent);
 }
 .tq-pipeline__node--clickable[aria-expanded="true"] .tq-pipeline__node-icon {
-  background: rgba(99, 102, 241, 0.2);
+  background: rgba(37, 99, 235, 0.2);
 }
 
 /* ── Pipeline panels ──────────────────────────────────────────── */
@@ -1529,8 +1580,8 @@ button { font-family: inherit; }
 
 /* ── Pipeline: stronger active/expanded node state ───────────── */
 .tq-pipeline__node--clickable[aria-expanded="true"] {
-  background: rgba(99, 102, 241, 0.1);
-  outline: 1px solid rgba(129, 140, 248, 0.4);
+  background: rgba(37, 99, 235, 0.1);
+  outline: 1px solid rgba(59, 130, 246, 0.4);
   outline-offset: 4px;
   border-radius: var(--radius-lg);
 }

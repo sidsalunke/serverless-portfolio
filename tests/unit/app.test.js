@@ -253,3 +253,140 @@ describe('Experience accordion', () => {
     expect(document.querySelector('.exp__card').classList).not.toContain('exp__card--expanded');
   });
 });
+
+// ── Scroll-reveal entrance motion ──────────────────────────────
+const REVEAL_DOM = `
+  <span id="footer-year"></span>
+  <nav id="main-nav" class="nav"></nav>
+  <button id="nav-hamburger" aria-expanded="false"><span></span><span></span><span></span></button>
+  <ul id="nav-links" class="nav__links"></ul>
+  <h2 class="section__heading">About</h2>
+  <div class="about__photo-wrap"></div>
+  <article class="exp__card"></article>
+  <div class="skills__group"></div>
+`;
+
+function mockMatchMedia(matchingQueries) {
+  window.matchMedia = jest.fn().mockImplementation((query) => ({
+    matches: matchingQueries.indexOf(query) !== -1,
+    media: query,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+  }));
+}
+
+class MockIntersectionObserver {
+  constructor(callback, options) {
+    this.callback = callback;
+    this.options = options;
+    this.observed = [];
+    MockIntersectionObserver.lastInstance = this;
+  }
+  observe(el) { this.observed.push(el); }
+  unobserve(el) { this.observed = this.observed.filter((o) => o !== el); }
+  disconnect() { this.observed = []; }
+}
+
+describe('Scroll-reveal entrance motion', () => {
+  afterEach(() => {
+    delete window.IntersectionObserver;
+  });
+
+  test('observes reveal-eligible elements when IntersectionObserver is available and motion is allowed', () => {
+    window.IntersectionObserver = MockIntersectionObserver;
+    mockMatchMedia([]); // prefers-reduced-motion: reduce -> not matched
+    document.body.innerHTML = REVEAL_DOM;
+    jest.resetModules();
+    ({ initPortfolio } = require('../../js/app.js'));
+    initPortfolio();
+
+    const revealEls = document.querySelectorAll('.reveal');
+    expect(revealEls.length).toBe(4);
+    expect(MockIntersectionObserver.lastInstance.observed.length).toBe(4);
+  });
+
+  test('adds reveal--in and stops observing once an element intersects', () => {
+    window.IntersectionObserver = MockIntersectionObserver;
+    mockMatchMedia([]);
+    document.body.innerHTML = REVEAL_DOM;
+    jest.resetModules();
+    ({ initPortfolio } = require('../../js/app.js'));
+    initPortfolio();
+
+    const heading = document.querySelector('.section__heading');
+    const observer = MockIntersectionObserver.lastInstance;
+    observer.callback([{ target: heading, isIntersecting: true }], observer);
+
+    expect(heading.classList).toContain('reveal--in');
+    expect(observer.observed).not.toContain(heading);
+  });
+
+  test('ignores non-intersecting entries', () => {
+    window.IntersectionObserver = MockIntersectionObserver;
+    mockMatchMedia([]);
+    document.body.innerHTML = REVEAL_DOM;
+    jest.resetModules();
+    ({ initPortfolio } = require('../../js/app.js'));
+    initPortfolio();
+
+    const heading = document.querySelector('.section__heading');
+    const observer = MockIntersectionObserver.lastInstance;
+    observer.callback([{ target: heading, isIntersecting: false }], observer);
+
+    expect(heading.classList).not.toContain('reveal--in');
+  });
+
+  test('skips reveal entirely when the user prefers reduced motion', () => {
+    window.IntersectionObserver = MockIntersectionObserver;
+    mockMatchMedia(['(prefers-reduced-motion: reduce)']);
+    document.body.innerHTML = REVEAL_DOM;
+    jest.resetModules();
+    ({ initPortfolio } = require('../../js/app.js'));
+    initPortfolio();
+
+    expect(document.querySelectorAll('.reveal').length).toBe(0);
+  });
+
+  test('skips reveal when IntersectionObserver is unavailable', () => {
+    delete window.IntersectionObserver;
+    mockMatchMedia([]);
+    document.body.innerHTML = REVEAL_DOM;
+    jest.resetModules();
+    ({ initPortfolio } = require('../../js/app.js'));
+    initPortfolio();
+
+    expect(document.querySelectorAll('.reveal').length).toBe(0);
+  });
+});
+
+// ── Card spotlight hover ────────────────────────────────────────
+describe('Card spotlight hover', () => {
+  test('updates --spot-x/--spot-y custom properties on mousemove when the device supports hover', () => {
+    mockMatchMedia(['(hover: hover) and (pointer: fine)']);
+    document.body.innerHTML = REVEAL_DOM;
+    jest.resetModules();
+    ({ initPortfolio } = require('../../js/app.js'));
+    initPortfolio();
+
+    const card = document.querySelector('.exp__card');
+    card.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 100 });
+    card.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 25, bubbles: true }));
+
+    expect(card.style.getPropertyValue('--spot-x')).toBe('25%');
+    expect(card.style.getPropertyValue('--spot-y')).toBe('25%');
+  });
+
+  test('does not attach the spotlight listener on touch-only devices', () => {
+    mockMatchMedia([]); // (hover: hover) and (pointer: fine) -> not matched
+    document.body.innerHTML = REVEAL_DOM;
+    jest.resetModules();
+    ({ initPortfolio } = require('../../js/app.js'));
+    initPortfolio();
+
+    const card = document.querySelector('.exp__card');
+    card.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 100 });
+    card.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 25, bubbles: true }));
+
+    expect(card.style.getPropertyValue('--spot-x')).toBe('');
+  });
+});
