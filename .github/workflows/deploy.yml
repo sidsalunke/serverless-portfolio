@@ -52,6 +52,8 @@ jobs:
             --include "js/app.js" \
             --include "images/*" \
             --include "favicon.svg" \
+            --include "robots.txt" \
+            --include "sitemap.xml" \
             --delete
         # Note: --acl public-read is intentionally omitted.
         # CloudFront OAC (configured in the console, codified in infra/main.tf)
@@ -187,6 +189,8 @@ jobs:
             --include "js/app.js" \
             --include "images/*" \
             --include "favicon.svg" \
+            --include "robots.txt" \
+            --include "sitemap.xml" \
             --delete
 
       - name: Invalidate CloudFront after rollback

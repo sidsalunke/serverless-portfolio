@@ -17,7 +17,7 @@ exports[`education list matches snapshot 1`] = `
           </div>
           <div class="exp__header-right">
             <div class="exp__tenure">
-              <img class="exp__logo" src="images/logos/uts.svg" alt="University of Technology Sydney logo" loading="lazy">
+              <img class="exp__logo" src="images/logos/uts.svg" alt="University of Technology Sydney logo" width="351" height="80" loading="lazy">
               <span class="exp__dates">Feb 2015 – Nov 2016</span>
             </div>
           </div>
@@ -45,7 +45,7 @@ exports[`education list matches snapshot 1`] = `
           </div>
           <div class="exp__header-right">
             <div class="exp__tenure">
-              <img class="exp__logo" src="images/logos/mitsom.jpg" alt="MIT School of Management logo" loading="lazy">
+              <img class="exp__logo" src="images/logos/mitsom.jpg" alt="MIT School of Management logo" width="140" height="140" loading="lazy">
               <span class="exp__dates">Jun 2010 – Jun 2013</span>
             </div>
           </div>
@@ -78,7 +78,7 @@ exports[`experience list matches snapshot 1`] = `
           </div>
           <div class="exp__header-right">
             <div class="exp__tenure">
-              <img class="exp__logo" src="images/logos/emirates.svg" alt="Emirates logo" loading="lazy">
+              <img class="exp__logo" src="images/logos/emirates.svg" alt="Emirates logo" width="24" height="24" loading="lazy">
               <span class="exp__dates">2025 – Present</span>
             </div>
           </div>
@@ -105,7 +105,7 @@ exports[`experience list matches snapshot 1`] = `
           </div>
           <div class="exp__header-right">
             <div class="exp__tenure">
-              <img class="exp__logo" src="images/logos/qantas.svg" alt="Qantas Airways logo" loading="lazy">
+              <img class="exp__logo" src="images/logos/qantas.svg" alt="Qantas Airways logo" width="24" height="24" loading="lazy">
               <span class="exp__dates">2023 – 2025</span>
             </div>
             <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"></use></svg></span>
@@ -140,7 +140,7 @@ exports[`experience list matches snapshot 1`] = `
           </div>
           <div class="exp__header-right">
             <div class="exp__tenure">
-              <img class="exp__logo" src="images/logos/canva.svg" alt="Canva logo" loading="lazy">
+              <img class="exp__logo" src="images/logos/canva.svg" alt="Canva logo" width="80" height="30" loading="lazy">
               <span class="exp__dates">2020 – 2023</span>
             </div>
             <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"></use></svg></span>
@@ -174,7 +174,7 @@ exports[`experience list matches snapshot 1`] = `
           </div>
           <div class="exp__header-right">
             <div class="exp__tenure">
-              <img class="exp__logo" src="images/logos/myob.svg" alt="MYOB Group logo" loading="lazy">
+              <img class="exp__logo" src="images/logos/myob.svg" alt="MYOB Group logo" width="24" height="24" loading="lazy">
               <span class="exp__dates">2017 – 2020</span>
             </div>
             <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"></use></svg></span>
@@ -207,7 +207,7 @@ exports[`experience list matches snapshot 1`] = `
           </div>
           <div class="exp__header-right">
             <div class="exp__tenure">
-              <img class="exp__logo" src="images/logos/suncorp.png" alt="Suncorp Group logo" loading="lazy">
+              <img class="exp__logo" src="images/logos/suncorp.png" alt="Suncorp Group logo" width="179" height="52" loading="lazy">
               <span class="exp__dates">2015 – 2017</span>
             </div>
             <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"></use></svg></span>
@@ -240,7 +240,7 @@ exports[`experience list matches snapshot 1`] = `
           </div>
           <div class="exp__header-right">
             <div class="exp__tenure">
-              <img class="exp__logo" src="images/logos/cognizant.svg" alt="Cognizant logo" loading="lazy">
+              <img class="exp__logo" src="images/logos/cognizant.svg" alt="Cognizant logo" width="24" height="24" loading="lazy">
               <span class="exp__dates">2013 – 2015</span>
             </div>
             <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"></use></svg></span>
