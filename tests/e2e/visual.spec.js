@@ -46,6 +46,13 @@ test.describe('Visual regression', () => {
   test('full page — desktop', async ({ page }) => {
     await page.goto('/');
     await page.waitForFunction(() => document.fonts.ready);
+    // Scroll-reveal fades sections in via IntersectionObserver as they enter
+    // the viewport; a fullPage screenshot stitches the page together while
+    // scrolling, which can outrun the observer and capture a section mid-fade.
+    // Force every reveal target to settle before the pixel comparison.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(700);
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(400);
     await expect(page).toHaveScreenshot('full-page-desktop.png', {
       fullPage: true,
