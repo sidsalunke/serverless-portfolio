@@ -19,8 +19,9 @@ const path = require('path');
 // jest-environment-jsdom provides DOMParser as a global — no import needed.
 // Do NOT require('jsdom') directly; it conflicts with the test environment.
 
-const CANONICAL_URL    = 'https://portfolio.sidsalunke.info';
-const AI_CANONICAL_URL = 'https://portfolio.sidsalunke.info/ai-engineering.html';
+const CANONICAL_URL       = 'https://portfolio.sidsalunke.info';
+const AI_CANONICAL_URL    = 'https://portfolio.sidsalunke.info/ai-engineering.html';
+const QUALITY_CANONICAL_URL = 'https://portfolio.sidsalunke.info/testing.html';
 
 let doc;
 let aiDoc;
@@ -373,5 +374,137 @@ describe('AI Engineering page — Document structure (SEO signals)', () => {
 
   test('no <title> tag appears more than once', () => {
     expect(aiDoc.querySelectorAll('title').length).toBe(1);
+  });
+});
+
+// ── testing.html (Quality Suite) ──────────────────────────────────────────────
+
+describe('Quality Suite page — Primary SEO', () => {
+  test('<title> is present and includes the person name', () => {
+    expect(testingDoc.title.trim().length).toBeGreaterThan(10);
+    expect(testingDoc.title).toMatch(/Siddharth Salunke/i);
+  });
+
+  test('meta description is between 50 and 160 characters', () => {
+    const content = testingDoc.querySelector('meta[name="description"]').getAttribute('content');
+    expect(content.length).toBeGreaterThanOrEqual(50);
+    expect(content.length).toBeLessThanOrEqual(160);
+  });
+
+  test('meta description mentions the test suite', () => {
+    const content = testingDoc.querySelector('meta[name="description"]').getAttribute('content').toLowerCase();
+    expect(content).toMatch(/test|accessibility|security|e2e/);
+  });
+
+  test('robots meta tag allows indexing and following', () => {
+    const content = testingDoc.querySelector('meta[name="robots"]').getAttribute('content');
+    expect(content).toMatch(/index/);
+    expect(content).toMatch(/follow/);
+  });
+
+  test('canonical link points to the testing page', () => {
+    const href = testingDoc.querySelector('link[rel="canonical"]').getAttribute('href');
+    expect(href).toBe(QUALITY_CANONICAL_URL);
+  });
+
+  test('<html> has lang attribute', () => {
+    expect(testingDoc.documentElement.hasAttribute('lang')).toBe(true);
+  });
+});
+
+describe('Quality Suite page — Open Graph', () => {
+  function og(prop) {
+    return testingDoc.querySelector(`meta[property="og:${prop}"]`);
+  }
+
+  test('og:type is "website"', () => {
+    expect(og('type').getAttribute('content')).toBe('website');
+  });
+
+  test('og:url matches canonical', () => {
+    expect(og('url').getAttribute('content')).toBe(QUALITY_CANONICAL_URL);
+  });
+
+  test('og:title is present and non-empty', () => {
+    expect(og('title').getAttribute('content').length).toBeGreaterThan(5);
+  });
+
+  test('og:description is present (40+ chars)', () => {
+    expect(og('description').getAttribute('content').length).toBeGreaterThanOrEqual(40);
+  });
+
+  test('og:image is present and is an absolute URL', () => {
+    expect(og('image').getAttribute('content')).toMatch(/^https?:\/\//);
+  });
+});
+
+describe('Quality Suite page — Twitter Card', () => {
+  function tw(name) {
+    return testingDoc.querySelector(`meta[name="twitter:${name}"]`);
+  }
+
+  test('twitter:card is present', () => {
+    expect(['summary', 'summary_large_image']).toContain(tw('card').getAttribute('content'));
+  });
+
+  test('twitter:title is present', () => {
+    expect(tw('title').getAttribute('content').length).toBeGreaterThan(5);
+  });
+
+  test('twitter:description is present (40+ chars)', () => {
+    expect(tw('description').getAttribute('content').length).toBeGreaterThanOrEqual(40);
+  });
+});
+
+describe('Quality Suite page — JSON-LD structured data', () => {
+  let schema;
+
+  beforeAll(() => {
+    const el = testingDoc.querySelector('script[type="application/ld+json"]');
+    expect(el).not.toBeNull();
+    schema = JSON.parse(el.textContent);
+  });
+
+  test('@context is schema.org', () => {
+    expect(schema['@context']).toBe('https://schema.org');
+  });
+
+  test('@type is WebPage', () => {
+    expect(schema['@type']).toBe('WebPage');
+  });
+
+  test('url matches canonical', () => {
+    expect(schema.url).toBe(QUALITY_CANONICAL_URL);
+  });
+
+  test('isPartOf references the portfolio website', () => {
+    expect(schema.isPartOf).toBeDefined();
+    expect(schema.isPartOf['@type']).toBe('WebSite');
+  });
+
+  test('author is the Person', () => {
+    expect(schema.author).toBeDefined();
+    expect(schema.author['@type']).toBe('Person');
+    expect(schema.author.name).toBe('Siddharth Salunke');
+  });
+
+  test('JSON-LD is valid JSON (no parse errors)', () => {
+    expect(typeof schema).toBe('object');
+  });
+});
+
+describe('Quality Suite page — Document structure (SEO signals)', () => {
+  test('exactly one <h1> on the page', () => {
+    expect(testingDoc.querySelectorAll('h1').length).toBe(1);
+  });
+
+  test('all <img> elements have non-empty alt text', () => {
+    testingDoc.querySelectorAll('img').forEach(img => {
+      expect(img.getAttribute('alt') || '').not.toBe('');
+    });
+  });
+
+  test('no <title> tag appears more than once', () => {
+    expect(testingDoc.querySelectorAll('title').length).toBe(1);
   });
 });

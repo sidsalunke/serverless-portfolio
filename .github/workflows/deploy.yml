@@ -52,6 +52,8 @@ jobs:
             --include "js/app.js" \
             --include "images/*" \
             --include "favicon.svg" \
+            --include "robots.txt" \
+            --include "sitemap.xml" \
             --delete
         # Note: --acl public-read is intentionally omitted.
         # CloudFront OAC (configured in the console, codified in infra/main.tf)
@@ -187,6 +189,8 @@ jobs:
             --include "js/app.js" \
             --include "images/*" \
             --include "favicon.svg" \
+            --include "robots.txt" \
+            --include "sitemap.xml" \
             --delete
 
       - name: Invalidate CloudFront after rollback
@@ -257,10 +261,10 @@ jobs:
         run: npm install -g @lhci/cli
 
       - name: Run Lighthouse CI against live site
+        # URLs (all 3 pages) and numberOfRuns come from .lighthouserc.json —
+        # not passed here, so every page gets audited, not just the homepage.
         run: |
           lhci autorun \
-            --collect.url=https://portfolio.sidsalunke.info \
-            --collect.numberOfRuns=3 \
             --upload.target=filesystem \
             --upload.outputDir=.lighthouseci
         continue-on-error: true
