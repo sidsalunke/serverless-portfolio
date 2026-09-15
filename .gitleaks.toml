@@ -1,0 +1,14 @@
+title = "gitleaks config"
+
+[extend]
+useDefault = true
+
+# The IndexNow key is not a secret — per https://www.indexnow.org/documentation
+# it must be published in plaintext at https://<host>/<key>.txt so search
+# engines can verify domain ownership before accepting pings. It carries no
+# privileged access. Appears in deploy.yml (the ping payload) and in the
+# key file itself; allowlisted by value rather than by path so a future key
+# rotation still gets scanned like any other string until this list is updated.
+[[allowlist]]
+description = "IndexNow verification key (intentionally public, see deploy.yml)"
+regexes = ['''d6a69049b7ef3ef62df1b7ead257a870''']
