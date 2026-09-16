@@ -54,6 +54,7 @@ jobs:
             --include "favicon.svg" \
             --include "robots.txt" \
             --include "sitemap.xml" \
+            --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
             --delete
         # Note: --acl public-read is intentionally omitted.
         # CloudFront OAC (configured in the console, codified in infra/main.tf)
@@ -79,6 +80,29 @@ jobs:
           aws cloudfront wait invalidation-completed \
             --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --id ${{ steps.invalidation.outputs.id }}
+
+      # Bing, Yandex, Naver, and Seznam consume IndexNow pings and will
+      # crawl faster than waiting on their own discovery cycle (Bing in
+      # particular has sat on this domain's other pages for weeks with a
+      # "discovered but not crawled" status). Google does not participate
+      # in IndexNow, so this has no effect there — it only speeds up the
+      # non-Google engines. continue-on-error: a failed ping should never
+      # fail an otherwise-successful deploy.
+      - name: Ping IndexNow
+        continue-on-error: true
+        run: |
+          curl -s -X POST https://api.indexnow.org/indexnow \
+            -H "Content-Type: application/json" \
+            -d '{
+              "host": "portfolio.sidsalunke.info",
+              "key": "d6a69049b7ef3ef62df1b7ead257a870",
+              "keyLocation": "https://portfolio.sidsalunke.info/d6a69049b7ef3ef62df1b7ead257a870.txt",
+              "urlList": [
+                "https://portfolio.sidsalunke.info",
+                "https://portfolio.sidsalunke.info/ai-engineering.html",
+                "https://portfolio.sidsalunke.info/testing.html"
+              ]
+            }'
 
   # ── Job 2: generate and upload SBOM (runs in parallel with deploy) ───────
   sbom:
@@ -191,6 +215,7 @@ jobs:
             --include "favicon.svg" \
             --include "robots.txt" \
             --include "sitemap.xml" \
+            --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
             --delete
 
       - name: Invalidate CloudFront after rollback

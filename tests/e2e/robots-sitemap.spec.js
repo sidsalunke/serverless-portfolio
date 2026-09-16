@@ -8,7 +8,7 @@ const { test, expect } = require('@playwright/test');
  * was never added to the allowlist. This runs both locally (PR checks,
  * against `npx serve .`) and against the live site (e2e-live job).
  */
-test.describe('robots.txt and sitemap.xml are deployed', () => {
+test.describe('robots.txt, sitemap.xml, and the IndexNow key file are deployed', () => {
   test('robots.txt is served and points to the sitemap', async ({ request }) => {
     const res = await request.get('/robots.txt');
     expect(res.status()).toBe(200);
@@ -25,5 +25,12 @@ test.describe('robots.txt and sitemap.xml are deployed', () => {
     expect(body).toContain('https://portfolio.sidsalunke.info');
     expect(body).toContain('/ai-engineering.html');
     expect(body).toContain('/testing.html');
+  });
+
+  test('IndexNow key file is served and matches the key used in deploy.yml', async ({ request }) => {
+    const res = await request.get('/d6a69049b7ef3ef62df1b7ead257a870.txt');
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body.trim()).toBe('d6a69049b7ef3ef62df1b7ead257a870');
   });
 });
