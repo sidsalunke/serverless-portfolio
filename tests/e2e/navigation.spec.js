@@ -6,41 +6,46 @@ test.describe('Navigation', () => {
   });
 
   test('displays hero name and role', async ({ page }) => {
-    await expect(page.locator('h1.hero__name')).toBeVisible();
-    await expect(page.locator('h1.hero__name')).toHaveText('Siddharth Salunke');
-    await expect(page.locator('p.hero__role')).toContainText('Principal Engineer');
+    const hero = page.getByRole('region', { name: 'Introduction' });
+    await expect(page.getByRole('heading', { level: 1, name: 'Siddharth Salunke' })).toBeVisible();
+    await expect(hero.getByText('Principal Engineer', { exact: false })).toBeVisible();
   });
 
   test('nav contains expected section links', async ({ page }) => {
+    const nav = page.getByRole('navigation', { name: 'Main navigation' });
     for (const label of ['About', 'Experience', 'Education', 'Skills']) {
-      await expect(page.locator(`.nav__link:has-text("${label}")`)).toBeVisible();
+      await expect(nav.getByRole('link', { name: label, exact: true })).toBeVisible();
     }
   });
 
   test('nav gets glassmorphism class after scroll', async ({ page }) => {
+    const nav = page.getByRole('navigation', { name: 'Main navigation' });
     await page.evaluate(() => window.scrollTo(0, 100));
-    await expect(page.locator('#main-nav')).toHaveClass(/nav--scrolled/);
+    await expect(nav).toHaveClass(/nav--scrolled/);
   });
 
   test('clicking nav logo scrolls back to top', async ({ page }) => {
+    const nav = page.getByRole('navigation', { name: 'Main navigation' });
     await page.evaluate(() => window.scrollTo(0, 500));
-    await page.locator('.nav__logo').click();
+    await nav.getByRole('link', { name: 'SS' }).click();
     await expect(page).toHaveURL(/#hero/);
   });
 
   test('all section headings are present', async ({ page }) => {
-    const headings = ['Platform leadership, through a quality lens.', "Where I\u2019ve worked.", 'Where it started.', 'What I work with.'];
+    const headings = ['Platform leadership, through a quality lens.', "Where I’ve worked.", 'Where it started.', 'What I work with.'];
     for (const text of headings) {
-      await expect(page.locator(`h2:has-text("${text}")`)).toBeAttached();
+      await expect(page.getByRole('heading', { level: 2, name: text })).toBeAttached();
     }
   });
 
   test('LinkedIn and GitHub CTA buttons link correctly', async ({ page }) => {
-    const linkedin = page.locator('.hero__ctas a').first();
+    const hero = page.getByRole('region', { name: 'Introduction' });
+
+    const linkedin = hero.getByRole('link', { name: 'LinkedIn' });
     await expect(linkedin).toHaveAttribute('href', /linkedin\.com/);
     await expect(linkedin).toHaveAttribute('target', '_blank');
 
-    const github = page.locator('.hero__ctas a').last();
+    const github = hero.getByRole('link', { name: 'GitHub' });
     await expect(github).toHaveAttribute('href', /github\.com/);
     await expect(github).toHaveAttribute('target', '_blank');
   });
@@ -64,24 +69,30 @@ for (const { name, path, currentLabel } of SUB_PAGES) {
     });
 
     test('nav contains expected links, pointing back at index.html sections', async ({ page }) => {
+      const nav = page.getByRole('navigation', { name: 'Main navigation' });
       for (const label of ['About', 'Experience', 'Education', 'Skills']) {
-        const link = page.locator(`.nav__link:has-text("${label}")`);
+        const link = nav.getByRole('link', { name: label, exact: true });
         await expect(link).toBeVisible();
         await expect(link).toHaveAttribute('href', new RegExp(`index\\.html#${label.toLowerCase()}`));
       }
     });
 
     test(`"${currentLabel}" nav link is marked as the current page`, async ({ page }) => {
-      await expect(page.locator('.nav__link[aria-current="page"]')).toHaveText(currentLabel);
+      const nav = page.getByRole('navigation', { name: 'Main navigation' });
+      // aria-current is a genuine ARIA state (not a styling hook), so an
+      // attribute match here is the correct locator, not a CSS-brittleness risk.
+      await expect(nav.locator('[aria-current="page"]')).toHaveText(currentLabel);
     });
 
     test('nav gets glassmorphism class after scroll', async ({ page }) => {
+      const nav = page.getByRole('navigation', { name: 'Main navigation' });
       await page.evaluate(() => window.scrollTo(0, 100));
-      await expect(page.locator('#main-nav')).toHaveClass(/nav--scrolled/);
+      await expect(nav).toHaveClass(/nav--scrolled/);
     });
 
     test('nav logo navigates back to the homepage', async ({ page }) => {
-      await page.locator('.nav__logo').click();
+      const nav = page.getByRole('navigation', { name: 'Main navigation' });
+      await nav.getByRole('link', { name: 'SS' }).click();
       await expect(page).toHaveURL(/\/$/);
     });
   });

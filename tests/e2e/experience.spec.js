@@ -6,61 +6,67 @@ test.describe('Experience accordion', () => {
   });
 
   test('all 6 companies are listed', async ({ page }) => {
+    const experience = page.getByRole('region', { name: "Where I’ve worked." });
     const companies = ['Emirates Group', 'Qantas Airways', 'Canva', 'MYOB Group', 'Suncorp Group', 'Cognizant'];
     for (const name of companies) {
-      await expect(page.locator(`.exp__company:has-text("${name}")`)).toBeVisible();
+      await expect(experience.getByText(name, { exact: true })).toBeVisible();
     }
   });
 
-  test('Emirates card has no expand chevron (current role)', async ({ page }) => {
-    const card = page.locator('[aria-label="Principal Quality Engineer at Emirates Group"]');
-    await expect(card.locator('.exp__chevron')).toHaveCount(0);
+  test('Emirates card has no expand button (current role)', async ({ page }) => {
+    const card = page.getByRole('article', { name: 'Principal Quality Engineer at Emirates Group' });
+    await expect(card.getByRole('button')).toHaveCount(0);
   });
 
   test('Qantas card expands on click', async ({ page }) => {
-    const card = page.locator('[aria-label="Software Technical Lead at Qantas Airways"]');
-    await card.locator('.exp__header').click();
-    await expect(card).toHaveClass(/exp__card--expanded/);
-    await expect(card.locator('.exp__details')).toHaveClass(/exp__details--open/);
-    await expect(card.locator('.exp__chevron')).toHaveClass(/exp__chevron--open/);
+    const card = page.getByRole('article', { name: 'Software Technical Lead at Qantas Airways' });
+    const header = card.getByRole('button');
+    await header.click();
+    await expect(header).toHaveAttribute('aria-expanded', 'true');
+    await expect(card.getByText('Australia’s largest domestic', { exact: false })).toBeVisible();
   });
 
   test('Qantas card collapses on second click', async ({ page }) => {
-    const card = page.locator('[aria-label="Software Technical Lead at Qantas Airways"]');
-    await card.locator('.exp__header').click();
-    await card.locator('.exp__header').click();
-    await expect(card).not.toHaveClass(/exp__card--expanded/);
-    await expect(card.locator('.exp__details')).not.toHaveClass(/exp__details--open/);
+    const card = page.getByRole('article', { name: 'Software Technical Lead at Qantas Airways' });
+    const header = card.getByRole('button');
+    await header.click();
+    await header.click();
+    await expect(header).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('only one card is expanded at a time', async ({ page }) => {
-    await page.locator('[aria-label="Software Technical Lead at Qantas Airways"] .exp__header').click();
-    await page.locator('[aria-label="QA Manager at Canva"] .exp__header').click();
-    await expect(page.locator('.exp__card--expanded')).toHaveCount(1);
+    const qantas = page.getByRole('article', { name: 'Software Technical Lead at Qantas Airways' });
+    const canva  = page.getByRole('article', { name: 'QA Manager at Canva' });
+    await qantas.getByRole('button').click();
+    await canva.getByRole('button').click();
+    await expect(qantas.getByRole('button')).toHaveAttribute('aria-expanded', 'false');
+    await expect(canva.getByRole('button')).toHaveAttribute('aria-expanded', 'true');
   });
 
   test('expanded card shows responsibilities', async ({ page }) => {
-    const card = page.locator('[aria-label="Software Technical Lead at Qantas Airways"]');
-    await card.locator('.exp__header').click();
-    await expect(card.locator('.exp__bullet')).toHaveCount(5);
+    const card = page.getByRole('article', { name: 'Software Technical Lead at Qantas Airways' });
+    await card.getByRole('button').click();
+    await expect(card.getByRole('listitem')).toHaveCount(5);
   });
 
   test('each expandable card has a Visit link', async ({ page }) => {
-    const expandable = page.locator('.exp__card--expandable');
-    const count = await expandable.count();
+    const cards = page.getByRole('article').filter({ has: page.getByRole('button') });
+    const count = await cards.count();
     for (let i = 0; i < count; i++) {
-      await expandable.nth(i).locator('.exp__header').click();
-      await expect(expandable.nth(i).locator('.exp__ext-link')).toBeVisible();
-      await expandable.nth(i).locator('.exp__header').click(); // close
+      const card = cards.nth(i);
+      await card.getByRole('button').click();
+      await expect(card.getByRole('link', { name: /^Visit/ })).toBeVisible();
+      await card.getByRole('button').click(); // close
     }
   });
 
   test('accordion is keyboard accessible', async ({ page }) => {
-    const header = page.locator('[aria-label="QA Manager at Canva"] .exp__header');
+    const canva  = page.getByRole('article', { name: 'QA Manager at Canva' });
+    const header = canva.getByRole('button');
     await header.focus();
     await page.keyboard.press('Enter');
-    await expect(page.locator('[aria-label="QA Manager at Canva"]')).toHaveClass(/exp__card--expanded/);
+    await expect(header).toHaveAttribute('aria-expanded', 'true');
     await page.keyboard.press('Space');
-    await expect(page.locator('[aria-label="QA Manager at Canva"]')).not.toHaveClass(/exp__card--expanded/);
+    await expect(header).toHaveAttribute('aria-expanded', 'false');
   });
 });

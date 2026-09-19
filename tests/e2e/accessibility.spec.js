@@ -20,7 +20,14 @@ test.describe('Accessibility (axe WCAG 2.1 AA)', () => {
     // otherwise a mid-transition sample can read as a transient contrast
     // failure that isn't present in the final rendered state.
     await page.waitForTimeout(700);
-    await page.locator('[aria-label="Software Technical Lead at Qantas Airways"] .exp__header').click();
+    await page.getByRole('article', { name: 'Software Technical Lead at Qantas Airways' })
+      .getByRole('button')
+      .click();
+    // The accordion's own max-height transition (0.42s, see .exp__details in
+    // main.css) can otherwise get sampled mid-animation — same class of flake
+    // as the scroll-reveal wait above, just triggered by this click instead
+    // of page load.
+    await page.waitForTimeout(500);
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze();
@@ -34,7 +41,7 @@ test.describe('Accessibility (axe WCAG 2.1 AA)', () => {
     // otherwise a mid-transition sample can read as a transient contrast
     // failure that isn't present in the final rendered state.
     await page.waitForTimeout(700);
-    await page.locator('#nav-hamburger').click();
+    await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze();
@@ -62,7 +69,7 @@ test.describe('Accessibility (axe WCAG 2.1 AA) — Quality Suite page', () => {
   test('page has no violations with a pipeline panel expanded', async ({ page }) => {
     await page.goto('/testing.html');
     await page.waitForTimeout(700); // let scroll-reveal settle — see comment above
-    await page.locator('.tq-pipeline__node--clickable').first().click();
+    await page.getByRole('button', { name: 'PR Checks' }).click();
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze();
@@ -73,7 +80,7 @@ test.describe('Accessibility (axe WCAG 2.1 AA) — Quality Suite page', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/testing.html');
     await page.waitForTimeout(700); // let scroll-reveal settle — see comment above
-    await page.locator('#nav-hamburger').click();
+    await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze();
@@ -95,7 +102,7 @@ test.describe('Accessibility (axe WCAG 2.1 AA) — AI Engineering page', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/ai-engineering.html');
     await page.waitForTimeout(700); // let scroll-reveal settle — see comment above
-    await page.locator('#nav-hamburger').click();
+    await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze();

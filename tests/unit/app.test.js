@@ -6,6 +6,22 @@
  * initPortfolio() and asserts JS behaviour without a browser.
  */
 
+const fs   = require('fs');
+const path = require('path');
+
+// The hamburger bind lives in a critical inline <script> in index.html's
+// <head> (ahead of the main.css link — see the comment there for why), not
+// in js/app.js. Read the exact shipped script out of the real file and eval
+// it here, so this test covers the actual bytes served in production rather
+// than a hand-copied approximation that could drift from it.
+function bindHamburgerFromShippedScript() {
+  const html = fs.readFileSync(path.join(__dirname, '../../index.html'), 'utf8').replace(/\r\n/g, '\n');
+  const match = html.match(/<script>\n([\s\S]*?)\n<\/script>\n {2}<link rel="stylesheet"/);
+  if (!match) throw new Error('Could not find the critical inline nav script in index.html');
+  // eslint-disable-next-line no-new-func
+  new Function(match[1])();
+}
+
 const MINIMAL_DOM = `
   <span id="footer-year"></span>
   <nav id="main-nav" class="nav"></nav>
@@ -17,19 +33,19 @@ const MINIMAL_DOM = `
     <li><a href="#skills" class="nav__link">Skills</a></li>
   </ul>
   <article class="exp__card exp__card--expandable">
-    <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+    <button type="button" class="exp__header" aria-expanded="false">
       <div class="exp__header-right">
         <span class="exp__chevron"></span>
       </div>
-    </div>
+    </button>
     <div class="exp__details"></div>
   </article>
   <article class="exp__card exp__card--expandable">
-    <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+    <button type="button" class="exp__header" aria-expanded="false">
       <div class="exp__header-right">
         <span class="exp__chevron"></span>
       </div>
-    </div>
+    </button>
     <div class="exp__details"></div>
   </article>
 `;
@@ -65,6 +81,10 @@ describe('Footer year', () => {
 
 // ── Hamburger menu ─────────────────────────────────────────────
 describe('Hamburger menu', () => {
+  beforeEach(() => {
+    bindHamburgerFromShippedScript();
+  });
+
   test('opens nav drawer on click', () => {
     document.getElementById('nav-hamburger').click();
     expect(document.getElementById('nav-links').classList).toContain('nav__links--open');
@@ -126,18 +146,18 @@ const PIPELINE_DOM = `
   <nav id="main-nav" class="nav"></nav>
   <button id="nav-hamburger" aria-expanded="false"><span></span><span></span><span></span></button>
   <ul id="nav-links" class="nav__links"></ul>
-  <div class="tq-pipeline__node tq-pipeline__node--clickable"
-       role="button" tabindex="0" aria-expanded="false" data-panel="panel-pr-checks">
+  <button type="button" class="tq-pipeline__node tq-pipeline__node--clickable"
+       aria-expanded="false" data-panel="panel-pr-checks">
     <span class="tq-pipeline__node-label">PR Checks</span>
-  </div>
-  <div class="tq-pipeline__node tq-pipeline__node--clickable"
-       role="button" tabindex="0" aria-expanded="false" data-panel="panel-deploy">
+  </button>
+  <button type="button" class="tq-pipeline__node tq-pipeline__node--clickable"
+       aria-expanded="false" data-panel="panel-deploy">
     <span class="tq-pipeline__node-label">Deploy</span>
-  </div>
-  <div class="tq-pipeline__node tq-pipeline__node--clickable"
-       role="button" tabindex="0" aria-expanded="false" data-panel="panel-live-verify">
+  </button>
+  <button type="button" class="tq-pipeline__node tq-pipeline__node--clickable"
+       aria-expanded="false" data-panel="panel-live-verify">
     <span class="tq-pipeline__node-label">Live Verify</span>
-  </div>
+  </button>
   <div id="panel-pr-checks"   class="tq-panel" hidden></div>
   <div id="panel-deploy"      class="tq-panel" hidden></div>
   <div id="panel-live-verify" class="tq-panel" hidden></div>
@@ -190,23 +210,11 @@ describe('Pipeline panel toggle', () => {
     expect(openPanels.length).toBe(1);
   });
 
-  test('Enter key opens a panel', () => {
-    const node = document.querySelectorAll('.tq-pipeline__node--clickable')[0];
-    node.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    expect(document.getElementById('panel-pr-checks').hidden).toBe(false);
-  });
-
-  test('Space key opens a panel', () => {
-    const node = document.querySelectorAll('.tq-pipeline__node--clickable')[0];
-    node.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
-    expect(document.getElementById('panel-pr-checks').hidden).toBe(false);
-  });
-
-  test('other keys do not open a panel', () => {
-    const node = document.querySelectorAll('.tq-pipeline__node--clickable')[0];
-    node.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
-    expect(document.getElementById('panel-pr-checks').hidden).toBe(true);
-  });
+  // Enter/Space-activates-a-button is native browser behaviour that jsdom
+  // doesn't simulate (dispatching a keydown here does not synthesize the
+  // 'click' a real browser would fire) — covered for real in Playwright:
+  // tests/e2e/quality-suite.spec.js ("Enter key opens a pipeline panel",
+  // "Space key opens a pipeline panel").
 });
 
 // ── Experience accordion ───────────────────────────────────────
@@ -235,23 +243,10 @@ describe('Experience accordion', () => {
     expect(document.querySelectorAll('.exp__card')[1].classList).toContain('exp__card--expanded');
   });
 
-  test('Enter key expands a card', () => {
-    const header = document.querySelector('.exp__header');
-    header.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    expect(document.querySelector('.exp__card').classList).toContain('exp__card--expanded');
-  });
-
-  test('Space key expands a card', () => {
-    const header = document.querySelector('.exp__header');
-    header.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
-    expect(document.querySelector('.exp__card').classList).toContain('exp__card--expanded');
-  });
-
-  test('other keys do not toggle the card', () => {
-    const header = document.querySelector('.exp__header');
-    header.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
-    expect(document.querySelector('.exp__card').classList).not.toContain('exp__card--expanded');
-  });
+  // Enter/Space-activates-a-button is native browser behaviour that jsdom
+  // doesn't simulate (dispatching a keydown here does not synthesize the
+  // 'click' a real browser would fire) — covered for real in Playwright:
+  // tests/e2e/experience.spec.js ("accordion is keyboard accessible").
 });
 
 // ── Scroll-reveal entrance motion ──────────────────────────────

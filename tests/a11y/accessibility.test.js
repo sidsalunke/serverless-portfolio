@@ -52,7 +52,7 @@ test('page has a single h1', () => {
 test('landmark regions are present', () => {
   document.documentElement.innerHTML = html;
   expect(document.querySelector('nav')).not.toBeNull();
-  expect(document.querySelector('main, [role="main"], section')).not.toBeNull();
+  expect(document.querySelector('main')).not.toBeNull();
   expect(document.querySelector('footer')).not.toBeNull();
 });
 
@@ -77,9 +77,10 @@ test('testing.html pipeline nodes are keyboard-reachable', () => {
   document.documentElement.innerHTML = testingHtml;
   const nodes = document.querySelectorAll('.tq-pipeline__node--clickable');
   expect(nodes.length).toBeGreaterThan(0);
+  // Real <button> elements are natively focusable and keyboard-activatable —
+  // no tabindex/role needed (and adding them would be redundant ARIA).
   nodes.forEach(node => {
-    expect(node.getAttribute('tabindex')).toBe('0');
-    expect(node.getAttribute('role')).toBe('button');
+    expect(node.tagName).toBe('BUTTON');
   });
 });
 

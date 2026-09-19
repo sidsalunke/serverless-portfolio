@@ -46,7 +46,7 @@
   <!-- ── CSP (same policy as index.html) ──────────────────────────────────── -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'none';
-                 script-src 'self';
+                 script-src 'self' 'sha256-2vMLbFF0gwQJckriPBDpgVIGIR152fls1JcnPNEF0Ac=';
                  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
                  font-src https://fonts.gstatic.com;
                  img-src 'self' data:;
@@ -63,6 +63,57 @@
   <link id="google-fonts" rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" as="style">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
+  <!--
+    Nav hamburger: bound here, inline, ahead of the main.css stylesheet link.
+    A classic <script> always waits for every preceding stylesheet to finish
+    loading before it executes — that's what left the hamburger tappable-looking
+    but non-functional for ~700ms+ on a cold mobile load (js/app.js sits after
+    main.css and only binds the click handler once it finally runs). Since this
+    block precedes main.css, it runs at parse time with nothing to wait on, and
+    polls via requestAnimationFrame until the button exists in the DOM (which
+    happens fast, well before CSS/fonts/app.js are ready). app.js no longer
+    binds this listener — see js/app.js for why.
+  -->
+  <script>
+(function () {
+  function bind() {
+    var hamburger = document.getElementById('nav-hamburger');
+    var navLinks  = document.getElementById('nav-links');
+    if (!hamburger || !navLinks) { requestAnimationFrame(bind); return; }
+
+    var backdrop = null;
+
+    function openMenu() {
+      hamburger.classList.add('nav__hamburger--open');
+      navLinks.classList.add('nav__links--open');
+      hamburger.setAttribute('aria-expanded', 'true');
+      backdrop = document.createElement('div');
+      backdrop.className = 'nav__backdrop';
+      backdrop.setAttribute('aria-hidden', 'true');
+      backdrop.setAttribute('data-testid', 'nav-backdrop');
+      backdrop.addEventListener('click', closeMenu);
+      document.body.appendChild(backdrop);
+    }
+
+    function closeMenu() {
+      hamburger.classList.remove('nav__hamburger--open');
+      navLinks.classList.remove('nav__links--open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      if (backdrop) { backdrop.remove(); backdrop = null; }
+    }
+
+    hamburger.addEventListener('click', function () {
+      navLinks.classList.contains('nav__links--open') ? closeMenu() : openMenu();
+    });
+
+    navLinks.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', closeMenu);
+    });
+  }
+
+  bind();
+})();
+</script>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
@@ -151,6 +202,8 @@
   </button>
 </nav>
 
+<main>
+
 <!-- ============================================================ HERO -->
 <section class="section tq-hero" aria-labelledby="tq-hero-heading">
   <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
@@ -216,15 +269,15 @@
       </div>
 
       <!-- Node: PR Checks (clickable) -->
-      <div class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable"
-           role="button" tabindex="0" aria-expanded="false" data-panel="panel-pr-checks">
+      <button type="button" class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable"
+           aria-expanded="false" data-panel="panel-pr-checks">
         <div class="tq-pipeline__node-icon" aria-hidden="true">
           <svg width="22" height="22"><use href="#i-flask"/></svg>
         </div>
         <span class="tq-pipeline__node-label">PR Checks</span>
         <span class="tq-pipeline__node-sub">3 parallel jobs</span>
         <span class="tq-pipeline__node-hint" aria-hidden="true">tap to explore</span>
-      </div>
+      </button>
 
       <div class="tq-pipeline__arrow" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
@@ -244,30 +297,30 @@
       </div>
 
       <!-- Node: Deploy (clickable) -->
-      <div class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable"
-           role="button" tabindex="0" aria-expanded="false" data-panel="panel-deploy">
+      <button type="button" class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable"
+           aria-expanded="false" data-panel="panel-deploy">
         <div class="tq-pipeline__node-icon" aria-hidden="true">
           <svg width="22" height="22"><use href="#i-cloud"/></svg>
         </div>
         <span class="tq-pipeline__node-label">Deploy</span>
         <span class="tq-pipeline__node-sub">S3 + CloudFront</span>
         <span class="tq-pipeline__node-hint" aria-hidden="true">tap to explore</span>
-      </div>
+      </button>
 
       <div class="tq-pipeline__arrow" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
       </div>
 
       <!-- Node: Live Verify (clickable) -->
-      <div class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable"
-           role="button" tabindex="0" aria-expanded="false" data-panel="panel-live-verify">
+      <button type="button" class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable"
+           aria-expanded="false" data-panel="panel-live-verify">
         <div class="tq-pipeline__node-icon" aria-hidden="true">
           <svg width="22" height="22"><use href="#i-eye"/></svg>
         </div>
         <span class="tq-pipeline__node-label">Live Verify</span>
         <span class="tq-pipeline__node-sub">post-deploy</span>
         <span class="tq-pipeline__node-hint" aria-hidden="true">tap to explore</span>
-      </div>
+      </button>
 
     </div><!-- /.tq-pipeline -->
 
@@ -786,6 +839,8 @@
     </div><!-- /.tq-deploy-grid -->
   </div>
 </section>
+
+</main>
 
 <!-- ============================================================ FOOTER -->
 <footer class="footer" role="contentinfo">

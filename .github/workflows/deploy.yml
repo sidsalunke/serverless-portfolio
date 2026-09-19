@@ -54,6 +54,7 @@ jobs:
             --include "favicon.svg" \
             --include "robots.txt" \
             --include "sitemap.xml" \
+            --include "llms.txt" \
             --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
             --delete
         # Note: --acl public-read is intentionally omitted.
@@ -215,6 +216,7 @@ jobs:
             --include "favicon.svg" \
             --include "robots.txt" \
             --include "sitemap.xml" \
+            --include "llms.txt" \
             --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
             --delete
 

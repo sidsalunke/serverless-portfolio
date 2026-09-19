@@ -85,7 +85,12 @@
     of whether the hosting platform supports custom response headers.
 
     default-src 'none'     → deny everything not explicitly allowed
-    script-src 'self'      → only our own js/app.js; no inline scripts, no CDN JS
+    script-src 'self' 'sha256-...' → our own js/app.js, plus one exact, hashed
+               inline <script> (the critical nav-hamburger bind below) — no
+               other inline scripts, no CDN JS. The hash pins that inline
+               script to its exact current content; changing it requires
+               recomputing the hash here, in the sibling pages, and in
+               infra/main.tf's CloudFront response_headers_policy.
     style-src  'self' 'unsafe-inline' fonts.googleapis.com
                → main.css + inline style="" attributes (SVG colours, CSS vars) + Google Fonts CSS
     font-src   fonts.gstatic.com
@@ -99,7 +104,7 @@
   -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'none';
-                 script-src 'self';
+                 script-src 'self' 'sha256-2vMLbFF0gwQJckriPBDpgVIGIR152fls1JcnPNEF0Ac=';
                  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
                  font-src https://fonts.gstatic.com;
                  img-src 'self' data:;
@@ -125,6 +130,57 @@
   -->
   <link id="google-fonts" rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" as="style">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <!--
+    Nav hamburger: bound here, inline, ahead of the main.css stylesheet link.
+    A classic <script> always waits for every preceding stylesheet to finish
+    loading before it executes — that's what left the hamburger tappable-looking
+    but non-functional for ~700ms+ on a cold mobile load (js/app.js sits after
+    main.css and only binds the click handler once it finally runs). Since this
+    block precedes main.css, it runs at parse time with nothing to wait on, and
+    polls via requestAnimationFrame until the button exists in the DOM (which
+    happens fast, well before CSS/fonts/app.js are ready). app.js no longer
+    binds this listener — see js/app.js for why.
+  -->
+  <script>
+(function () {
+  function bind() {
+    var hamburger = document.getElementById('nav-hamburger');
+    var navLinks  = document.getElementById('nav-links');
+    if (!hamburger || !navLinks) { requestAnimationFrame(bind); return; }
+
+    var backdrop = null;
+
+    function openMenu() {
+      hamburger.classList.add('nav__hamburger--open');
+      navLinks.classList.add('nav__links--open');
+      hamburger.setAttribute('aria-expanded', 'true');
+      backdrop = document.createElement('div');
+      backdrop.className = 'nav__backdrop';
+      backdrop.setAttribute('aria-hidden', 'true');
+      backdrop.setAttribute('data-testid', 'nav-backdrop');
+      backdrop.addEventListener('click', closeMenu);
+      document.body.appendChild(backdrop);
+    }
+
+    function closeMenu() {
+      hamburger.classList.remove('nav__hamburger--open');
+      navLinks.classList.remove('nav__links--open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      if (backdrop) { backdrop.remove(); backdrop = null; }
+    }
+
+    hamburger.addEventListener('click', function () {
+      navLinks.classList.contains('nav__links--open') ? closeMenu() : openMenu();
+    });
+
+    navLinks.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', closeMenu);
+    });
+  }
+
+  bind();
+})();
+</script>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
@@ -198,6 +254,8 @@
     <span></span><span></span><span></span>
   </button>
 </nav>
+
+<main>
 
 <!-- ============================================================ HERO -->
 <section id="hero" class="hero" aria-label="Introduction">
@@ -294,8 +352,8 @@
       <article class="exp__card" style="--company-color:#C60C30" aria-label="Principal Quality Engineer at Emirates Group">
         <div class="exp__header">
           <div class="exp__header-left">
-            <div class="exp__domain">New Loyalty Program</div>
-            <div class="exp__role">Principal Quality Engineer</div>
+            <p class="exp__domain">New Loyalty Program</p>
+            <p class="exp__role">Principal Quality Engineer</p>
             <div class="exp__company-row">
               <span class="exp__company">Emirates Group</span>
               <span class="exp__sep" aria-hidden="true">&middot;</span>
@@ -319,10 +377,10 @@
 
       <!-- Qantas Airways -->
       <article class="exp__card exp__card--expandable" style="--company-color:#E8002D" aria-label="Software Technical Lead at Qantas Airways">
-        <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+        <button type="button" class="exp__header" aria-expanded="false">
           <div class="exp__header-left">
-            <div class="exp__domain">Cloud Platform &amp; Digital</div>
-            <div class="exp__role">Software Technical Lead</div>
+            <p class="exp__domain">Cloud Platform &amp; Digital</p>
+            <p class="exp__role">Software Technical Lead</p>
             <div class="exp__company-row">
               <span class="exp__company">Qantas Airways</span>
               <span class="exp__sep" aria-hidden="true">&middot;</span>
@@ -336,7 +394,7 @@
             </div>
             <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"/></svg></span>
           </div>
-        </div>
+        </button>
         <div class="exp__details">
           <p class="exp__description">Qantas Airways is Australia&rsquo;s largest domestic and international airline and the country&rsquo;s flag carrier, regarded as a global leader in safety and operational performance.</p>
           <ul class="exp__bullets">
@@ -354,10 +412,10 @@
 
       <!-- Canva -->
       <article class="exp__card exp__card--expandable" style="--company-color:#7D2AE8" aria-label="QA Manager at Canva">
-        <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+        <button type="button" class="exp__header" aria-expanded="false">
           <div class="exp__header-left">
-            <div class="exp__domain">Content &amp; Discovery</div>
-            <div class="exp__role">QA Manager</div>
+            <p class="exp__domain">Content &amp; Discovery</p>
+            <p class="exp__role">QA Manager</p>
             <div class="exp__company-row">
               <span class="exp__company">Canva</span>
               <span class="exp__sep" aria-hidden="true">&middot;</span>
@@ -371,7 +429,7 @@
             </div>
             <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"/></svg></span>
           </div>
-        </div>
+        </button>
         <div class="exp__details">
           <p class="exp__description">Canva is an Australian-born global graphic design platform used by millions worldwide to create presentations, marketing materials, and visual content.</p>
           <ul class="exp__bullets">
@@ -388,10 +446,10 @@
 
       <!-- MYOB Group -->
       <article class="exp__card exp__card--expandable" style="--company-color:#00A651" aria-label="Senior Quality Analyst at MYOB Group">
-        <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+        <button type="button" class="exp__header" aria-expanded="false">
           <div class="exp__header-left">
-            <div class="exp__domain">Online Tax</div>
-            <div class="exp__role">Senior Quality Analyst</div>
+            <p class="exp__domain">Online Tax</p>
+            <p class="exp__role">Senior Quality Analyst</p>
             <div class="exp__company-row">
               <span class="exp__company">MYOB Group</span>
               <span class="exp__sep" aria-hidden="true">&middot;</span>
@@ -405,7 +463,7 @@
             </div>
             <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"/></svg></span>
           </div>
-        </div>
+        </button>
         <div class="exp__details">
           <p class="exp__description">MYOB is Australia&rsquo;s leading accounting and financial management software platform, serving SMEs and enterprise clients across Australia and New Zealand.</p>
           <ul class="exp__bullets">
@@ -421,10 +479,10 @@
 
       <!-- Suncorp Group -->
       <article class="exp__card exp__card--expandable" style="--company-color:#F5A623" aria-label="Software Test Engineer at Suncorp Group">
-        <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+        <button type="button" class="exp__header" aria-expanded="false">
           <div class="exp__header-left">
-            <div class="exp__domain">Digital Banking &amp; Insurance</div>
-            <div class="exp__role">Software Test Engineer</div>
+            <p class="exp__domain">Digital Banking &amp; Insurance</p>
+            <p class="exp__role">Software Test Engineer</p>
             <div class="exp__company-row">
               <span class="exp__company">Suncorp Group</span>
               <span class="exp__sep" aria-hidden="true">&middot;</span>
@@ -438,7 +496,7 @@
             </div>
             <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"/></svg></span>
           </div>
-        </div>
+        </button>
         <div class="exp__details">
           <p class="exp__description">Suncorp Group is one of Australia&rsquo;s largest financial services groups, operating across banking, insurance, and wealth management brands in Australia and New Zealand.</p>
           <ul class="exp__bullets">
@@ -454,10 +512,10 @@
 
       <!-- Cognizant -->
       <article class="exp__card exp__card--expandable" style="--company-color:#1363A4" aria-label="Programmer at Cognizant">
-        <div class="exp__header" role="button" tabindex="0" aria-expanded="false">
+        <button type="button" class="exp__header" aria-expanded="false">
           <div class="exp__header-left">
-            <div class="exp__domain">Credit Suisse Account</div>
-            <div class="exp__role">Programmer</div>
+            <p class="exp__domain">Credit Suisse Account</p>
+            <p class="exp__role">Programmer</p>
             <div class="exp__company-row">
               <span class="exp__company">Cognizant</span>
               <span class="exp__sep" aria-hidden="true">&middot;</span>
@@ -471,7 +529,7 @@
             </div>
             <span class="exp__chevron" aria-hidden="true"><svg width="16" height="16"><use href="#i-chevron-down"/></svg></span>
           </div>
-        </div>
+        </button>
         <div class="exp__details">
           <p class="exp__description">Cognizant Technology Solutions is an American multinational IT corporation. Worked on the Credit Suisse account delivering quality engineering services within a global investment banking client engagement.</p>
           <ul class="exp__bullets">
@@ -499,8 +557,8 @@
       <article class="exp__card" style="--company-color:#3b82f6" aria-label="Master of Information Technology at University of Technology Sydney">
         <div class="exp__header">
           <div class="exp__header-left">
-            <div class="exp__domain">Software Development</div>
-            <div class="exp__role">Master of Information Technology</div>
+            <p class="exp__domain">Software Development</p>
+            <p class="exp__role">Master of Information Technology</p>
             <div class="exp__company-row">
               <span class="exp__company">University of Technology Sydney</span>
               <span class="exp__sep" aria-hidden="true">&middot;</span>
@@ -527,8 +585,8 @@
       <article class="exp__card" style="--company-color:#38bdf8" aria-label="Bachelor of Computer Applications at MITSOM College">
         <div class="exp__header">
           <div class="exp__header-left">
-            <div class="exp__domain">Computer Applications</div>
-            <div class="exp__role">Bachelor of Computer Applications</div>
+            <p class="exp__domain">Computer Applications</p>
+            <p class="exp__role">Bachelor of Computer Applications</p>
             <div class="exp__company-row">
               <span class="exp__company">MITSOM College</span>
               <span class="exp__sep" aria-hidden="true">&middot;</span>
@@ -658,6 +716,8 @@
     </p>
   </div>
 </section>
+
+</main>
 
 <!-- ============================================================ FOOTER -->
 <footer class="footer" role="contentinfo">

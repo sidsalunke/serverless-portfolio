@@ -36,11 +36,10 @@ test.describe('Visual regression', () => {
   test('experience card expanded', async ({ page }) => {
     await page.goto('/');
     await page.waitForFunction(() => document.fonts.ready);
-    await page.locator('[aria-label="Software Technical Lead at Qantas Airways"] .exp__header').click();
+    const card = page.getByRole('article', { name: 'Software Technical Lead at Qantas Airways' });
+    await card.getByRole('button').click();
     await page.waitForTimeout(500); // accordion animation
-    await expect(
-      page.locator('[aria-label="Software Technical Lead at Qantas Airways"]')
-    ).toHaveScreenshot('qantas-expanded.png', { maxDiffPixelRatio: 0.02 });
+    await expect(card).toHaveScreenshot('qantas-expanded.png', { maxDiffPixelRatio: 0.02 });
   });
 
   test('full page — desktop', async ({ page }) => {
@@ -74,7 +73,7 @@ test.describe('Visual regression — Quality Suite', () => {
   test('pipeline with PR Checks panel open', async ({ page }) => {
     await page.goto('/testing.html');
     await page.waitForFunction(() => document.fonts.ready);
-    await page.locator('[data-panel="panel-pr-checks"]').click();
+    await page.getByRole('button', { name: 'PR Checks' }).click();
     await page.waitForTimeout(300);
     await expect(page.locator('.tq-pipeline-section')).toHaveScreenshot('quality-suite-pipeline-panel.png', {
       maxDiffPixelRatio: 0.02,

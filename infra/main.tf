@@ -205,7 +205,7 @@ resource "aws_cloudfront_response_headers_policy" "security" {
 
     # Disables browser features not needed by a static portfolio
     content_security_policy {
-      content_security_policy = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'"
+      content_security_policy = "default-src 'none'; script-src 'self' 'sha256-2vMLbFF0gwQJckriPBDpgVIGIR152fls1JcnPNEF0Ac='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'"
       override                = true
     }
   }
@@ -245,18 +245,24 @@ resource "aws_cloudfront_distribution" "site" {
     max_ttl     = 2592000 # 30 days for immutable assets
   }
 
-  # Custom error pages – serve index.html for 403/404 (SPA-friendly)
+  # Custom error pages – this is a multi-page static site (no client-side
+  # router), so unknown paths are real 404s, not a route the app should
+  # handle. The bucket's public-access block makes S3 return 403 (not 404)
+  # for a missing key, since it won't disclose whether the object exists —
+  # both error codes are mapped here to the same page but keep their real
+  # HTTP status, so crawlers/tools see an honest 404 instead of a 200 with
+  # duplicate homepage content.
   custom_error_response {
     error_code            = 403
-    response_code         = 200
-    response_page_path    = "/index.html"
+    response_code         = 404
+    response_page_path    = "/404.html"
     error_caching_min_ttl = 10
   }
 
   custom_error_response {
     error_code            = 404
     response_code         = 404
-    response_page_path    = "/index.html"
+    response_page_path    = "/404.html"
     error_caching_min_ttl = 10
   }
 
