@@ -43,22 +43,34 @@ jobs:
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           aws-region: us-east-1
 
-      # Split by asset class so each gets the right Cache-Control: HTML must
-      # always revalidate (it's what changes on every deploy); CSS/JS get a
-      # short cache since they're not content-hashed and can change between
-      # deploys; images/favicon get a long cache since they're effectively
-      # immutable in practice; crawler/metadata files stay uncached since
-      # freshness there matters more than the bandwidth they'd save.
+      # Split by asset class so each gets the right Cache-Control: HTML gets
+      # a short cache (60s — it's what changes on every deploy, but we also
+      # invalidate CloudFront below so this window barely matters in
+      # practice); CSS/JS get a slightly longer cache since they're not
+      # content-hashed but change less often than HTML; images/favicon get
+      # a long cache since they're effectively immutable in practice;
+      # crawler/metadata files get the same short cache as HTML.
       # Lighthouse flagged every static asset as uncacheable (0 TTL) before
       # this — this repo previously set CloudFront's edge-cache TTL
       # (infra/main.tf default_ttl/max_ttl) but never the browser-facing
       # Cache-Control response header, so nothing was ever cached client-side.
-      - name: Sync HTML to S3 (no client cache — always revalidate)
+      #
+      # IMPORTANT: this distribution's default_cache_behavior uses the
+      # legacy min_ttl/default_ttl/max_ttl fields (not a Cache Policy), and
+      # CloudFront's edge cache honors the origin's Cache-Control for its
+      # own TTL when one is present — so literal "no-cache" here doesn't
+      # just skip the *browser* cache, it disables CloudFront's *edge*
+      # cache for that file too, turning every single visitor's request
+      # into a full round trip to S3. Confirmed live: HTML previously sent
+      # "no-cache" and showed X-Cache: Miss on every request, ~900ms-1.5s+
+      # TTFB instead of a fast edge hit. Use a short max-age, never
+      # "no-cache", for anything CloudFront should still edge-cache.
+      - name: Sync HTML to S3 (short client cache)
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "*.html" \
-            --cache-control "no-cache" \
+            --cache-control "public, max-age=60" \
             --delete
 
       - name: Sync CSS/JS to S3 (short client cache)
@@ -79,7 +91,7 @@ jobs:
             --cache-control "public, max-age=2592000" \
             --delete
 
-      - name: Sync crawler/metadata files to S3 (no client cache)
+      - name: Sync crawler/metadata files to S3 (short client cache)
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
@@ -87,7 +99,7 @@ jobs:
             --include "sitemap.xml" \
             --include "llms.txt" \
             --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
-            --cache-control "no-cache" \
+            --cache-control "public, max-age=60" \
             --delete
         # Note: --acl public-read is intentionally omitted from every sync
         # above. CloudFront OAC (configured in the console, codified in
@@ -238,12 +250,12 @@ jobs:
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Restore previous HTML to S3 (no client cache — always revalidate)
+      - name: Restore previous HTML to S3 (short client cache)
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "*.html" \
-            --cache-control "no-cache" \
+            --cache-control "public, max-age=60" \
             --delete
 
       - name: Restore previous CSS/JS to S3 (short client cache)
@@ -264,7 +276,7 @@ jobs:
             --cache-control "public, max-age=2592000" \
             --delete
 
-      - name: Restore previous crawler/metadata files to S3 (no client cache)
+      - name: Restore previous crawler/metadata files to S3 (short client cache)
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
@@ -272,7 +284,7 @@ jobs:
             --include "sitemap.xml" \
             --include "llms.txt" \
             --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
-            --cache-control "no-cache" \
+            --cache-control "public, max-age=60" \
             --delete
 
       - name: Invalidate CloudFront after rollback
