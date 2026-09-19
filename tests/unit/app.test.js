@@ -9,6 +9,7 @@
 const MINIMAL_DOM = `
   <span id="footer-year"></span>
   <nav id="main-nav" class="nav"></nav>
+  <button id="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme"></button>
   <button id="nav-hamburger" class="nav__hamburger" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
@@ -38,6 +39,8 @@ let initPortfolio;
 
 beforeEach(() => {
   jest.resetModules();
+  document.documentElement.removeAttribute('data-theme');
+  localStorage.clear();
   document.body.innerHTML = MINIMAL_DOM;
   ({ initPortfolio } = require('../../js/app.js'));
   initPortfolio();
@@ -60,6 +63,42 @@ describe('Footer year', () => {
   test('sets #footer-year to the current year', () => {
     expect(document.getElementById('footer-year').textContent)
       .toBe(String(new Date().getFullYear()));
+  });
+});
+
+// ── Theme toggle ──────────────────────────────────────────────
+describe('Theme toggle', () => {
+  test('starts in light mode with aria-pressed="false"', () => {
+    expect(document.documentElement.getAttribute('data-theme')).toBeNull();
+    expect(document.getElementById('theme-toggle').getAttribute('aria-pressed')).toBe('false');
+  });
+
+  test('switches to dark theme on click, updates aria-pressed and aria-label, persists to localStorage', () => {
+    document.getElementById('theme-toggle').click();
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    expect(document.getElementById('theme-toggle').getAttribute('aria-pressed')).toBe('true');
+    expect(document.getElementById('theme-toggle').getAttribute('aria-label')).toBe('Switch to light theme');
+    expect(localStorage.getItem('theme')).toBe('dark');
+  });
+
+  test('switches back to light theme on second click, updates state and persistence', () => {
+    const btn = document.getElementById('theme-toggle');
+    btn.click();
+    btn.click();
+    expect(document.documentElement.getAttribute('data-theme')).toBeNull();
+    expect(btn.getAttribute('aria-pressed')).toBe('false');
+    expect(btn.getAttribute('aria-label')).toBe('Switch to dark theme');
+    expect(localStorage.getItem('theme')).toBe('light');
+  });
+
+  test('reflects a data-theme="dark" already set on <html> (as the head theme-init script would do) on init', () => {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    jest.resetModules();
+    ({ initPortfolio } = require('../../js/app.js'));
+    initPortfolio();
+
+    expect(document.getElementById('theme-toggle').getAttribute('aria-pressed')).toBe('true');
+    expect(document.getElementById('theme-toggle').getAttribute('aria-label')).toBe('Switch to light theme');
   });
 });
 

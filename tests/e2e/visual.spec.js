@@ -81,3 +81,37 @@ test.describe('Visual regression — Quality Suite', () => {
   });
 
 });
+
+// Deliberately not a full second copy of the light-theme suite above — light
+// is the default and gets full coverage; dark is a themed override of the
+// same tokens, so these two catch "dark theme renders broken/unstyled"
+// without doubling the Linux-baseline maintenance burden of every component.
+test.describe('Visual regression — Dark theme', () => {
+  test.beforeEach(async ({ page }) => {
+    // Set the preference the theme-init script reads, then reload so it
+    // applies data-theme="dark" before first paint — the same path a
+    // returning dark-mode visitor takes, rather than screenshotting mid-toggle.
+    await page.goto('/');
+    await page.evaluate(() => localStorage.setItem('theme', 'dark'));
+    await page.reload();
+    await page.waitForFunction(() => document.fonts.ready);
+    await page.waitForTimeout(400);
+  });
+
+  test('hero section', async ({ page }) => {
+    await expect(page.locator('.hero__content')).toHaveScreenshot('hero-content-dark.png', {
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+
+  test('full page — desktop', async ({ page }) => {
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(700);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(400);
+    await expect(page).toHaveScreenshot('full-page-desktop-dark.png', {
+      fullPage: true,
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+});

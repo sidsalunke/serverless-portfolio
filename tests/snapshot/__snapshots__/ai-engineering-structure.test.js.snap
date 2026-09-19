@@ -56,9 +56,15 @@ exports[`navigation links match snapshot 1`] = `
     </li>
   </ul>
 
-  <button class="nav__hamburger" id="nav-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="nav__actions">
+    <button class="nav__theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false">
+      <svg class="nav__theme-icon nav__theme-icon--sun" width="19" height="19" aria-hidden="true"><use href="#i-sun"></use></svg>
+      <svg class="nav__theme-icon nav__theme-icon--moon" width="19" height="19" aria-hidden="true"><use href="#i-moon"></use></svg>
+    </button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
 "
 `;
 

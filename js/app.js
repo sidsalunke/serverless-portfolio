@@ -41,6 +41,34 @@ function initPortfolio() {
     window.addEventListener('scroll', updateNavScrolled, { passive: true });
   }
 
+  /* ── Theme: light/dark toggle ──
+     The theme-init inline <script> in <head> already applied a stored
+     "dark" preference (if any) to <html> before this script even loads, so
+     there's no flash to fix here — this just wires up the toggle button and
+     keeps localStorage in sync going forward. */
+  var themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    var root = document.documentElement;
+
+    var syncThemeToggleLabel = function () {
+      var isDark = root.getAttribute('data-theme') === 'dark';
+      themeToggle.setAttribute('aria-pressed', String(isDark));
+      themeToggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+    };
+    syncThemeToggleLabel();
+
+    themeToggle.addEventListener('click', function () {
+      var isDark = root.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        root.removeAttribute('data-theme');
+      } else {
+        root.setAttribute('data-theme', 'dark');
+      }
+      syncThemeToggleLabel();
+      try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
+    });
+  }
+
   /* ── Nav: hamburger / mobile drawer ──
      Bound here in the normal app.js load path — no special early-binding
      trick needed. This button used to be hidden on mobile until scrolled
@@ -61,6 +89,7 @@ function initPortfolio() {
       hamburger.classList.add('nav__hamburger--open');
       navLinks.classList.add('nav__links--open');
       hamburger.setAttribute('aria-expanded', 'true');
+      if (nav) nav.classList.add('nav--menu-open');
       backdrop = document.createElement('div');
       backdrop.className = 'nav__backdrop';
       backdrop.setAttribute('aria-hidden', 'true');
@@ -73,6 +102,7 @@ function initPortfolio() {
       hamburger.classList.remove('nav__hamburger--open');
       navLinks.classList.remove('nav__links--open');
       hamburger.setAttribute('aria-expanded', 'false');
+      if (nav) nav.classList.remove('nav--menu-open');
       if (backdrop) { backdrop.remove(); backdrop = null; }
     };
 

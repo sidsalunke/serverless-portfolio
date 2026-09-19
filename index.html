@@ -85,7 +85,10 @@
     of whether the hosting platform supports custom response headers.
 
     default-src 'none'     → deny everything not explicitly allowed
-    script-src 'self'      → only our own js/app.js; no inline scripts, no CDN JS
+    script-src 'self' 'sha256-ohlc98rSlXyE4og+4moML50wS+X2XKr5tqySt8ujkeE='
+               → js/app.js, plus the theme-init inline <script> in <head>
+               (hash of that exact script's contents — recompute and update
+               here, in the meta tag below, and in infra/main.tf if it changes)
     style-src  'self' 'unsafe-inline' fonts.googleapis.com
                → main.css + inline style="" attributes (SVG colours, CSS vars) + Google Fonts CSS
     font-src   fonts.gstatic.com
@@ -102,7 +105,7 @@
   -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'none';
-                 script-src 'self';
+                 script-src 'self' 'sha256-ohlc98rSlXyE4og+4moML50wS+X2XKr5tqySt8ujkeE=';
                  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
                  font-src https://fonts.gstatic.com;
                  img-src 'self' data:;
@@ -129,6 +132,24 @@
   <link id="google-fonts" rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=optional" as="style">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=optional" rel="stylesheet"></noscript>
   <link rel="preload" href="js/app.js" as="script" fetchpriority="high">
+  <!--
+    Theme init — applies a stored "dark" preference before first paint so a
+    returning dark-mode user never sees a flash of the light default. Inline
+    and synchronous (not in app.js, which loads with `defer`) specifically so
+    it runs before the stylesheet below paints anything. CSP allows it via
+    the sha256 hash on script-src (see the meta tag above); if this script's
+    contents change, the hash must be recomputed and updated there and in
+    infra/main.tf.
+  -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
@@ -137,6 +158,16 @@
 <!-- SVG icon sprite — zero network requests, renders instantly with the HTML -->
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
   <!-- Lucide icons (stroke-based) -->
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v2"/><path d="M12 20v2"/>
+    <path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>
+    <path d="M2 12h2"/><path d="M20 12h2"/>
+    <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+  </symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+  </symbol>
   <symbol id="i-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/>
     <circle cx="12" cy="10" r="3"/>
@@ -198,9 +229,15 @@
     </li>
   </ul>
 
-  <button class="nav__hamburger" id="nav-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="nav__actions">
+    <button class="nav__theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false">
+      <svg class="nav__theme-icon nav__theme-icon--sun" width="19" height="19" aria-hidden="true"><use href="#i-sun"/></svg>
+      <svg class="nav__theme-icon nav__theme-icon--moon" width="19" height="19" aria-hidden="true"><use href="#i-moon"/></svg>
+    </button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
 </nav>
 
 <main>
