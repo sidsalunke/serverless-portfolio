@@ -42,16 +42,16 @@ function initPortfolio() {
   }
 
   /* ── Nav: hamburger / mobile drawer ──
-     On mobile this button only ever becomes visible once .nav--scrolled is
-     active (see main.css) — never on initial load. That sidesteps a real
-     WebKit-specific bug we chased through two fixes (requestAnimationFrame
-     polling, then MutationObserver) without resolving: on physical iOS
-     Safari/Chrome (both forced onto WebKit), tap responsiveness stayed
-     broken for several seconds right after a cold load, reliably, despite
-     both fixes working under every DevTools throttling test. It was always
-     smooth once scrolled, so the button simply isn't shown before then —
-     by which point this normal (non-inline, CSS-blocking-gated) binding
-     has long since run. */
+     Bound here in the normal app.js load path — no special early-binding
+     trick needed. This button used to be hidden on mobile until scrolled
+     (see main.css git history), a workaround for tap responsiveness
+     breaking on real iOS Safari/Chrome for several seconds after a cold
+     load, which two earlier JS-scheduling fixes (requestAnimationFrame
+     polling, then MutationObserver) didn't resolve. The actual cause was
+     .hero__orb's blur(90px) layers competing for GPU compositing time on
+     first paint — see main.css's mobile media query — not anything about
+     when this listener binds. With that fixed, the button is visible (and
+     should be responsive) immediately again. */
   var hamburger = document.getElementById('nav-hamburger');
   var navLinks  = document.getElementById('nav-links');
   if (hamburger && navLinks) {

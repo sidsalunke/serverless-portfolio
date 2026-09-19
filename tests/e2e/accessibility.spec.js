@@ -41,7 +41,6 @@ test.describe('Accessibility (axe WCAG 2.1 AA)', () => {
     // otherwise a mid-transition sample can read as a transient contrast
     // failure that isn't present in the final rendered state.
     await page.waitForTimeout(700);
-    await page.evaluate(() => window.scrollTo(0, 100)); // hamburger only appears once scrolled
     await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
@@ -81,7 +80,6 @@ test.describe('Accessibility (axe WCAG 2.1 AA) — Quality Suite page', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/testing.html');
     await page.waitForTimeout(700); // let scroll-reveal settle — see comment above
-    await page.evaluate(() => window.scrollTo(0, 100)); // hamburger only appears once scrolled
     await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
@@ -104,7 +102,6 @@ test.describe('Accessibility (axe WCAG 2.1 AA) — AI Engineering page', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/ai-engineering.html');
     await page.waitForTimeout(700); // let scroll-reveal settle — see comment above
-    await page.evaluate(() => window.scrollTo(0, 100)); // hamburger only appears once scrolled
     await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
