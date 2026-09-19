@@ -1,7 +1,63 @@
 /* ============================================================
    DESIGN TOKENS
+   Light is the default theme (see the toggle in the nav); dark is an
+   explicit opt-in via [data-theme="dark"] on <html>, set by js/app.js
+   and persisted to localStorage. The theme-init inline <script> in
+   <head> (ahead of this stylesheet) applies a stored "dark" choice
+   before first paint, so returning dark-mode users don't see a flash
+   of light before it switches.
    ============================================================ */
 :root {
+  --bg-0:          #ffffff;
+  --bg-1:          #f8fafc;
+  --bg-2:          #f1f5f9;
+  --bg-card:       rgba(15, 23, 42, 0.035);
+  --bg-card-hover: rgba(15, 23, 42, 0.06);
+  --border:        rgba(15, 23, 42, 0.09);
+  --border-hover:  rgba(15, 23, 42, 0.18);
+
+  --accent:        #1d4ed8;
+  --accent-2:      #0b7288;
+  --accent-3:      #0e7490;
+  --accent-dark:   #1e40af;
+  --accent-glow:   rgba(37, 99, 235, 0.08);
+
+  --text-1:  #0f172a;
+  --text-2:  #334155;
+  --text-3:  #475569;
+  --text-4:  #5c6b7d;
+
+  --shadow-sm: 0 2px 12px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 6px 28px rgba(15, 23, 42, 0.10);
+  --shadow-lg: 0 16px 56px rgba(15, 23, 42, 0.14);
+
+  /* Nav glassmorphism background once .nav--scrolled is active */
+  --nav-scrolled-bg: rgba(255, 255, 255, 0.85);
+
+  /* Subtle surface tints for chips/counts/dividers that were previously
+     hardcoded as rgba(255, 255, 255, X) — fine on the old dark-only
+     background, invisible/wrong on light, so themed here instead. Named
+     by their opacity tier since that's what varies between call sites,
+     not a semantic role. */
+  --tint-02: rgba(15, 23, 42, 0.03);
+  --tint-04: rgba(15, 23, 42, 0.045);
+  --tint-06: rgba(15, 23, 42, 0.06);
+  --tint-08: rgba(15, 23, 42, 0.08);
+  --tint-10: rgba(15, 23, 42, 0.10);
+  --tint-12: rgba(15, 23, 42, 0.14);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --max-w: 1080px;
+  --nav-h: 64px;
+}
+
+:root[data-theme="dark"] {
   --bg-0:          #020204;
   --bg-1:          #07070e;
   --bg-2:          #0e0e1c;
@@ -21,19 +77,18 @@
   --text-3:  #94a3b8;
   --text-4:  #64748b;
 
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-
   --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 6px 28px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 16px 56px rgba(0, 0, 0, 0.55);
 
-  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --nav-scrolled-bg: rgba(2, 2, 4, 0.82);
 
-  --max-w: 1080px;
-  --nav-h: 64px;
+  --tint-02: rgba(255, 255, 255, 0.02);
+  --tint-04: rgba(255, 255, 255, 0.04);
+  --tint-06: rgba(255, 255, 255, 0.06);
+  --tint-08: rgba(255, 255, 255, 0.08);
+  --tint-10: rgba(255, 255, 255, 0.10);
+  --tint-12: rgba(255, 255, 255, 0.12);
 }
 
 /* ============================================================
@@ -150,8 +205,15 @@ button { font-family: inherit; }
   transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
-.nav--scrolled {
-  background: rgba(2, 2, 4, 0.82);
+/* .nav--menu-open: the mobile drawer's backdrop sits at a lower z-index than
+   .nav, but .nav has no background of its own until scrolled, so the
+   backdrop's darkening shows straight through it — leaving the (dark, for
+   light theme) logo text on a darkened area with failing contrast. Applying
+   the scrolled nav background whenever the drawer is open opaques the nav
+   bar so the backdrop no longer bleeds through it. */
+.nav--scrolled,
+.nav--menu-open {
+  background: var(--nav-scrolled-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
@@ -202,6 +264,35 @@ button { font-family: inherit; }
   font-size: 1.35rem;
   padding: 0.8rem 1.8rem;
 }
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  z-index: 1001;
+}
+
+.nav__theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-1);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--transition), color var(--transition), transform var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.nav__theme-toggle:hover  { background: var(--tint-06); color: var(--accent); }
+.nav__theme-toggle:active { transform: scale(0.9); }
+.nav__theme-icon--moon { display: none; }
+:root[data-theme="dark"] .nav__theme-icon--sun  { display: none; }
+:root[data-theme="dark"] .nav__theme-icon--moon { display: block; }
 
 /* Hamburger */
 .nav__hamburger {
@@ -1140,7 +1231,7 @@ button.exp__header {
   left: 0;
   right: 1.8rem;
   height: 1px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  border-top: 1px dashed var(--tint-12);
 }
 
 /* ── Stage layout ──────────────────────────────────────────── */
@@ -1218,8 +1309,8 @@ button.exp__header {
   border-radius: 10rem;
   font-size: 1.3rem;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--tint-06);
+  border: 1px solid var(--tint-10);
   color: var(--text-2);
   white-space: nowrap;
   flex-shrink: 0;
@@ -1238,7 +1329,7 @@ button.exp__header {
 
 /* ── Individual test cards ─────────────────────────────────── */
 .tq-card {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--tint-02);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 2.4rem;
@@ -1276,7 +1367,7 @@ button.exp__header {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--tint-06);
   flex-shrink: 0;
   color: var(--card-color, var(--accent));
 }
@@ -1334,8 +1425,8 @@ button.exp__header {
   font-size: 1.2rem;
   font-weight: 800;
   color: var(--card-color, var(--accent));
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--tint-04);
+  border: 1px solid var(--tint-08);
   border-radius: 10rem;
   padding: 0.2rem 0.8rem;
   white-space: nowrap;
@@ -1349,7 +1440,7 @@ button.exp__header {
 }
 
 .tq-deploy-card {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--tint-02);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 2.8rem;
@@ -1390,7 +1481,7 @@ button.exp__header {
   gap: 0.5rem;
   margin-top: 2rem;
   padding: 0.5rem 1.2rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--tint-04);
   border: 1px solid var(--border);
   border-radius: 10rem;
   font-size: 1.3rem;
@@ -1443,9 +1534,20 @@ button.exp__header {
     grid-template-columns: 1fr;
   }
 
+  /* Intrinsic-width flex-wrap (the desktop layout) wraps stats onto rows
+     purely by how much text happens to fit, so the number of items per row
+     — and therefore how the rows line up under each other — varies with
+     each page's label lengths. testing.html's 5 short-labelled stats
+     happened to wrap 2-then-3 and looked fine; ai-engineering.html's 4
+     longer-labelled stats wrapped 1-then-2-then-1, reading as misaligned.
+     A fixed 2-column grid aligns every stat into the same two columns on
+     every page regardless of label length or item count. */
   .tq-hero__stats {
-    gap: 3.2rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3.2rem 2rem;
   }
+  .tq-hero__stats .hero__stat { text-align: center; }
 
   .tq-stage__header {
     margin-bottom: 4rem;
@@ -1611,13 +1713,16 @@ button.exp__header {
 .tq-hero__stats {
   justify-content: flex-start;
 }
+/* #047857 (not the brighter #34d399 used elsewhere for this same green accent)
+   — the brighter shade only meets AA contrast on the dark theme's near-black
+   background; on light backgrounds (here, and especially at the label's
+   smaller size with the old opacity: 0.75) it fails WCAG AA. */
 .hero__stat--highlight .hero__stat-value {
-  color: #34d399;
-  text-shadow: 0 0 22px rgba(52, 211, 153, 0.4);
+  color: #047857;
+  text-shadow: 0 0 22px rgba(4, 120, 87, 0.25);
 }
 .hero__stat--highlight .hero__stat-label {
-  color: #34d399;
-  opacity: 0.75;
+  color: #047857;
 }
 
 /* ── Panel: left-align bullet items, drop space-between ──────── */
