@@ -54,7 +54,7 @@
                  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
                  font-src https://fonts.gstatic.com;
                  img-src 'self' data:;
-                 connect-src 'none';
+                 connect-src 'self';
                  base-uri 'self';
                  form-action 'none'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -390,6 +390,6 @@
   </div>
 </footer>
 
-<script src="js/app.js" fetchpriority="high"></script>
+<script src="js/app.js" fetchpriority="high" defer></script>
 </body>
 </html>

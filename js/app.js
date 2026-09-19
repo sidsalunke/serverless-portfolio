@@ -25,13 +25,19 @@ function initPortfolio() {
      (e.g. an index.html#experience link from another page) never fires a
      scroll event, so without this the sticky state (and on mobile, the
      hamburger it gates — see .nav--scrolled .nav__hamburger in main.css)
-     would stay stuck off even though they're well past the 30px threshold. */
+     would stay stuck off even though they're well past the 30px threshold.
+     The initial check runs via requestAnimationFrame, not synchronously —
+     reading window.scrollY right here would force a synchronous layout in
+     the middle of the rest of this function's DOM writes (confirmed via a
+     Lighthouse "forced reflow" trace pointing at this exact line, ~117ms).
+     rAF defers the read to just before the browser's own next paint, so it
+     doesn't fight the layout the rest of initPortfolio is still producing. */
   var nav = document.getElementById('main-nav');
   if (nav) {
     function updateNavScrolled() {
       nav.classList.toggle('nav--scrolled', window.scrollY > 30);
     }
-    updateNavScrolled();
+    requestAnimationFrame(updateNavScrolled);
     window.addEventListener('scroll', updateNavScrolled, { passive: true });
   }
 

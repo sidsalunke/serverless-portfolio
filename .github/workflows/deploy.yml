@@ -43,23 +43,56 @@ jobs:
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Sync static files to S3
+      # Split by asset class so each gets the right Cache-Control: HTML must
+      # always revalidate (it's what changes on every deploy); CSS/JS get a
+      # short cache since they're not content-hashed and can change between
+      # deploys; images/favicon get a long cache since they're effectively
+      # immutable in practice; crawler/metadata files stay uncached since
+      # freshness there matters more than the bandwidth they'd save.
+      # Lighthouse flagged every static asset as uncacheable (0 TTL) before
+      # this — this repo previously set CloudFront's edge-cache TTL
+      # (infra/main.tf default_ttl/max_ttl) but never the browser-facing
+      # Cache-Control response header, so nothing was ever cached client-side.
+      - name: Sync HTML to S3 (no client cache — always revalidate)
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "*.html" \
+            --cache-control "no-cache" \
+            --delete
+
+      - name: Sync CSS/JS to S3 (short client cache)
+        run: |
+          aws s3 sync . s3://portfolio.sidsalunke.info \
+            --exclude "*" \
             --include "styles/*" \
             --include "js/app.js" \
+            --cache-control "public, max-age=3600" \
+            --delete
+
+      - name: Sync images to S3 (long client cache)
+        run: |
+          aws s3 sync . s3://portfolio.sidsalunke.info \
+            --exclude "*" \
             --include "images/*" \
             --include "favicon.svg" \
+            --cache-control "public, max-age=2592000" \
+            --delete
+
+      - name: Sync crawler/metadata files to S3 (no client cache)
+        run: |
+          aws s3 sync . s3://portfolio.sidsalunke.info \
+            --exclude "*" \
             --include "robots.txt" \
             --include "sitemap.xml" \
             --include "llms.txt" \
             --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
+            --cache-control "no-cache" \
             --delete
-        # Note: --acl public-read is intentionally omitted.
-        # CloudFront OAC (configured in the console, codified in infra/main.tf)
-        # is the only permitted reader. Public S3 URLs return 403.
+        # Note: --acl public-read is intentionally omitted from every sync
+        # above. CloudFront OAC (configured in the console, codified in
+        # infra/main.tf) is the only permitted reader. Public S3 URLs
+        # return 403.
 
       # Capture the invalidation ID so we can wait for it to finish before
       # running E2E tests. Without waiting, tests may hit stale CDN cache
@@ -205,19 +238,41 @@ jobs:
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Restore previous version to S3
+      - name: Restore previous HTML to S3 (no client cache — always revalidate)
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "*.html" \
+            --cache-control "no-cache" \
+            --delete
+
+      - name: Restore previous CSS/JS to S3 (short client cache)
+        run: |
+          aws s3 sync . s3://portfolio.sidsalunke.info \
+            --exclude "*" \
             --include "styles/*" \
             --include "js/app.js" \
+            --cache-control "public, max-age=3600" \
+            --delete
+
+      - name: Restore previous images to S3 (long client cache)
+        run: |
+          aws s3 sync . s3://portfolio.sidsalunke.info \
+            --exclude "*" \
             --include "images/*" \
             --include "favicon.svg" \
+            --cache-control "public, max-age=2592000" \
+            --delete
+
+      - name: Restore previous crawler/metadata files to S3 (no client cache)
+        run: |
+          aws s3 sync . s3://portfolio.sidsalunke.info \
+            --exclude "*" \
             --include "robots.txt" \
             --include "sitemap.xml" \
             --include "llms.txt" \
             --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
+            --cache-control "no-cache" \
             --delete
 
       - name: Invalidate CloudFront after rollback
