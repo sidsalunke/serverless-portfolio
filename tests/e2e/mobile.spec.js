@@ -15,42 +15,61 @@ for (const { name, path } of PAGES) {
       await page.goto(path);
     });
 
-    test('hamburger button is visible on mobile', async ({ page }) => {
-      await expect(page.getByRole('button', { name: 'Toggle navigation menu' })).toBeVisible();
-    });
-
-    test('hamburger opens the nav drawer', async ({ page }) => {
+    // The hamburger only appears once the sticky header (.nav--scrolled) is
+    // active, not on initial load — see main.css. Real-device testing found
+    // tap responsiveness unreliable for several seconds right after a cold
+    // mobile load (WebKit-specific: reproduced on physical iOS Safari and
+    // iOS Chrome, not on Android Chrome or any desktop DevTools throttling
+    // profile), but always smooth once scrolled — so the control is simply
+    // withheld until that point instead of chasing the underlying timing bug.
+    test('hamburger is hidden until the sticky header activates, then becomes usable', async ({ page }) => {
       const hamburger = page.getByRole('button', { name: 'Toggle navigation menu' });
-      await hamburger.click();
-      await expect(hamburger).toHaveAttribute('aria-expanded', 'true');
-      await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible();
+      await expect(hamburger).toBeHidden();
+
+      await page.evaluate(() => window.scrollTo(0, 100));
+      await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveClass(/nav--scrolled/);
+      await expect(hamburger).toBeVisible();
     });
 
-    test('backdrop appears when drawer is open', async ({ page }) => {
-      await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
-      // Purely decorative (aria-hidden) — no accessible role/name, so a
-      // data-testid hook is the correct locator here, not a CSS class.
-      await expect(page.getByTestId('nav-backdrop')).toBeAttached();
-    });
+    test.describe('once scrolled', () => {
+      test.beforeEach(async ({ page }) => {
+        await page.evaluate(() => window.scrollTo(0, 100));
+        await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveClass(/nav--scrolled/);
+      });
 
-    test('clicking backdrop closes the drawer', async ({ page }) => {
-      const hamburger = page.getByRole('button', { name: 'Toggle navigation menu' });
-      await hamburger.click();
-      // Click the left edge of the backdrop — the right side is covered by the 28rem drawer
-      await page.getByTestId('nav-backdrop').click({ position: { x: 50, y: 400 } });
-      await expect(hamburger).toHaveAttribute('aria-expanded', 'false');
-      await expect(page.getByTestId('nav-backdrop')).toHaveCount(0);
-    });
+      test('hamburger opens the nav drawer', async ({ page }) => {
+        const hamburger = page.getByRole('button', { name: 'Toggle navigation menu' });
+        await hamburger.click();
+        await expect(hamburger).toHaveAttribute('aria-expanded', 'true');
+        await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible();
+      });
 
-    test('clicking a nav link closes the drawer', async ({ page }) => {
-      const hamburger = page.getByRole('button', { name: 'Toggle navigation menu' });
-      await hamburger.click();
-      await page.getByRole('navigation', { name: 'Main navigation' })
-        .getByRole('list')
-        .getByRole('link')
-        .first()
-        .click();
-      await expect(hamburger).toHaveAttribute('aria-expanded', 'false');
+      test('backdrop appears when drawer is open', async ({ page }) => {
+        await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
+        // Purely decorative (aria-hidden) — no accessible role/name, so a
+        // data-testid hook is the correct locator here, not a CSS class.
+        await expect(page.getByTestId('nav-backdrop')).toBeAttached();
+      });
+
+      test('clicking backdrop closes the drawer', async ({ page }) => {
+        const hamburger = page.getByRole('button', { name: 'Toggle navigation menu' });
+        await hamburger.click();
+        // Click the left edge of the backdrop — the right side is covered by the 28rem drawer
+        await page.getByTestId('nav-backdrop').click({ position: { x: 50, y: 400 } });
+        await expect(hamburger).toHaveAttribute('aria-expanded', 'false');
+        await expect(page.getByTestId('nav-backdrop')).toHaveCount(0);
+      });
+
+      test('clicking a nav link closes the drawer', async ({ page }) => {
+        const hamburger = page.getByRole('button', { name: 'Toggle navigation menu' });
+        await hamburger.click();
+        await page.getByRole('navigation', { name: 'Main navigation' })
+          .getByRole('list')
+          .getByRole('link')
+          .first()
+          .click();
+        await expect(hamburger).toHaveAttribute('aria-expanded', 'false');
+      });
     });
 
     test('content is readable without horizontal scroll', async ({ page }) => {
