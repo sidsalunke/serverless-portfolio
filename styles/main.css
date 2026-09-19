@@ -1534,9 +1534,20 @@ button.exp__header {
     grid-template-columns: 1fr;
   }
 
+  /* Intrinsic-width flex-wrap (the desktop layout) wraps stats onto rows
+     purely by how much text happens to fit, so the number of items per row
+     — and therefore how the rows line up under each other — varies with
+     each page's label lengths. testing.html's 5 short-labelled stats
+     happened to wrap 2-then-3 and looked fine; ai-engineering.html's 4
+     longer-labelled stats wrapped 1-then-2-then-1, reading as misaligned.
+     A fixed 2-column grid aligns every stat into the same two columns on
+     every page regardless of label length or item count. */
   .tq-hero__stats {
-    gap: 3.2rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3.2rem 2rem;
   }
+  .tq-hero__stats .hero__stat { text-align: center; }
 
   .tq-stage__header {
     margin-bottom: 4rem;
