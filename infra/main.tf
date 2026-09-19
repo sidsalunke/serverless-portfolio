@@ -205,7 +205,7 @@ resource "aws_cloudfront_response_headers_policy" "security" {
 
     # Disables browser features not needed by a static portfolio
     content_security_policy {
-      content_security_policy = "default-src 'none'; script-src 'self' 'sha256-2vMLbFF0gwQJckriPBDpgVIGIR152fls1JcnPNEF0Ac='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'"
+      content_security_policy = "default-src 'none'; script-src 'self' 'sha256-8STUoTJoP2Fc3rDlhg5AUk5DLwLH9tyCg9dStvG3H0o='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'"
       override                = true
     }
   }
