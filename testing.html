@@ -46,7 +46,7 @@
   <!-- ── CSP (same policy as index.html) ──────────────────────────────────── -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'none';
-                 script-src 'self' 'sha256-8STUoTJoP2Fc3rDlhg5AUk5DLwLH9tyCg9dStvG3H0o=';
+                 script-src 'self';
                  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
                  font-src https://fonts.gstatic.com;
                  img-src 'self' data:;
@@ -63,74 +63,6 @@
   <link id="google-fonts" rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" as="style">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
-  <!--
-    Nav hamburger: bound here, inline, ahead of the main.css stylesheet link.
-    A classic <script> always waits for every preceding stylesheet to finish
-    loading before it executes — that's what left the hamburger tappable-looking
-    but non-functional for ~700ms+ on a cold mobile load (js/app.js sits after
-    main.css and only binds the click handler once it finally runs). Since this
-    block precedes main.css, it runs at parse time with nothing to wait on.
-    app.js no longer binds this listener — see js/app.js for why.
-
-    The DOM-ready wait itself uses MutationObserver (+ a setInterval backstop),
-    not requestAnimationFrame: rAF callbacks can go unserviced for several
-    seconds on real mobile hardware while the page is still busy loading other
-    resources (images, fonts) — confirmed on a physical iOS Safari device,
-    not reproducible under desktop DevTools CPU/network throttling.
-    MutationObserver runs off the microtask queue, independent of
-    paint/frame scheduling, so it isn't subject to that starvation.
-  -->
-  <script>
-(function () {
-  function attach() {
-    var hamburger = document.getElementById('nav-hamburger');
-    var navLinks  = document.getElementById('nav-links');
-    if (!hamburger || !navLinks) { return false; }
-
-    var backdrop = null;
-
-    function openMenu() {
-      hamburger.classList.add('nav__hamburger--open');
-      navLinks.classList.add('nav__links--open');
-      hamburger.setAttribute('aria-expanded', 'true');
-      backdrop = document.createElement('div');
-      backdrop.className = 'nav__backdrop';
-      backdrop.setAttribute('aria-hidden', 'true');
-      backdrop.setAttribute('data-testid', 'nav-backdrop');
-      backdrop.addEventListener('click', closeMenu);
-      document.body.appendChild(backdrop);
-    }
-
-    function closeMenu() {
-      hamburger.classList.remove('nav__hamburger--open');
-      navLinks.classList.remove('nav__links--open');
-      hamburger.setAttribute('aria-expanded', 'false');
-      if (backdrop) { backdrop.remove(); backdrop = null; }
-    }
-
-    hamburger.addEventListener('click', function () {
-      navLinks.classList.contains('nav__links--open') ? closeMenu() : openMenu();
-    });
-
-    navLinks.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', closeMenu);
-    });
-
-    return true;
-  }
-
-  if (attach()) { return; }
-
-  var observer = new MutationObserver(function () {
-    if (attach()) { observer.disconnect(); clearInterval(poll); }
-  });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
-
-  var poll = setInterval(function () {
-    if (attach()) { observer.disconnect(); clearInterval(poll); }
-  }, 50);
-})();
-</script>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
