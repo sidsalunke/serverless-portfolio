@@ -14,34 +14,27 @@ import { test, expect } from '@playwright/test';
 test.describe.configure({ mode: 'serial' });
 
 /**
- * document.fonts.ready alone doesn't guarantee the Outfit webfont actually
- * won its font-display: optional swap window — under CI network variance,
- * one run can render with Outfit and another with the system-font fallback
- * (different metrics -> different line wraps -> real, deterministic-per-run
- * but non-deterministic-across-runs layout height, seen as a ~95px full-page
- * diff between two otherwise-identical runs). Explicitly loading each weight
- * removes the race instead of just hoping the swap resolved in time.
+ * Google Fonts fetch reliability on shared CI runners is itself
+ * non-deterministic: the @font-face CSS can register successfully while the
+ * actual woff2 binary silently fails to download, so one run renders with
+ * Outfit and another with the system-font fallback (different metrics ->
+ * different line wraps -> real page-height differences between two
+ * otherwise-identical runs — first seen as a ~95px full-page diff, then as a
+ * 112px hero diff, between a freshly-regenerated baseline and the very next
+ * verification run of the same commit). No amount of client-side waiting
+ * fixes an external network flake, so every visual test blocks the Google
+ * Fonts requests instead — every run, baseline or verification, consistently
+ * renders with the fallback font ('Segoe UI'/system-ui from the font-family
+ * stack in main.css), trading "pretty in the report" for actually
+ * deterministic.
  */
-async function waitForFonts(page) {
-  // The Outfit @font-face isn't registered in the CSSOM until app.js flips
-  // #google-fonts from rel="preload" to rel="stylesheet" — document.fonts.load()
-  // silently no-ops on a family with no matching @font-face yet, so calling
-  // it before this flip defeats the whole point of this helper.
-  await page.waitForFunction(
-    () => document.getElementById('google-fonts')?.rel === 'stylesheet'
-  );
-  await page.evaluate(async () => {
-    await Promise.all(
-      [400, 500, 600, 700, 800].map((w) => document.fonts.load(`${w} 16px Outfit`))
-    );
-    await document.fonts.ready;
-  });
-}
+test.beforeEach(async ({ page }) => {
+  await page.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.abort());
+});
 
 test.describe('Visual regression', () => {
   test('hero section', async ({ page }) => {
     await page.goto('/');
-    await waitForFonts(page);
     await page.waitForTimeout(400);
     await expect(page.locator('.hero__content')).toHaveScreenshot('hero-content.png', {
       maxDiffPixelRatio: 0.02,
@@ -50,7 +43,6 @@ test.describe('Visual regression', () => {
 
   test('skills grid', async ({ page }) => {
     await page.goto('/');
-    await waitForFonts(page);
     await page.locator('#skills').scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);
     await expect(page.locator('.skills__grid')).toHaveScreenshot('skills-grid.png', {
@@ -60,7 +52,6 @@ test.describe('Visual regression', () => {
 
   test('experience card expanded', async ({ page }) => {
     await page.goto('/');
-    await waitForFonts(page);
     const card = page.getByRole('article', { name: 'Software Technical Lead at Qantas Airways' });
     await card.getByRole('button').click();
     await page.waitForTimeout(500); // accordion animation
@@ -69,7 +60,6 @@ test.describe('Visual regression', () => {
 
   test('full page — desktop', async ({ page }) => {
     await page.goto('/');
-    await waitForFonts(page);
     // Scroll-reveal fades sections in via IntersectionObserver as they enter
     // the viewport; a fullPage screenshot stitches the page together while
     // scrolling, which can outrun the observer and capture a section mid-fade.
@@ -88,7 +78,6 @@ test.describe('Visual regression', () => {
 test.describe('Visual regression — Quality Suite', () => {
   test('quality suite hero', async ({ page }) => {
     await page.goto('/testing.html');
-    await waitForFonts(page);
     await page.waitForTimeout(400);
     await expect(page.locator('.tq-hero__stats')).toHaveScreenshot('quality-suite-hero-stats.png', {
       maxDiffPixelRatio: 0.02,
@@ -97,7 +86,6 @@ test.describe('Visual regression — Quality Suite', () => {
 
   test('pipeline with PR Checks panel open', async ({ page }) => {
     await page.goto('/testing.html');
-    await waitForFonts(page);
     await page.getByRole('button', { name: 'PR Checks' }).click();
     await page.waitForTimeout(300);
     await expect(page.locator('.tq-pipeline-section')).toHaveScreenshot('quality-suite-pipeline-panel.png', {
@@ -119,7 +107,6 @@ test.describe('Visual regression — Dark theme', () => {
     await page.goto('/');
     await page.evaluate(() => localStorage.setItem('theme', 'dark'));
     await page.reload();
-    await waitForFonts(page);
     await page.waitForTimeout(400);
   });
 
