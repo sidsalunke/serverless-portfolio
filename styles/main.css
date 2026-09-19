@@ -867,8 +867,17 @@ button.exp__header {
 @media (max-width: 768px) {
   html { font-size: 56.25%; }
 
-  /* Nav mobile */
-  .nav__hamburger { display: flex; }
+  /* Nav mobile
+     Hamburger only appears once the sticky header (.nav--scrolled) is
+     active, not on initial load. Real-device testing (physical iOS Safari
+     and iOS Chrome, both WebKit) found tap responsiveness reliably broken
+     for several seconds right after a cold load, in a way two rounds of
+     JS-scheduling fixes (requestAnimationFrame polling, then
+     MutationObserver) didn't resolve — but interaction was always smooth
+     once scrolled. Not showing the control until that point sidesteps the
+     failure mode entirely instead of continuing to chase it. */
+  .nav__hamburger { display: none; }
+  .nav--scrolled .nav__hamburger { display: flex; }
   .nav__backdrop  { display: block; }
 
   .nav__links {

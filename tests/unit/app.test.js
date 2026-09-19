@@ -6,22 +6,6 @@
  * initPortfolio() and asserts JS behaviour without a browser.
  */
 
-const fs   = require('fs');
-const path = require('path');
-
-// The hamburger bind lives in a critical inline <script> in index.html's
-// <head> (ahead of the main.css link — see the comment there for why), not
-// in js/app.js. Read the exact shipped script out of the real file and eval
-// it here, so this test covers the actual bytes served in production rather
-// than a hand-copied approximation that could drift from it.
-function bindHamburgerFromShippedScript() {
-  const html = fs.readFileSync(path.join(__dirname, '../../index.html'), 'utf8').replace(/\r\n/g, '\n');
-  const match = html.match(/<script>\n([\s\S]*?)\n<\/script>\n {2}<link rel="stylesheet"/);
-  if (!match) throw new Error('Could not find the critical inline nav script in index.html');
-  // eslint-disable-next-line no-new-func
-  new Function(match[1])();
-}
-
 const MINIMAL_DOM = `
   <span id="footer-year"></span>
   <nav id="main-nav" class="nav"></nav>
@@ -81,10 +65,6 @@ describe('Footer year', () => {
 
 // ── Hamburger menu ─────────────────────────────────────────────
 describe('Hamburger menu', () => {
-  beforeEach(() => {
-    bindHamburgerFromShippedScript();
-  });
-
   test('opens nav drawer on click', () => {
     document.getElementById('nav-hamburger').click();
     expect(document.getElementById('nav-links').classList).toContain('nav__links--open');

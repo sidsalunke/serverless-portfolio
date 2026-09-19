@@ -20,22 +20,64 @@ function initPortfolio() {
   var yearEl = document.getElementById('footer-year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  /* ── Nav: scroll glassmorphism ── */
+  /* ── Nav: scroll glassmorphism ──
+     Checked once on load too, not just on 'scroll' — a user landing mid-page
+     (e.g. an index.html#experience link from another page) never fires a
+     scroll event, so without this the sticky state (and on mobile, the
+     hamburger it gates — see .nav--scrolled .nav__hamburger in main.css)
+     would stay stuck off even though they're well past the 30px threshold. */
   var nav = document.getElementById('main-nav');
   if (nav) {
-    window.addEventListener('scroll', function () {
+    function updateNavScrolled() {
       nav.classList.toggle('nav--scrolled', window.scrollY > 30);
-    }, { passive: true });
+    }
+    updateNavScrolled();
+    window.addEventListener('scroll', updateNavScrolled, { passive: true });
   }
 
   /* ── Nav: hamburger / mobile drawer ──
-     Binding now lives in a critical inline <script> in <head>, ahead of the
-     main.css link — see index.html/testing.html/ai-engineering.html. A classic
-     script here (after main.css in document order) waits for that stylesheet
-     to finish loading before it runs, which left the button visibly tappable
-     but dead for ~700ms+ on a cold mobile load. Do not re-add the binding
-     here; it would double-register the click listener alongside the inline
-     one and break open/close toggling. */
+     On mobile this button only ever becomes visible once .nav--scrolled is
+     active (see main.css) — never on initial load. That sidesteps a real
+     WebKit-specific bug we chased through two fixes (requestAnimationFrame
+     polling, then MutationObserver) without resolving: on physical iOS
+     Safari/Chrome (both forced onto WebKit), tap responsiveness stayed
+     broken for several seconds right after a cold load, reliably, despite
+     both fixes working under every DevTools throttling test. It was always
+     smooth once scrolled, so the button simply isn't shown before then —
+     by which point this normal (non-inline, CSS-blocking-gated) binding
+     has long since run. */
+  var hamburger = document.getElementById('nav-hamburger');
+  var navLinks  = document.getElementById('nav-links');
+  if (hamburger && navLinks) {
+    var backdrop = null;
+
+    var openMenu = function () {
+      hamburger.classList.add('nav__hamburger--open');
+      navLinks.classList.add('nav__links--open');
+      hamburger.setAttribute('aria-expanded', 'true');
+      backdrop = document.createElement('div');
+      backdrop.className = 'nav__backdrop';
+      backdrop.setAttribute('aria-hidden', 'true');
+      backdrop.setAttribute('data-testid', 'nav-backdrop');
+      backdrop.addEventListener('click', closeMenu);
+      document.body.appendChild(backdrop);
+    };
+
+    var closeMenu = function () {
+      hamburger.classList.remove('nav__hamburger--open');
+      navLinks.classList.remove('nav__links--open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      if (backdrop) { backdrop.remove(); backdrop = null; }
+    };
+
+    hamburger.addEventListener('click', function () {
+      navLinks.classList.contains('nav__links--open') ? closeMenu() : openMenu();
+    });
+
+    navLinks.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', closeMenu);
+    });
+  }
 
   /* ── Pipeline: interactive nodes (testing.html) ── */
   var pipelineNodes = document.querySelectorAll('.tq-pipeline__node--clickable');
