@@ -23,6 +23,13 @@ test.describe.configure({ mode: 'serial' });
  * removes the race instead of just hoping the swap resolved in time.
  */
 async function waitForFonts(page) {
+  // The Outfit @font-face isn't registered in the CSSOM until app.js flips
+  // #google-fonts from rel="preload" to rel="stylesheet" — document.fonts.load()
+  // silently no-ops on a family with no matching @font-face yet, so calling
+  // it before this flip defeats the whole point of this helper.
+  await page.waitForFunction(
+    () => document.getElementById('google-fonts')?.rel === 'stylesheet'
+  );
   await page.evaluate(async () => {
     await Promise.all(
       [400, 500, 600, 700, 800].map((w) => document.fonts.load(`${w} 16px Outfit`))
