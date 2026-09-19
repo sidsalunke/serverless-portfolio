@@ -123,8 +123,8 @@
     The preload hint starts the download immediately; app.js flips rel to 'stylesheet' once
     the script executes, activating the font with zero render-blocking.
   -->
-  <link id="google-fonts" rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" as="style">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <link id="google-fonts" rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=optional" as="style">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=optional" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
@@ -254,7 +254,10 @@
     <div class="about__grid">
       <div class="about__photo-wrap">
         <div class="about__photo-glow" aria-hidden="true"></div>
-        <img src="images/profile.png" alt="Siddharth Salunke" class="about__photo" width="922" height="918" loading="lazy">
+        <picture>
+          <source srcset="images/profile.webp" type="image/webp">
+          <img src="images/profile.png" alt="Siddharth Salunke" class="about__photo" width="704" height="704" loading="lazy">
+        </picture>
       </div>
       <div class="about__body">
         <p class="section__label">About Me</p>
