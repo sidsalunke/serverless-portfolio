@@ -92,7 +92,10 @@
                → Google Fonts binary files only
     img-src    'self' data:
                → local images + data URIs (inline SVG / favicons)
-    connect-src 'none'     → this page makes zero XHR/fetch calls
+    connect-src 'self'     → the page itself makes zero XHR/fetch calls, but
+               same-origin is allowed (not 'none') so tools like Lighthouse
+               can verify robots.txt/llms.txt from within the page context;
+               still blocks exfiltration to any third-party origin
     frame-ancestors 'none' → equivalent to X-Frame-Options: DENY; prevents clickjacking
     base-uri   'self'      → prevents <base> tag injection attacks
     form-action 'none'     → no forms on this page
@@ -103,7 +106,7 @@
                  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
                  font-src https://fonts.gstatic.com;
                  img-src 'self' data:;
-                 connect-src 'none';
+                 connect-src 'self';
                  base-uri 'self';
                  form-action 'none'">
   <!--
@@ -682,6 +685,6 @@
   </div>
 </footer>
 
-<script src="js/app.js" fetchpriority="high"></script>
+<script src="js/app.js" fetchpriority="high" defer></script>
 </body>
 </html>
