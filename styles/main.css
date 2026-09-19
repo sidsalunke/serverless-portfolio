@@ -914,9 +914,13 @@ button.exp__header {
 
   /* Three continuously-animated blur(90px) layers are expensive to
      composite on mobile GPUs, and can visibly delay input responsiveness
-     (e.g. tapping the hamburger) for the first few seconds after load —
-     purely decorative, so disable rather than tune. */
-  .hero__orb { animation: none; }
+     (e.g. tapping the hamburger) and first paint for the first few seconds
+     after load — purely decorative, so remove rather than tune.
+     animation: none alone (the original mitigation here) stopped the
+     per-frame recompositing but left the blur itself, which is still a
+     one-time expensive layer to composite on real mobile GPUs; display:
+     none drops that cost too. */
+  .hero__orb { display: none; }
 
   /* About */
   .about__photo { width: 17rem; height: 17rem; }

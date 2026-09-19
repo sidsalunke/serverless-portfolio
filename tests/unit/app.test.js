@@ -332,6 +332,28 @@ describe('Scroll-reveal entrance motion', () => {
 
     expect(document.querySelectorAll('.reveal').length).toBe(0);
   });
+
+  test('leaves an element already visible in the viewport alone instead of hiding it', () => {
+    // Real-device bug: an element on screen when this code runs used to
+    // still get .reveal (opacity: 0) added, snapping it invisible for an
+    // instant before the observer faded it back in.
+    window.IntersectionObserver = MockIntersectionObserver;
+    mockMatchMedia([]);
+    document.body.innerHTML = REVEAL_DOM;
+    jest.resetModules();
+    ({ initPortfolio } = require('../../js/app.js'));
+
+    const heading = document.querySelector('.section__heading');
+    heading.getBoundingClientRect = () => ({ top: 10, bottom: 50, left: 0, width: 200, height: 40 });
+
+    initPortfolio();
+
+    expect(heading.classList).not.toContain('reveal');
+    expect(MockIntersectionObserver.lastInstance.observed).not.toContain(heading);
+    // The other 3 reveal-eligible elements (still off-screen, jsdom's
+    // default zero-size rect) are unaffected.
+    expect(document.querySelectorAll('.reveal').length).toBe(3);
+  });
 });
 
 // ── Card spotlight hover ────────────────────────────────────────
