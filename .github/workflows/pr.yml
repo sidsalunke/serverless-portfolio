@@ -166,10 +166,26 @@ jobs:
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
   # ── Job 3: Playwright (only if static tests AND security scan pass) ──────
+  #
+  # Split by named spec-group (not Playwright's numeric --shard) so each
+  # group shows up as its own entry in the PR checks list -- e.g. "Playwright
+  # — visual" -- and a flaky failure in one group can be re-run by itself
+  # from the Actions UI/API instead of re-running the whole ~300-test suite.
+  # fail-fast: false so one group failing doesn't cancel the others mid-run.
   playwright:
-    name: Playwright — functional, visual, a11y & security (local server)
+    name: Playwright — ${{ matrix.group.name }}
     needs: [static-tests, security-scan]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        group:
+          - { name: a11y,       pattern: tests/e2e/accessibility.spec.js }
+          - { name: mobile,     pattern: tests/e2e/mobile.spec.js }
+          - { name: security,   pattern: tests/e2e/security.spec.js }
+          - { name: seo,        pattern: tests/e2e/seo.spec.js tests/e2e/robots-sitemap.spec.js }
+          - { name: visual,     pattern: tests/e2e/visual.spec.js }
+          - { name: functional, pattern: tests/e2e/navigation.spec.js tests/e2e/experience.spec.js tests/e2e/education.spec.js tests/e2e/quality-suite.spec.js tests/e2e/ai-engineering.spec.js }
 
     steps:
       - uses: actions/checkout@v4
@@ -182,20 +198,33 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # Browser binaries are the slow part of "install Playwright browsers"
+      # (~100+ MB Chromium download); caching them keyed on the installed
+      # version means most runs skip straight to the OS-deps step below.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+        # npx playwright install is idempotent -- if the cache above already
+        # has a matching-version Chromium, this skips the download and just
+        # verifies/installs the OS-level dependencies (not cacheable the
+        # same way on ephemeral runners), so it's still fast on a cache hit.
 
-      - name: Run Playwright tests
-        run: npm run test:e2e
+      - name: Run Playwright tests (${{ matrix.group.name }})
+        run: npx playwright test ${{ matrix.group.pattern }}
         # playwright.config.js automatically starts `npx serve -p 3000 .`
-        # when BASE_URL is not set, so no manual server step needed.
-        # Includes tests/e2e/security.spec.js which asserts CSP, X-Content-Type-Options,
-        # Referrer-Policy and Permissions-Policy meta tags are present and correct.
+        # when BASE_URL is not set, so no manual server step needed. Runs
+        # against both configured projects (chromium, mobile-chrome) for
+        # every file in this group, same as the unsplit suite did.
 
       - name: Upload Playwright report on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-pr
+          name: playwright-report-pr-${{ matrix.group.name }}
           path: playwright-report/
           retention-days: 7
