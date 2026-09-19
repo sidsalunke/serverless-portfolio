@@ -868,16 +868,21 @@ button.exp__header {
   html { font-size: 56.25%; }
 
   /* Nav mobile
-     Hamburger only appears once the sticky header (.nav--scrolled) is
-     active, not on initial load. Real-device testing (physical iOS Safari
-     and iOS Chrome, both WebKit) found tap responsiveness reliably broken
-     for several seconds right after a cold load, in a way two rounds of
-     JS-scheduling fixes (requestAnimationFrame polling, then
-     MutationObserver) didn't resolve — but interaction was always smooth
-     once scrolled. Not showing the control until that point sidesteps the
-     failure mode entirely instead of continuing to chase it. */
-  .nav__hamburger { display: none; }
-  .nav--scrolled .nav__hamburger { display: flex; }
+     Hamburger is visible immediately on load again — it was previously
+     gated behind .nav--scrolled (only shown after the user scrolled) as a
+     workaround for tap responsiveness breaking for several seconds on a
+     cold load on real iOS Safari/Chrome, which two rounds of JS-scheduling
+     fixes didn't resolve. The actual cause turned out to be the
+     .hero__orb blur(90px) layers competing for GPU compositing time on
+     first paint (see the display: none rule and comment further down this
+     media query) — a cost that was already independently documented
+     as delaying "tapping the hamburger" specifically, before this gate was
+     ever added. With that cost gone, the gate is no longer needed and was
+     a real usability regression on its own (returning to a page — e.g.
+     via back-navigation or a same-page anchor link — left the menu
+     unreachable until scrolling). Needs real-device confirmation; if tap
+     responsiveness regresses again, the fix is elsewhere, not this gate. */
+  .nav__hamburger { display: flex; }
   .nav__backdrop  { display: block; }
 
   .nav__links {
