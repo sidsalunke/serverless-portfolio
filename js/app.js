@@ -145,7 +145,25 @@ function initPortfolio() {
   /* ── Scroll-reveal entrance motion ──
      Progressive enhancement only: elements just render normally without
      IntersectionObserver support, and reduced-motion users get the final
-     state immediately rather than a suppressed/broken animation. */
+     state immediately rather than a suppressed/broken animation.
+
+     Two things fixed here after real-device reports of a visible flash on
+     load and blank sections during fast scrolling:
+
+     1. An element already on screen when this code runs (e.g. .about__body
+        if the user loaded mid-page, or on a short viewport where more than
+        one section fits) used to still get the hidden .reveal class added,
+        snapping it invisible for an instant before the observer fired and
+        faded it back in — pure regression with no animation benefit, since
+        it was already visible. Now checked against the viewport first and
+        left alone (rendered normally, no animate-in) if already in view.
+     2. rootMargin's bottom value was negative (0px 0px -40px 0px), which
+        shrinks the trigger area — the reveal only started once an element
+        was already meaningfully on screen. On a fast flick-scroll the 0.6s
+        fade couldn't keep up, so a section could scroll into view still at
+        opacity: 0, reading as a blank/black gap. A positive bottom margin
+        starts the fade before the element is actually visible, so by the
+        time it scrolls into view it's already fading in or done. */
   var revealEls = document.querySelectorAll(
     '.section__heading, .about__photo-wrap, .about__body, .exp__card, .skills__group'
   );
@@ -153,8 +171,6 @@ function initPortfolio() {
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (revealEls.length && 'IntersectionObserver' in window && !prefersReducedMotion) {
-    revealEls.forEach(function (el) { el.classList.add('reveal'); });
-
     var revealObserver = new IntersectionObserver(function (entries, observer) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
@@ -162,9 +178,16 @@ function initPortfolio() {
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.15, rootMargin: '0px 0px 200px 0px' });
 
-    revealEls.forEach(function (el) { revealObserver.observe(el); });
+    revealEls.forEach(function (el) {
+      var rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        return; // already visible — leave it alone, nothing to animate
+      }
+      el.classList.add('reveal');
+      revealObserver.observe(el);
+    });
   }
 
   /* ── Card spotlight hover ──
