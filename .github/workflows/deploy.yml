@@ -96,7 +96,7 @@ jobs:
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "robots.txt" \
-            --include "sitemap.xml" \
+            --include "sitemap_index.xml" \
             --include "llms.txt" \
             --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
             --cache-control "public, max-age=60" \
@@ -105,6 +105,14 @@ jobs:
         # above. CloudFront OAC (configured in the console, codified in
         # infra/main.tf) is the only permitted reader. Public S3 URLs
         # return 403.
+
+      # sitemap.xml was renamed to sitemap_index.xml; the sync above only
+      # manages files matching its --include filters, so the old key would
+      # otherwise sit in the bucket indefinitely still serving stale content.
+      # DeleteObject on a key that no longer exists is a no-op, so this is
+      # safe to leave in place permanently rather than reverting it later.
+      - name: Remove renamed sitemap.xml from S3
+        run: aws s3 rm s3://portfolio.sidsalunke.info/sitemap.xml
 
       # Capture the invalidation ID so we can wait for it to finish before
       # running E2E tests. Without waiting, tests may hit stale CDN cache
@@ -281,7 +289,7 @@ jobs:
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "robots.txt" \
-            --include "sitemap.xml" \
+            --include "sitemap_index.xml" \
             --include "llms.txt" \
             --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
             --cache-control "public, max-age=60" \
