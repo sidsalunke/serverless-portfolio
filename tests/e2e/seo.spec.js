@@ -175,6 +175,29 @@ test.describe('SEO — document structure', () => {
     }
   });
 
+  // Regression guard: a wrong Content-Type on a static asset (served as
+  // binary/octet-stream instead of image/png etc.) renders as a broken
+  // image even though the bytes are perfectly valid — X-Content-Type-Options:
+  // nosniff (intentionally set at the CDN edge) stops the browser from
+  // guessing the real type from the data and rendering it anyway. This
+  // exact bug shipped to production once already, from a manual S3
+  // metadata-only copy that reset Content-Type without an explicit
+  // override; local visual regression tests never touch the live CDN
+  // response headers, so they can't catch it, but this live-site check can.
+  test('all <img> elements load successfully (no broken images)', async ({ page }) => {
+    // loading="lazy" images (company logos, profile photo) don't start
+    // downloading until scrolled near — force everything to trigger.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForLoadState('networkidle');
+
+    const broken = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('img'))
+        .filter((img) => img.complete && img.naturalWidth === 0)
+        .map((img) => img.src)
+    );
+    expect(broken).toEqual([]);
+  });
+
   test('page has at least two <h2> section headings', async ({ page }) => {
     const count = await page.locator('h2').count();
     expect(count).toBeGreaterThanOrEqual(2);
