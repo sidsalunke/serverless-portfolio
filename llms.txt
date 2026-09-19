@@ -1,0 +1,16 @@
+# Siddharth Salunke — Portfolio
+
+> Principal Quality Engineer with 13+ years at Emirates, Qantas and Canva. Test automation, performance engineering, DevSecOps, Kubernetes, AWS, CI/CD.
+
+Static portfolio site (HTML, CSS, vanilla JS — no framework), deployed on AWS S3 + CloudFront.
+
+## Pages
+
+- [Home](https://portfolio.sidsalunke.info/): Profile, work experience, education, and technical skills.
+- [AI Engineering](https://portfolio.sidsalunke.info/ai-engineering.html): How Claude Code and other AI tools are used in daily engineering work, plus tools built with them.
+- [Quality Suite](https://portfolio.sidsalunke.info/testing.html): The test automation, accessibility, security, and performance-testing practices used to build and verify this site.
+
+## Contact
+
+- [LinkedIn](https://www.linkedin.com/in/sidsalunke/)
+- [GitHub](https://github.com/sidsalunke)

@@ -15,42 +15,47 @@ test.describe('AI Engineering page', () => {
   });
 
   test('h1 reads "AI Engineering"', async ({ page }) => {
-    await expect(page.locator('h1')).toHaveText('AI Engineering');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('AI Engineering');
   });
 
   test('nav AI Engineering link is marked as current page', async ({ page }) => {
-    await expect(page.locator('.nav__link[aria-current="page"]')).toHaveText('AI Engineering');
+    const nav = page.getByRole('navigation', { name: 'Main navigation' });
+    // aria-current is a genuine ARIA state (not a styling hook), so an
+    // attribute match here is the correct locator, not a CSS-brittleness risk.
+    await expect(nav.locator('[aria-current="page"]')).toHaveText('AI Engineering');
   });
 
   test('nav logo links back to the homepage', async ({ page }) => {
-    await expect(page.locator('.nav__logo')).toHaveAttribute('href', '/');
+    const nav = page.getByRole('navigation', { name: 'Main navigation' });
+    await expect(nav.getByRole('link', { name: 'SS' })).toHaveAttribute('href', '/');
   });
 
   test('hero displays 4 stats', async ({ page }) => {
-    const stats = page.locator('.tq-hero__stats .hero__stat');
-    await expect(stats).toHaveCount(4);
+    const hero = page.getByRole('region', { name: 'AI Engineering' });
+    await expect(hero.getByRole('listitem')).toHaveCount(4);
   });
 
   test('workflow section lists all AI tools', async ({ page }) => {
+    const section = page.getByRole('region', { name: 'How I work with AI.' });
     for (const name of ['Claude Code', 'GitLab Duo', 'MCP']) {
-      await expect(page.locator('.tq-card__name', { hasText: name })).toBeVisible();
+      await expect(section.getByText(name, { exact: true }).first()).toBeVisible();
     }
   });
 
   test('shipped-at-work section lists both case studies', async ({ page }) => {
-    const cards = page.locator('#work-heading').locator('xpath=ancestor::section').locator('.tq-deploy-card');
-    await expect(cards).toHaveCount(2);
+    const section = page.getByRole('region', { name: 'Tools built with it.' });
+    await expect(section.locator('.tq-deploy-card')).toHaveCount(2);
   });
 
   test('beyond-work section lists both personal projects', async ({ page }) => {
-    await expect(page.locator('.tq-card__name', { hasText: 'Content Strategy Analytics' })).toBeVisible();
-    await expect(page.locator('.tq-card__name', { hasText: 'Personal Tax Estimation Agent' })).toBeVisible();
+    await expect(page.getByText('Content Strategy Analytics', { exact: true })).toBeVisible();
+    await expect(page.getByText('Personal Tax Estimation Agent', { exact: true })).toBeVisible();
   });
 
   test('all section headings are present', async ({ page }) => {
     const headings = ['How I work with AI.', 'Disciplined, not default.', 'Tools built with it.', 'Applied AI, off the clock.'];
     for (const text of headings) {
-      await expect(page.locator(`h2:has-text("${text}")`)).toBeAttached();
+      await expect(page.getByRole('heading', { level: 2, name: text })).toBeAttached();
     }
   });
 });

@@ -33,4 +33,20 @@ test.describe('robots.txt, sitemap.xml, and the IndexNow key file are deployed',
     const body = await res.text();
     expect(body.trim()).toBe('d6a69049b7ef3ef62df1b7ead257a870');
   });
+
+  test('llms.txt is served and follows the llmstxt.org format', async ({ request }) => {
+    const res = await request.get('/llms.txt');
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body).toMatch(/^# /); // must open with an H1
+  });
+});
+
+test.describe('unknown paths return a real 404, not a soft-200', () => {
+  test('a nonexistent path returns HTTP 404 with the 404 page', async ({ request }) => {
+    const res = await request.get('/this-page-does-not-exist-xyz123');
+    expect(res.status()).toBe(404);
+    const body = await res.text();
+    expect(body).toContain('Page not found');
+  });
 });

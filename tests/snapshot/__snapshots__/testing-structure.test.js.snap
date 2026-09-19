@@ -83,14 +83,14 @@ exports[`pipeline matches snapshot 1`] = `
       </div>
 
       <!-- Node: PR Checks (clickable) -->
-      <div class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable" role="button" tabindex="0" aria-expanded="false" data-panel="panel-pr-checks">
+      <button type="button" class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable" aria-expanded="false" data-panel="panel-pr-checks">
         <div class="tq-pipeline__node-icon" aria-hidden="true">
           <svg width="22" height="22"><use href="#i-flask"></use></svg>
         </div>
         <span class="tq-pipeline__node-label">PR Checks</span>
         <span class="tq-pipeline__node-sub">3 parallel jobs</span>
         <span class="tq-pipeline__node-hint" aria-hidden="true">tap to explore</span>
-      </div>
+      </button>
 
       <div class="tq-pipeline__arrow" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg>
@@ -110,28 +110,28 @@ exports[`pipeline matches snapshot 1`] = `
       </div>
 
       <!-- Node: Deploy (clickable) -->
-      <div class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable" role="button" tabindex="0" aria-expanded="false" data-panel="panel-deploy">
+      <button type="button" class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable" aria-expanded="false" data-panel="panel-deploy">
         <div class="tq-pipeline__node-icon" aria-hidden="true">
           <svg width="22" height="22"><use href="#i-cloud"></use></svg>
         </div>
         <span class="tq-pipeline__node-label">Deploy</span>
         <span class="tq-pipeline__node-sub">S3 + CloudFront</span>
         <span class="tq-pipeline__node-hint" aria-hidden="true">tap to explore</span>
-      </div>
+      </button>
 
       <div class="tq-pipeline__arrow" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg>
       </div>
 
       <!-- Node: Live Verify (clickable) -->
-      <div class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable" role="button" tabindex="0" aria-expanded="false" data-panel="panel-live-verify">
+      <button type="button" class="tq-pipeline__node tq-pipeline__node--active tq-pipeline__node--clickable" aria-expanded="false" data-panel="panel-live-verify">
         <div class="tq-pipeline__node-icon" aria-hidden="true">
           <svg width="22" height="22"><use href="#i-eye"></use></svg>
         </div>
         <span class="tq-pipeline__node-label">Live Verify</span>
         <span class="tq-pipeline__node-sub">post-deploy</span>
         <span class="tq-pipeline__node-hint" aria-hidden="true">tap to explore</span>
-      </div>
+      </button>
 
     "
 `;

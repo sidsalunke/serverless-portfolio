@@ -95,5 +95,7 @@ badges/*.svg
 infra/.terraform/
 *.tfstate
 *.tfstate.*
+*.tfplan
+tfplan
 *.tfvars
 *.tfvars.json

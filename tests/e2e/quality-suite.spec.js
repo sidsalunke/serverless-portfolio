@@ -17,26 +17,31 @@ test.describe('Quality Suite page', () => {
   });
 
   test('h1 reads "Quality Suite"', async ({ page }) => {
-    await expect(page.locator('h1')).toHaveText('Quality Suite');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Quality Suite');
   });
 
   test('nav Quality Suite link is marked as current page', async ({ page }) => {
-    await expect(page.locator('.nav__link[aria-current="page"]')).toHaveText('Quality Suite');
+    const nav = page.getByRole('navigation', { name: 'Main navigation' });
+    // aria-current is a genuine ARIA state (not a styling hook), so an
+    // attribute match here is the correct locator, not a CSS-brittleness risk.
+    await expect(nav.locator('[aria-current="page"]')).toHaveText('Quality Suite');
   });
 
   test('nav logo links back to the homepage', async ({ page }) => {
-    await expect(page.locator('.nav__logo')).toHaveAttribute('href', '/');
+    const nav = page.getByRole('navigation', { name: 'Main navigation' });
+    await expect(nav.getByRole('link', { name: 'SS' })).toHaveAttribute('href', '/');
   });
 
   // ── Hero stats ───────────────────────────────────────────────
 
   test('hero displays 5 stats', async ({ page }) => {
-    const stats = page.locator('.tq-hero__stats .hero__stat');
-    await expect(stats).toHaveCount(5);
+    const hero = page.getByRole('region', { name: 'Quality Suite' });
+    await expect(hero.getByRole('listitem')).toHaveCount(5);
   });
 
   test('highlighted stats show Accessibility, SEO and Performance', async ({ page }) => {
-    const highlights = page.locator('.hero__stat--highlight .hero__stat-label');
+    const hero = page.getByRole('region', { name: 'Quality Suite' });
+    const highlights = hero.locator('.hero__stat--highlight .hero__stat-label');
     await expect(highlights).toHaveCount(3);
     await expect(highlights.nth(0)).toHaveText('Accessibility');
     await expect(highlights.nth(1)).toHaveText('SEO Score');
@@ -46,8 +51,9 @@ test.describe('Quality Suite page', () => {
   // ── Pipeline nodes ───────────────────────────────────────────
 
   test('three clickable pipeline nodes are present', async ({ page }) => {
-    const nodes = page.locator('.tq-pipeline__node--clickable');
-    await expect(nodes).toHaveCount(3);
+    for (const name of ['PR Checks', 'Deploy S3', 'Live Verify']) {
+      await expect(page.getByRole('button', { name })).toBeVisible();
+    }
   });
 
   test('all panels are hidden on load', async ({ page }) => {
@@ -59,12 +65,12 @@ test.describe('Quality Suite page', () => {
   // ── Pipeline interaction ─────────────────────────────────────
 
   test('clicking PR Checks reveals its panel', async ({ page }) => {
-    await page.locator('[data-panel="panel-pr-checks"]').click();
+    await page.getByRole('button', { name: 'PR Checks' }).click();
     await expect(page.locator('#panel-pr-checks')).toBeVisible();
   });
 
   test('clicking the same node again hides the panel', async ({ page }) => {
-    const node = page.locator('[data-panel="panel-pr-checks"]');
+    const node = page.getByRole('button', { name: 'PR Checks' });
     await node.click();
     await expect(page.locator('#panel-pr-checks')).toBeVisible();
     await node.click();
@@ -72,37 +78,37 @@ test.describe('Quality Suite page', () => {
   });
 
   test('active node gets aria-expanded="true"', async ({ page }) => {
-    const node = page.locator('[data-panel="panel-pr-checks"]');
+    const node = page.getByRole('button', { name: 'PR Checks' });
     await node.click();
     await expect(node).toHaveAttribute('aria-expanded', 'true');
   });
 
   test('clicking a different node closes the first panel', async ({ page }) => {
-    await page.locator('[data-panel="panel-pr-checks"]').click();
+    await page.getByRole('button', { name: 'PR Checks' }).click();
     await expect(page.locator('#panel-pr-checks')).toBeVisible();
 
-    await page.locator('[data-panel="panel-deploy"]').click();
+    await page.getByRole('button', { name: /^Deploy/ }).click();
     await expect(page.locator('#panel-pr-checks')).toBeHidden();
     await expect(page.locator('#panel-deploy')).toBeVisible();
   });
 
   test('only one panel is open at a time', async ({ page }) => {
-    for (const panelId of ['panel-pr-checks', 'panel-deploy', 'panel-live-verify']) {
-      await page.locator(`[data-panel="${panelId}"]`).click();
+    for (const name of ['PR Checks', 'Deploy S3', 'Live Verify']) {
+      await page.getByRole('button', { name }).click();
     }
     const visiblePanels = page.locator('.tq-panel:visible');
     await expect(visiblePanels).toHaveCount(1);
   });
 
   test('Enter key opens a pipeline panel', async ({ page }) => {
-    const node = page.locator('[data-panel="panel-pr-checks"]');
+    const node = page.getByRole('button', { name: 'PR Checks' });
     await node.focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('#panel-pr-checks')).toBeVisible();
   });
 
   test('Space key opens a pipeline panel', async ({ page }) => {
-    const node = page.locator('[data-panel="panel-deploy"]');
+    const node = page.getByRole('button', { name: /^Deploy/ });
     await node.focus();
     await page.keyboard.press('Space');
     await expect(page.locator('#panel-deploy')).toBeVisible();
@@ -111,7 +117,7 @@ test.describe('Quality Suite page', () => {
   // ── Panel content ────────────────────────────────────────────
 
   test('PR Checks panel lists all 3 job columns', async ({ page }) => {
-    await page.locator('[data-panel="panel-pr-checks"]').click();
+    await page.getByRole('button', { name: 'PR Checks' }).click();
     const panel = page.locator('#panel-pr-checks');
     await expect(panel.locator('.tq-panel__col-name', { hasText: 'Static Tests' })).toBeVisible();
     await expect(panel.locator('.tq-panel__col-name', { hasText: 'Security Scan' })).toBeVisible();
@@ -119,14 +125,14 @@ test.describe('Quality Suite page', () => {
   });
 
   test('Deploy panel mentions AWS and Terraform', async ({ page }) => {
-    await page.locator('[data-panel="panel-deploy"]').click();
+    await page.getByRole('button', { name: /^Deploy/ }).click();
     const panel = page.locator('#panel-deploy');
     await expect(panel.locator('.tq-panel__col-name', { hasText: 'AWS Stack' })).toBeVisible();
     await expect(panel.locator('.tq-panel__col-name', { hasText: 'Infrastructure as Code' })).toBeVisible();
   });
 
   test('Live Verify panel covers rollback', async ({ page }) => {
-    await page.locator('[data-panel="panel-live-verify"]').click();
+    await page.getByRole('button', { name: 'Live Verify' }).click();
     const panel = page.locator('#panel-live-verify');
     await expect(panel.locator('.tq-panel__col-name', { hasText: 'Auto-Rollback' })).toBeVisible();
   });

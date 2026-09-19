@@ -28,38 +28,14 @@ function initPortfolio() {
     }, { passive: true });
   }
 
-  /* ── Nav: hamburger / mobile drawer ── */
-  var hamburger = document.getElementById('nav-hamburger');
-  var navLinks  = document.getElementById('nav-links');
-  var backdrop  = null;
-
-  function openMenu() {
-    hamburger.classList.add('nav__hamburger--open');
-    navLinks.classList.add('nav__links--open');
-    hamburger.setAttribute('aria-expanded', 'true');
-    backdrop = document.createElement('div');
-    backdrop.className = 'nav__backdrop';
-    backdrop.setAttribute('aria-hidden', 'true');
-    backdrop.addEventListener('click', closeMenu);
-    document.body.appendChild(backdrop);
-  }
-
-  function closeMenu() {
-    hamburger.classList.remove('nav__hamburger--open');
-    navLinks.classList.remove('nav__links--open');
-    hamburger.setAttribute('aria-expanded', 'false');
-    if (backdrop) { backdrop.remove(); backdrop = null; }
-  }
-
-  if (hamburger && navLinks) {
-    hamburger.addEventListener('click', function () {
-      navLinks.classList.contains('nav__links--open') ? closeMenu() : openMenu();
-    });
-
-    navLinks.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', closeMenu);
-    });
-  }
+  /* ── Nav: hamburger / mobile drawer ──
+     Binding now lives in a critical inline <script> in <head>, ahead of the
+     main.css link — see index.html/testing.html/ai-engineering.html. A classic
+     script here (after main.css in document order) waits for that stylesheet
+     to finish loading before it runs, which left the button visibly tappable
+     but dead for ~700ms+ on a cold mobile load. Do not re-add the binding
+     here; it would double-register the click listener alongside the inline
+     one and break open/close toggling. */
 
   /* ── Pipeline: interactive nodes (testing.html) ── */
   var pipelineNodes = document.querySelectorAll('.tq-pipeline__node--clickable');
@@ -81,10 +57,9 @@ function initPortfolio() {
           if (panel.scrollIntoView) { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
         }
       }
+      // node is a real <button> now, so Enter/Space activation comes from
+      // the browser for free — just listen for 'click'.
       node.addEventListener('click', togglePanel);
-      node.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePanel(); }
-      });
     });
   }
 
@@ -112,11 +87,10 @@ function initPortfolio() {
       }
     }
 
+    // header is a real <button> now, so Enter/Space activation and focus
+    // styling come from the browser for free — just listen for 'click'.
     if (header) {
       header.addEventListener('click', toggle);
-      header.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
-      });
     }
   });
 

@@ -207,15 +207,20 @@ button { font-family: inherit; }
 .nav__hamburger {
   display: none;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   gap: 5px;
+  width: 44px;
+  height: 44px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 0;
   z-index: 1001;
   border-radius: var(--radius-sm);
   transition: transform var(--transition), background var(--transition);
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .nav__hamburger span {
   display: block;
@@ -545,6 +550,19 @@ button { font-family: inherit; }
   transition: background var(--transition);
 }
 .exp__header:hover { background: rgba(255,255,255,0.015); }
+
+/* Expandable cards use a real <button> for the header (native keyboard/AT
+   semantics instead of div[role=button]) — reset the UA button chrome so it
+   still looks like the plain flex row above. */
+button.exp__header {
+  background: none;
+  border: none;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
 
 .exp__header-left { flex: 1; min-width: 0; }
 
@@ -1439,7 +1457,18 @@ button { font-family: inherit; }
 .skills__teaser-link:hover svg { margin-left: 0.5rem; }
 
 /* ── Pipeline: clickable nodes ────────────────────────────────── */
+/* Real <button> now (was div[role=button][tabindex=0]) — reset UA button
+   chrome so it keeps the same look, and inherit .tq-pipeline__node's flex
+   layout since a <button> element doesn't get it for free. */
 .tq-pipeline__node--clickable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
   cursor: pointer;
   border-radius: var(--radius-md);
   padding: 0.4rem;
