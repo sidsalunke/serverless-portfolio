@@ -290,9 +290,11 @@ button { font-family: inherit; }
 }
 .nav__theme-toggle:hover  { background: var(--tint-06); color: var(--accent); }
 .nav__theme-toggle:active { transform: scale(0.9); }
-.nav__theme-icon--moon { display: none; }
-:root[data-theme="dark"] .nav__theme-icon--sun  { display: none; }
-:root[data-theme="dark"] .nav__theme-icon--moon { display: block; }
+/* Icon shows what clicking switches TO, not the current theme — moon
+   (switch to dark) shows in light mode, sun (switch to light) in dark. */
+.nav__theme-icon--sun { display: none; }
+:root[data-theme="dark"] .nav__theme-icon--moon { display: none; }
+:root[data-theme="dark"] .nav__theme-icon--sun  { display: block; }
 
 /* Hamburger */
 .nav__hamburger {
@@ -958,6 +960,11 @@ button.exp__header {
 @media (max-width: 768px) {
   html { font-size: 56.25%; }
 
+  /* .section's 10rem top/bottom padding is desktop's rhythm; unchanged on
+     mobile it stacks with .hero's own bottom padding below the scroll
+     indicator, leaving a large gap before the next section's content. */
+  .section { padding: 6rem 0; }
+
   /* Nav mobile
      Hamburger is visible immediately on load again — it was previously
      gated behind .nav--scrolled (only shown after the user scrolled) as a
@@ -1003,7 +1010,23 @@ button.exp__header {
   .nav__link:active { background: rgba(59, 130, 246, 0.12); }
   .nav__cta { align-self: flex-start; }
 
-  /* Hero */
+  /* Hero
+     Desktop centers hero content in a min-height: 100vh box — fine when
+     content roughly fills the viewport, but on a tall phone (e.g. iPhone 16
+     Pro Max) the content is much shorter than 100vh, so flexbox centering
+     pushes it down and leaves a large empty gap above the location badge.
+     Sizing to content instead (and top-aligning) means the whole hero,
+     scroll indicator included, fits in the first screen on load rather than
+     being stretched across one. */
+  .hero {
+    min-height: auto;
+    align-items: flex-start;
+    /* .hero__scroll is `position: absolute; bottom: 3.2rem` — it doesn't
+       participate in flow height, so this padding has to be tall enough to
+       clear its own height plus that offset on its own, or it overlaps the
+       stats row above it. */
+    padding: calc(var(--nav-h) + 2rem) 2.4rem 8rem;
+  }
   .hero__stats { gap: 3.2rem; }
   .hero__ctas  { gap: 1rem; }
   .hero .btn   { padding: 1rem 1.8rem; font-size: 1.35rem; }
