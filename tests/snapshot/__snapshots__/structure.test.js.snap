@@ -324,8 +324,8 @@ exports[`navigation links match snapshot 1`] = `
     <li><a href="#experience" class="nav__link">Experience</a></li>
     <li><a href="#education" class="nav__link">Education</a></li>
     <li><a href="#skills" class="nav__link">Skills</a></li>
-    <li><a href="ai-engineering.html" class="nav__link">AI Engineering</a></li>
-    <li><a href="testing.html" class="nav__link">Quality Suite</a></li>
+    <li><a href="/ai-engineering" class="nav__link">AI Engineering</a></li>
+    <li><a href="/testing" class="nav__link">Quality Suite</a></li>
     <li>
       <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="nav__cta btn btn--primary">
         Connect&nbsp;<svg width="16" height="16" aria-hidden="true"><use href="#i-linkedin"></use></svg>
@@ -363,7 +363,7 @@ exports[`skills grid matches snapshot 1`] = `
         </div>
         <p class="skills__group-note">
           Deterministic tasks get automation rules; ambiguous ones get Claude. See
-          <a href="ai-engineering.html">AI Engineering</a> for the workflow, guardrails, and tools shipped with it.
+          <a href="/ai-engineering">AI Engineering</a> for the workflow, guardrails, and tools shipped with it.
         </p>
       </div>
 

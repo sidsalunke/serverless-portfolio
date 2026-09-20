@@ -77,7 +77,7 @@ test.describe('Visual regression', () => {
 
 test.describe('Visual regression — Quality Suite', () => {
   test('quality suite hero', async ({ page }) => {
-    await page.goto('/testing.html');
+    await page.goto('/testing');
     await page.waitForTimeout(400);
     await expect(page.locator('.tq-hero__stats')).toHaveScreenshot('quality-suite-hero-stats.png', {
       maxDiffPixelRatio: 0.02,
@@ -85,7 +85,7 @@ test.describe('Visual regression — Quality Suite', () => {
   });
 
   test('pipeline with PR Checks panel open', async ({ page }) => {
-    await page.goto('/testing.html');
+    await page.goto('/testing');
     await page.getByRole('button', { name: 'PR Checks' }).click();
     await page.waitForTimeout(300);
     await expect(page.locator('.tq-pipeline-section')).toHaveScreenshot('quality-suite-pipeline-panel.png', {

@@ -211,6 +211,17 @@ resource "aws_cloudfront_response_headers_policy" "security" {
   }
 }
 
+# Rewrites clean URLs (/testing, /ai-engineering) to their underlying .html
+# S3 objects, and 301-redirects the old .html/index.html URLs to the clean
+# form. See infra/functions/clean-urls.js for the full explanation.
+resource "aws_cloudfront_function" "clean_urls" {
+  name    = "portfolio-clean-urls"
+  runtime = "cloudfront-js-2.0"
+  comment = "Clean URL rewrite/redirect for /testing and /ai-engineering"
+  publish = true
+  code    = file("${path.module}/functions/clean-urls.js")
+}
+
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -243,6 +254,11 @@ resource "aws_cloudfront_distribution" "site" {
     min_ttl     = 0
     default_ttl = 86400   # 1 day for HTML
     max_ttl     = 2592000 # 30 days for immutable assets
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.clean_urls.arn
+    }
   }
 
   # Custom error pages – this is a multi-page static site (no client-side

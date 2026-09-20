@@ -21,9 +21,9 @@ import { test, expect } from '@playwright/test';
  */
 
 const PAGES = [
-  { name: 'index.html',           path: '/' },
-  { name: 'testing.html',         path: '/testing.html' },
-  { name: 'ai-engineering.html',  path: '/ai-engineering.html' },
+  { name: 'index',           path: '/' },
+  { name: 'testing',         path: '/testing' },
+  { name: 'ai-engineering',  path: '/ai-engineering' },
 ];
 
 for (const { name, path } of PAGES) {

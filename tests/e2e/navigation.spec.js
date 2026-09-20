@@ -51,15 +51,15 @@ test.describe('Navigation', () => {
   });
 });
 
-// ── testing.html and ai-engineering.html ────────────────────────────────────
-// These pages share the same nav component but link back to index.html's
+// ── /testing and /ai-engineering ────────────────────────────────────────────
+// These pages share the same nav component but link back to the homepage's
 // sections (no local #anchor targets) and mark their own nav link as the
-// current page — worth its own coverage rather than assuming index.html's
+// current page — worth its own coverage rather than assuming the homepage's
 // nav behavior generalizes.
 
 const SUB_PAGES = [
-  { name: 'Quality Suite page',    path: '/testing.html',        currentLabel: 'Quality Suite' },
-  { name: 'AI Engineering page',   path: '/ai-engineering.html', currentLabel: 'AI Engineering' },
+  { name: 'Quality Suite page',    path: '/testing',        currentLabel: 'Quality Suite' },
+  { name: 'AI Engineering page',   path: '/ai-engineering', currentLabel: 'AI Engineering' },
 ];
 
 for (const { name, path, currentLabel } of SUB_PAGES) {
@@ -68,12 +68,12 @@ for (const { name, path, currentLabel } of SUB_PAGES) {
       await page.goto(path);
     });
 
-    test('nav contains expected links, pointing back at index.html sections', async ({ page }) => {
+    test('nav contains expected links, pointing back at the homepage sections', async ({ page }) => {
       const nav = page.getByRole('navigation', { name: 'Main navigation' });
       for (const label of ['About', 'Experience', 'Education', 'Skills']) {
         const link = nav.getByRole('link', { name: label, exact: true });
         await expect(link).toBeVisible();
-        await expect(link).toHaveAttribute('href', new RegExp(`index\\.html#${label.toLowerCase()}`));
+        await expect(link).toHaveAttribute('href', new RegExp(`/#${label.toLowerCase()}`));
       }
     });
 
