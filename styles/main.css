@@ -1447,6 +1447,15 @@ button.exp__header {
   margin-bottom: 1.6rem;
 }
 
+.tq-card__link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+  transition: color var(--transition);
+}
+.tq-card__link:hover { color: var(--text-1); }
+
 .tq-card__tags {
   display: flex;
   flex-wrap: wrap;
