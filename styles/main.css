@@ -1562,6 +1562,16 @@ button.exp__header {
     grid-template-columns: 1fr;
   }
 
+  /* Same fix as .hero on index.html: min-height: 85vh + vertical centering
+     leaves a large empty gap above the badge on tall phones, since the
+     content is much shorter than 85vh. No .hero__scroll on this page, so
+     no bottom-padding balancing act needed — just size to content. */
+  .tq-hero {
+    min-height: auto;
+    align-items: flex-start;
+    padding: calc(var(--nav-h) + 2rem) 2.4rem 4rem;
+  }
+
   /* Intrinsic-width flex-wrap (the desktop layout) wraps stats onto rows
      purely by how much text happens to fit, so the number of items per row
      — and therefore how the rows line up under each other — varies with
