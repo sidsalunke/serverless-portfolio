@@ -34,6 +34,6 @@ test('footer matches snapshot', () => {
   expect(document.querySelector('footer').innerHTML).toMatchSnapshot();
 });
 
-test('number of deploy cards stays at 4', () => {
-  expect(document.querySelectorAll('.tq-deploy-card').length).toBe(4);
+test('number of deploy cards stays at 5', () => {
+  expect(document.querySelectorAll('.tq-deploy-card').length).toBe(5);
 });
