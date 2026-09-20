@@ -952,6 +952,22 @@ button.exp__header {
     text-align: center;
   }
   .about__links { align-items: center; }
+
+  /* Below 1024px .about__grid stacks (photo above text, photo comes first
+     in the DOM), but .hero still used the >1024px centered/100vh treatment
+     until this rule — that combination is what produced the ~400px gap
+     between the scroll indicator and "About Me": a full-height centered
+     hero followed immediately by a photo's worth of extra content before
+     the text even starts. Same fix as the mobile hero (min-height: 100vh
+     + centering leaves a gap on any viewport shorter-relative-to-content
+     than desktop, not just phones), tuned for this range's still-full-size
+     (22rem) photo. */
+  .hero {
+    min-height: auto;
+    align-items: flex-start;
+    padding: calc(var(--nav-h) + 3rem) 2.4rem 10.5rem;
+  }
+  .section--about { padding-top: 1.5rem; }
 }
 
 /* ============================================================
@@ -1032,7 +1048,15 @@ button.exp__header {
        stats row above it. */
     padding: calc(var(--nav-h) + 2rem) 2.4rem 12rem;
   }
-  .hero__stats { gap: 3.2rem; }
+  /* Same fix as .tq-hero__stats: intrinsic-width flex-wrap wraps items by
+     however much text happens to fit, not into consistent columns — with 4
+     stats that left the 4th ("Countries") alone on its own row, aligned
+     under the 1st instead of forming a clean 2x2 grid. */
+  .hero__stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3.2rem 2rem;
+  }
   .hero__ctas  { gap: 1rem; }
   .hero .btn   { padding: 1rem 1.8rem; font-size: 1.35rem; }
 
@@ -1465,6 +1489,13 @@ button.exp__header {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
+}
+
+/* Scoped to the "Beyond Work" grid specifically (3 cards) — the shared
+   .tq-deploy-grid rule above is a fixed 2-column layout other pages rely on
+   (testing.html's 4-card grid, this page's 2-card "Tools Shipped" grid). */
+.tq-deploy-grid--beyond {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .tq-deploy-card {

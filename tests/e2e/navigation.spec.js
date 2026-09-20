@@ -8,7 +8,7 @@ test.describe('Navigation', () => {
   test('displays hero name and role', async ({ page }) => {
     const hero = page.getByRole('region', { name: 'Introduction' });
     await expect(page.getByRole('heading', { level: 1, name: 'Siddharth Salunke' })).toBeVisible();
-    await expect(hero.getByText('Principal Engineer', { exact: false })).toBeVisible();
+    await expect(hero.getByText('Principal Quality Engineer', { exact: false })).toBeVisible();
   });
 
   test('nav contains expected section links', async ({ page }) => {

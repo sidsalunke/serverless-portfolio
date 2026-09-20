@@ -286,7 +286,7 @@ exports[`hero section matches snapshot 1`] = `
     </div>
 
     <h1 class="hero__name">Siddharth Salunke</h1>
-    <p class="hero__role">Principal Engineer · Platform Engineering &amp; Developer Enablement</p>
+    <p class="hero__role">Principal Quality Engineer · Platform Engineering &amp; Developer Enablement</p>
     <p class="hero__tagline">Building engineering platforms that accelerate delivery — leading teams that scale quality as a system-wide capability, not a bottleneck</p>
 
     <div class="hero__ctas">
@@ -304,12 +304,16 @@ exports[`hero section matches snapshot 1`] = `
         <div class="hero__stat-label">Years Experience</div>
       </div>
       <div class="hero__stat" role="listitem">
-        <div class="hero__stat-value">25</div>
+        <div class="hero__stat-value">35+</div>
         <div class="hero__stat-label">Engineers Led</div>
       </div>
       <div class="hero__stat" role="listitem">
         <div class="hero__stat-value">6</div>
         <div class="hero__stat-label">Companies</div>
+      </div>
+      <div class="hero__stat" role="listitem">
+        <div class="hero__stat-value">3</div>
+        <div class="hero__stat-label">Countries</div>
       </div>
     </div>
   "
