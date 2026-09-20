@@ -58,7 +58,7 @@ test.describe('Accessibility (axe WCAG 2.1 AA)', () => {
 // just index.html.
 test.describe('Accessibility (axe WCAG 2.1 AA) — Quality Suite page', () => {
   test('full page has no violations on load', async ({ page }) => {
-    await page.goto('/testing.html');
+    await page.goto('/testing');
     await page.waitForTimeout(700); // let scroll-reveal settle — see comment above
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
@@ -67,7 +67,7 @@ test.describe('Accessibility (axe WCAG 2.1 AA) — Quality Suite page', () => {
   });
 
   test('page has no violations with a pipeline panel expanded', async ({ page }) => {
-    await page.goto('/testing.html');
+    await page.goto('/testing');
     await page.waitForTimeout(700); // let scroll-reveal settle — see comment above
     await page.getByRole('button', { name: 'PR Checks' }).click();
     const results = await new AxeBuilder({ page })
@@ -78,7 +78,7 @@ test.describe('Accessibility (axe WCAG 2.1 AA) — Quality Suite page', () => {
 
   test('page has no violations with mobile drawer open', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto('/testing.html');
+    await page.goto('/testing');
     await page.waitForTimeout(700); // let scroll-reveal settle — see comment above
     await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
     const results = await new AxeBuilder({ page })
@@ -90,7 +90,7 @@ test.describe('Accessibility (axe WCAG 2.1 AA) — Quality Suite page', () => {
 
 test.describe('Accessibility (axe WCAG 2.1 AA) — AI Engineering page', () => {
   test('full page has no violations on load', async ({ page }) => {
-    await page.goto('/ai-engineering.html');
+    await page.goto('/ai-engineering');
     await page.waitForTimeout(700); // let scroll-reveal settle — see comment above
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
@@ -100,7 +100,7 @@ test.describe('Accessibility (axe WCAG 2.1 AA) — AI Engineering page', () => {
 
   test('page has no violations with mobile drawer open', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto('/ai-engineering.html');
+    await page.goto('/ai-engineering');
     await page.waitForTimeout(700); // let scroll-reveal settle — see comment above
     await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
     const results = await new AxeBuilder({ page })

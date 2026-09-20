@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Quality Suite page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/testing.html');
+    await page.goto('/testing');
   });
 
   // ── Page basics ──────────────────────────────────────────────

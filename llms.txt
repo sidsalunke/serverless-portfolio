@@ -7,8 +7,8 @@ Static portfolio site (HTML, CSS, vanilla JS — no framework), deployed on AWS 
 ## Pages
 
 - [Home](https://portfolio.sidsalunke.info/): Profile, work experience, education, and technical skills.
-- [AI Engineering](https://portfolio.sidsalunke.info/ai-engineering.html): How Claude Code and other AI tools are used in daily engineering work, plus tools built with them.
-- [Quality Suite](https://portfolio.sidsalunke.info/testing.html): The test automation, accessibility, security, and performance-testing practices used to build and verify this site.
+- [AI Engineering](https://portfolio.sidsalunke.info/ai-engineering): How Claude Code and other AI tools are used in daily engineering work, plus tools built with them.
+- [Quality Suite](https://portfolio.sidsalunke.info/testing): The test automation, accessibility, security, and performance-testing practices used to build and verify this site.
 
 ## Contact
 

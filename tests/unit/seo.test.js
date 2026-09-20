@@ -20,8 +20,8 @@ const path = require('path');
 // Do NOT require('jsdom') directly; it conflicts with the test environment.
 
 const CANONICAL_URL       = 'https://portfolio.sidsalunke.info';
-const AI_CANONICAL_URL    = 'https://portfolio.sidsalunke.info/ai-engineering.html';
-const QUALITY_CANONICAL_URL = 'https://portfolio.sidsalunke.info/testing.html';
+const AI_CANONICAL_URL    = 'https://portfolio.sidsalunke.info/ai-engineering';
+const QUALITY_CANONICAL_URL = 'https://portfolio.sidsalunke.info/testing';
 
 let doc;
 let aiDoc;

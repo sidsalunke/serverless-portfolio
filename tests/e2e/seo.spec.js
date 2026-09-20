@@ -213,11 +213,11 @@ test.describe('SEO — document structure', () => {
 
 // ── ai-engineering.html ────────────────────────────────────────────────────
 
-const AI_CANONICAL = `${LIVE_ORIGIN}/ai-engineering.html`;
+const AI_CANONICAL = `${LIVE_ORIGIN}/ai-engineering`;
 
 test.describe('SEO — AI Engineering page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ai-engineering.html');
+    await page.goto('/ai-engineering');
   });
 
   test('page title contains name and topic', async ({ page }) => {
@@ -284,11 +284,11 @@ test.describe('SEO — AI Engineering page', () => {
 
 // ── testing.html (Quality Suite) ────────────────────────────────────────────
 
-const QUALITY_CANONICAL = `${LIVE_ORIGIN}/testing.html`;
+const QUALITY_CANONICAL = `${LIVE_ORIGIN}/testing`;
 
 test.describe('SEO — Quality Suite page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/testing.html');
+    await page.goto('/testing');
   });
 
   test('page title contains name and topic', async ({ page }) => {

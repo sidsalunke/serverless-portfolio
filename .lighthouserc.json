@@ -3,8 +3,8 @@
     "collect": {
       "url": [
         "https://portfolio.sidsalunke.info",
-        "https://portfolio.sidsalunke.info/testing.html",
-        "https://portfolio.sidsalunke.info/ai-engineering.html"
+        "https://portfolio.sidsalunke.info/testing",
+        "https://portfolio.sidsalunke.info/ai-engineering"
       ],
       "numberOfRuns": 3
     },

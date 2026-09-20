@@ -4,9 +4,9 @@ import { test, expect } from '@playwright/test';
 test.use({ viewport: { width: 375, height: 812 } });
 
 const PAGES = [
-  { name: 'index.html',           path: '/' },
-  { name: 'testing.html',         path: '/testing.html' },
-  { name: 'ai-engineering.html',  path: '/ai-engineering.html' },
+  { name: 'index',           path: '/' },
+  { name: 'testing',         path: '/testing' },
+  { name: 'ai-engineering',  path: '/ai-engineering' },
 ];
 
 for (const { name, path } of PAGES) {

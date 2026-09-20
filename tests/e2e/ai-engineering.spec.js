@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('AI Engineering page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/ai-engineering.html');
+    await page.goto('/ai-engineering');
   });
 
   test('page title is correct', async ({ page }) => {
