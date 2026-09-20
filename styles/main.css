@@ -964,6 +964,11 @@ button.exp__header {
      mobile it stacks with .hero's own bottom padding below the scroll
      indicator, leaving a large gap before the next section's content. */
   .section { padding: 6rem 0; }
+  /* .hero's own bottom padding (below) already accounts for the space
+     above .hero__scroll — this section's usual top padding would stack on
+     top of that and push the gap below the indicator out of balance with
+     the gap above it. */
+  .section--about { padding-top: 2.3rem; }
 
   /* Nav mobile
      Hamburger is visible immediately on load again — it was previously
@@ -1025,7 +1030,7 @@ button.exp__header {
        participate in flow height, so this padding has to be tall enough to
        clear its own height plus that offset on its own, or it overlaps the
        stats row above it. */
-    padding: calc(var(--nav-h) + 2rem) 2.4rem 8rem;
+    padding: calc(var(--nav-h) + 2rem) 2.4rem 12rem;
   }
   .hero__stats { gap: 3.2rem; }
   .hero__ctas  { gap: 1rem; }
