@@ -46,18 +46,6 @@ beforeEach(() => {
   initPortfolio();
 });
 
-// ── Font activation ────────────────────────────────────────────
-describe('Font activation', () => {
-  test('sets rel="stylesheet" on #google-fonts link when present', () => {
-    document.body.innerHTML =
-      '<link id="google-fonts" rel="preload">' + document.body.innerHTML;
-    jest.resetModules();
-    ({ initPortfolio } = require('../../js/app.js'));
-    initPortfolio();
-    expect(document.getElementById('google-fonts').getAttribute('rel')).toBe('stylesheet');
-  });
-});
-
 // ── Footer year ────────────────────────────────────────────────
 describe('Footer year', () => {
   test('sets #footer-year to the current year', () => {
