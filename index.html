@@ -89,10 +89,10 @@
                → js/app.js, plus the theme-init inline <script> in <head>
                (hash of that exact script's contents — recompute and update
                here, in the meta tag below, and in infra/main.tf if it changes)
-    style-src  'self' 'unsafe-inline' fonts.googleapis.com
-               → main.css + inline style="" attributes (SVG colours, CSS vars) + Google Fonts CSS
-    font-src   fonts.gstatic.com
-               → Google Fonts binary files only
+    style-src  'self' 'unsafe-inline'
+               → main.css + inline style="" attributes (SVG colours, CSS vars)
+    font-src   'self'
+               → self-hosted Outfit variable font (fonts/outfit-variable.woff2)
     img-src    'self' data:
                → local images + data URIs (inline SVG / favicons)
     connect-src 'self'     → the page itself makes zero XHR/fetch calls, but
@@ -106,8 +106,8 @@
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'none';
                  script-src 'self' 'sha256-ohlc98rSlXyE4og+4moML50wS+X2XKr5tqySt8ujkeE=';
-                 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-                 font-src https://fonts.gstatic.com;
+                 style-src 'self' 'unsafe-inline';
+                 font-src 'self';
                  img-src 'self' data:;
                  connect-src 'self';
                  base-uri 'self';
@@ -121,16 +121,10 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
-  <!-- Fonts: non-blocking preload so they never delay first paint -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!--
-    Non-blocking font load without inline event handlers (CSP: script-src 'self' forbids them).
-    The preload hint starts the download immediately; app.js flips rel to 'stylesheet' once
-    the script executes, activating the font with zero render-blocking.
-  -->
-  <link id="google-fonts" rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=optional" as="style">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=optional" rel="stylesheet"></noscript>
+  <!-- Self-hosted font: preload the file directly, same-origin, no preconnect
+       or JS-driven activation needed (that was only ever required to work
+       around Google Fonts' CSP/inline-handler constraints). -->
+  <link rel="preload" href="/fonts/outfit-variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="js/app.js" as="script" fetchpriority="high">
   <!--
     Theme init — applies a stored "dark" preference before first paint so a

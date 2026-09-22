@@ -9,13 +9,6 @@ function initPortfolio() {
      feedback (hamburger, nav links, logo) silently never fires on iOS. */
   document.body.addEventListener('touchstart', function () {}, { passive: true });
 
-  /* ── Fonts: activate preloaded Google Fonts stylesheet ──
-     The <link id="google-fonts"> in <head> uses rel="preload" to start the
-     download without blocking render.  CSP script-src 'self' forbids inline
-     event handlers, so we activate the font here instead of via onload="...". */
-  var fontsEl = document.getElementById('google-fonts');
-  if (fontsEl) { fontsEl.rel = 'stylesheet'; }
-
   /* ── Footer: current year ── */
   var yearEl = document.getElementById('footer-year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -210,11 +203,18 @@ function initPortfolio() {
       });
     }, { threshold: 0.15, rootMargin: '0px 0px 200px 0px' });
 
+    // Read all layout rects first, then apply classes/observers in a second
+    // pass — interleaving getBoundingClientRect() reads with classList
+    // writes forces a synchronous layout recalc on every iteration
+    // (Lighthouse "forced reflow"); batching reads/writes avoids that.
+    var offscreenEls = [];
     revealEls.forEach(function (el) {
       var rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight && rect.bottom > 0) {
-        return; // already visible — leave it alone, nothing to animate
+      if (!(rect.top < window.innerHeight && rect.bottom > 0)) {
+        offscreenEls.push(el); // not yet visible — animate it in
       }
+    });
+    offscreenEls.forEach(function (el) {
       el.classList.add('reveal');
       revealObserver.observe(el);
     });

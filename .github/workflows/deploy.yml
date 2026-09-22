@@ -82,12 +82,13 @@ jobs:
             --cache-control "public, max-age=3600" \
             --delete
 
-      - name: Sync images to S3 (long client cache)
+      - name: Sync images and fonts to S3 (long client cache)
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "images/*" \
             --include "favicon.svg" \
+            --include "fonts/*" \
             --cache-control "public, max-age=2592000" \
             --delete
 
@@ -275,12 +276,13 @@ jobs:
             --cache-control "public, max-age=3600" \
             --delete
 
-      - name: Restore previous images to S3 (long client cache)
+      - name: Restore previous images and fonts to S3 (long client cache)
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "images/*" \
             --include "favicon.svg" \
+            --include "fonts/*" \
             --cache-control "public, max-age=2592000" \
             --delete
 

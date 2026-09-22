@@ -94,6 +94,27 @@
 /* ============================================================
    RESET & BASE
    ============================================================ */
+
+/* Self-hosted instead of Google Fonts: a third-party CDN dependency for
+   render-critical text means rendering is only as reliable as that CDN
+   being reachable from the visitor's network. Corporate networks are a
+   real, observed case where fonts.googleapis.com/fonts.gstatic.com is
+   blocked or slow enough to fall outside the font-display: optional swap
+   window — that visitor sees the fallback font permanently, forever,
+   different from everyone else. Serving it from this same origin removes
+   that dependency entirely; rendering is now deterministic regardless of
+   network. Outfit ships as a single variable-weight file (confirmed via
+   the font's fvar table: wght axis 100-900), so one file covers every
+   weight this site uses (400/500/600/700/800) instead of five near-
+   identical static files. */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: optional;
+  src: url('/fonts/outfit-variable.woff2') format('woff2');
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
