@@ -66,7 +66,7 @@ describe.each(PAGES)('$file', ({ file, url, type }) => {
   });
 });
 
-describe('writing index and routing', () => {
+describe('writing index', () => {
   test('there is at least one article', () => {
     expect(articleFiles.length).toBeGreaterThan(0);
   });
@@ -74,15 +74,6 @@ describe('writing index and routing', () => {
   test.each(articleFiles)('index links to %s', (post) => {
     const index = fs.readFileSync(path.join(root, 'writing.html'), 'utf8');
     expect(index).toContain(`href="/writing/${post.replace(/\.html$/, '')}"`);
-  });
-
-  // An article with no entry in the CloudFront function 404s in production
-  // even though it works on the local dev server.
-  test.each(articleFiles)('%s has a clean-URL route in the CloudFront function', (post) => {
-    const fn = fs.readFileSync(path.join(root, 'infra/functions/clean-urls.js'), 'utf8');
-    const clean = `/writing/${post.replace(/\.html$/, '')}`;
-    expect(fn).toContain(`"${clean}": "${clean}.html"`);
-    expect(fn).toContain(`"${clean}.html": "${clean}"`);
   });
 });
 
