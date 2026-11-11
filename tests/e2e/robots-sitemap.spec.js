@@ -27,6 +27,16 @@ test.describe('robots.txt, sitemap_index.xml, and the IndexNow key file are depl
     expect(body).toContain('/testing');
   });
 
+  // <lastmod> is the freshness signal Google uses to prioritise recrawls —
+  // every URL entry must carry one, in W3C date format.
+  test('every sitemap URL has a <lastmod> date', async ({ request }) => {
+    const body = await (await request.get('/sitemap_index.xml')).text();
+    const urls = body.match(/<url>/g) || [];
+    const lastmods = body.match(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g) || [];
+    expect(urls.length).toBe(3);
+    expect(lastmods.length).toBe(urls.length);
+  });
+
   test('IndexNow key file is served and matches the key used in deploy.yml', async ({ request }) => {
     const res = await request.get('/d6a69049b7ef3ef62df1b7ead257a870.txt');
     expect(res.status()).toBe(200);
