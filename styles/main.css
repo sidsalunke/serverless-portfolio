@@ -152,7 +152,7 @@ button { font-family: inherit; }
 }
 
 .section__label {
-  font-size: 1.2rem;
+  font-size: max(1.2rem, 12px);
   font-weight: 700;
   letter-spacing: 0.2rem;
   text-transform: uppercase;
@@ -445,7 +445,7 @@ button { font-family: inherit; }
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.22);
   border-radius: 10rem;
-  font-size: 1.3rem;
+  font-size: max(1.3rem, 12px);
   font-weight: 500;
   color: var(--accent);
   letter-spacing: 0.03rem;
@@ -501,7 +501,7 @@ button { font-family: inherit; }
 }
 
 .hero__stat-label {
-  font-size: 1.2rem;
+  font-size: max(1.2rem, 12px);
   color: var(--text-3);
   margin-top: 0.5rem;
   font-weight: 600;
@@ -521,7 +521,7 @@ button { font-family: inherit; }
   align-items: center;
   gap: 0.6rem;
   color: var(--text-3);
-  font-size: 1.1rem;
+  font-size: max(1.1rem, 12px);
   letter-spacing: 0.12rem;
   text-transform: uppercase;
   font-weight: 600;
@@ -681,7 +681,7 @@ button.exp__header {
 .exp__header-left { flex: 1; min-width: 0; }
 
 .exp__domain {
-  font-size: 1.15rem;
+  font-size: max(1.15rem, 12px);
   font-weight: 700;
   letter-spacing: 0.12rem;
   text-transform: uppercase;
@@ -902,7 +902,7 @@ button.exp__header {
 }
 
 .skills__group-note {
-  font-size: 1.3rem;
+  font-size: max(1.3rem, 12px);
   color: var(--text-3);
   line-height: 1.55;
   margin-top: 1.6rem;
@@ -958,7 +958,7 @@ button.exp__header {
 }
 
 .footer__copy {
-  font-size: 1.3rem;
+  font-size: max(1.3rem, 12px);
   color: var(--text-3);
 }
 
@@ -995,6 +995,9 @@ button.exp__header {
    RESPONSIVE — MOBILE  ≤ 768px
    ============================================================ */
 @media (max-width: 768px) {
+  /* This scales every rem-based size down 10% on small screens. Small labels
+     (1.0–1.3rem) would drop below 12px, so those rules use
+     font-size: max(<rem>, 12px) to keep a legible floor. */
   html { font-size: 56.25%; }
 
   /* .section's 10rem top/bottom padding is desktop's rhythm; unchanged on
@@ -1265,7 +1268,7 @@ button.exp__header {
 }
 
 .tq-pipeline__node-label {
-  font-size: 1.2rem;
+  font-size: max(1.2rem, 12px);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08rem;
@@ -1278,7 +1281,7 @@ button.exp__header {
 }
 
 .tq-pipeline__node-sub {
-  font-size: 1.1rem;
+  font-size: max(1.1rem, 12px);
   color: var(--text-4);
   text-align: center;
   max-width: 8rem;
@@ -1322,7 +1325,7 @@ button.exp__header {
 
 .tq-stage__label {
   display: inline-block;
-  font-size: 1.2rem;
+  font-size: max(1.2rem, 12px);
   font-weight: 700;
   letter-spacing: 0.2rem;
   text-transform: uppercase;
@@ -1380,7 +1383,7 @@ button.exp__header {
   align-items: center;
   padding: 0.4rem 1.2rem;
   border-radius: 10rem;
-  font-size: 1.3rem;
+  font-size: max(1.3rem, 12px);
   font-weight: 700;
   background: var(--tint-06);
   border: 1px solid var(--tint-10);
@@ -1453,7 +1456,7 @@ button.exp__header {
 }
 
 .tq-card__tool {
-  font-size: 1.2rem;
+  font-size: max(1.2rem, 12px);
   font-weight: 600;
   color: var(--text-3);
   margin-top: 0.2rem;
@@ -1489,7 +1492,7 @@ button.exp__header {
   background: rgba(59, 130, 246, 0.08);
   border: 1px solid rgba(59, 130, 246, 0.18);
   border-radius: 10rem;
-  font-size: 1.2rem;
+  font-size: max(1.2rem, 12px);
   font-weight: 500;
   color: var(--text-2);
   transition: background var(--transition), color var(--transition);
@@ -1573,7 +1576,7 @@ button.exp__header {
   background: var(--tint-04);
   border: 1px solid var(--border);
   border-radius: 10rem;
-  font-size: 1.3rem;
+  font-size: max(1.3rem, 12px);
   font-weight: 600;
   color: var(--card-color, var(--accent));
   align-self: flex-start;
@@ -1703,7 +1706,7 @@ button.exp__header {
   color: var(--accent);
 }
 .tq-pipeline__node-hint {
-  font-size: 1rem;
+  font-size: max(1rem, 12px);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08rem;
@@ -1737,7 +1740,7 @@ button.exp__header {
 }
 
 .tq-panel__title {
-  font-size: 1.2rem;
+  font-size: max(1.2rem, 12px);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16rem;
@@ -1768,7 +1771,7 @@ button.exp__header {
   flex: 1;
 }
 .tq-panel__col-note {
-  font-size: 1.15rem;
+  font-size: max(1.15rem, 12px);
   color: var(--text-4);
   font-weight: 500;
   white-space: nowrap;
@@ -1855,11 +1858,6 @@ button.exp__header {
 .post__header { padding-bottom: 5.6rem; }
 
 .post__title { font-size: clamp(3.2rem, 5.2vw, 5rem); line-height: 1.1; }
-
-/* The label holds a link back to /writing. The site-wide label size scales
-   down with the root font on phones (to under 11px), which is too small for
-   something tappable, so it gets a pixel floor here. */
-.post__header .section__label { font-size: max(1.2rem, 12px); }
 
 .post__back { color: inherit; text-decoration: underline; text-underline-offset: 0.3rem; }
 .post__back:hover { color: var(--text-1); }
