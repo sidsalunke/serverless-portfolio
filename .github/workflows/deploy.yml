@@ -242,7 +242,12 @@ jobs:
   rollback:
     name: Rollback to previous commit
     needs: [deploy, e2e-live]
-    if: needs.e2e-live.result == 'failure'
+    # always() is load-bearing. Without a status function GitHub prepends an
+    # implicit success() to this condition, and success() is false as soon as
+    # a needed job (e2e-live) fails — so the rollback was skipped in exactly
+    # the one case it exists for. The deploy check stops a rollback from
+    # running when nothing new was ever pushed to S3.
+    if: always() && needs.deploy.result == 'success' && needs.e2e-live.result == 'failure'
     runs-on: ubuntu-latest
 
     permissions:
