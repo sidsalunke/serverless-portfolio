@@ -108,3 +108,15 @@ test('ai-engineering.html has a single h1', () => {
   document.documentElement.innerHTML = aiHtml;
   expect(document.querySelectorAll('h1').length).toBe(1);
 });
+
+// ── /writing pages ──────────────────────────────────────────────────────────
+test.each([
+  'writing.html',
+  'writing/rollback-static-site-s3-cloudfront.html',
+])('%s has no WCAG 2.1 AA accessibility violations', async (file) => {
+  const pageHtml = fs.readFileSync(path.join(__dirname, '../..', file), 'utf8');
+  const results = await axe(pageHtml, {
+    runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
+  });
+  expect(results).toHaveNoViolations();
+});

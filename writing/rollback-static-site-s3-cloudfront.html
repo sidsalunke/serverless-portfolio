@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ── Primary SEO ──────────────────────────────────────────────────────── -->
+  <title>Automatic rollback for a static S3 + CloudFront site &ndash; Siddharth Salunke</title>
+  <meta name="description" content="How this site rolls back a bad deploy on S3 and CloudFront using GitHub Actions and live Playwright tests, and the one-line bug that meant it never ran.">
+  <meta name="author" content="Siddharth Salunke">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://portfolio.sidsalunke.info/writing/rollback-static-site-s3-cloudfront">
+
+  <!-- ── Open Graph (LinkedIn, Slack, iMessage previews) ──────────────────── -->
+  <meta property="og:type"        content="article">
+  <meta property="og:url"         content="https://portfolio.sidsalunke.info/writing/rollback-static-site-s3-cloudfront">
+  <meta property="og:title"       content="Automatic rollback for a static S3 + CloudFront site">
+  <meta property="og:description" content="How this site rolls back a bad deploy on S3 and CloudFront using GitHub Actions and live Playwright tests, and the one-line bug that meant it never ran.">
+  <meta property="og:image"       content="https://portfolio.sidsalunke.info/images/og-image.jpg">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="1200">
+  <meta property="og:image:alt"    content="Siddharth Salunke, Principal Quality Engineer">
+  <meta property="og:locale"      content="en_AU">
+  <meta property="og:site_name"   content="Siddharth Salunke Portfolio">
+
+  <!-- ── Twitter / X Card ─────────────────────────────────────────────────── -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Automatic rollback for a static S3 + CloudFront site">
+  <meta name="twitter:description" content="How this site rolls back a bad deploy on S3 and CloudFront using GitHub Actions and live Playwright tests, and the one-line bug that meant it never ran.">
+  <meta name="twitter:image"       content="https://portfolio.sidsalunke.info/images/og-image.jpg">
+  <meta name="twitter:image:alt"   content="Siddharth Salunke, Principal Quality Engineer">
+
+  <!-- ── JSON-LD structured data ───────────────────────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Automatic rollback for a static S3 + CloudFront site",
+    "description": "How this site rolls back a bad deploy on S3 and CloudFront using GitHub Actions and live Playwright tests, and the one-line bug that meant it never ran.",
+    "url": "https://portfolio.sidsalunke.info/writing/rollback-static-site-s3-cloudfront",
+    "mainEntityOfPage": "https://portfolio.sidsalunke.info/writing/rollback-static-site-s3-cloudfront",
+    "datePublished": "2026-11-11",
+    "dateModified": "2026-11-11",
+    "inLanguage": "en",
+    "image": "https://portfolio.sidsalunke.info/images/og-image.jpg",
+    "author": {
+      "@type": "Person",
+      "@id": "https://portfolio.sidsalunke.info/#person",
+      "name": "Siddharth Salunke",
+      "url": "https://portfolio.sidsalunke.info"
+    },
+    "publisher": {
+      "@type": "Person",
+      "@id": "https://portfolio.sidsalunke.info/#person",
+      "name": "Siddharth Salunke",
+      "url": "https://portfolio.sidsalunke.info"
+    },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Siddharth Salunke Portfolio",
+      "url": "https://portfolio.sidsalunke.info"
+    }
+  }
+  </script>
+
+  <!-- ── CSP (same policy as index.html) ──────────────────────────────────── -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none';
+                 script-src 'self' 'sha256-ohlc98rSlXyE4og+4moML50wS+X2XKr5tqySt8ujkeE=';
+                 style-src 'self' 'unsafe-inline';
+                 font-src 'self';
+                 img-src 'self' data:;
+                 connect-src 'self';
+                 base-uri 'self';
+                 form-action 'none'">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
+
+  <!-- ── Fonts (self-hosted; see main.css for why) ───────────────────────────── -->
+  <link rel="preload" href="/fonts/outfit-variable.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="preload" href="/js/app.js" as="script" fetchpriority="high">
+  <!--
+    Theme init — applies a stored "dark" preference before first paint so a
+    returning dark-mode user never sees a flash of the light default. Inline
+    and synchronous (not in app.js, which loads with `defer`) specifically so
+    it runs before the stylesheet below paints anything. CSP allows it via
+    the sha256 hash on script-src (see the meta tag above); if this script's
+    contents change, the hash must be recomputed and updated there and in
+    infra/main.tf.
+  -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+</head>
+<body>
+
+<!-- SVG icon sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v2"/><path d="M12 20v2"/>
+    <path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>
+    <path d="M2 12h2"/><path d="M20 12h2"/>
+    <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+  </symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+  </symbol>
+  <symbol id="i-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/>
+    <circle cx="12" cy="10" r="3"/>
+  </symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m6 9 6 6 6-6"/>
+  </symbol>
+  <symbol id="i-external-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15 3h6v6"/><path d="M10 14 21 3"/>
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+  </symbol>
+  <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>
+  </symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/>
+    <path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>
+  </symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>
+  </symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+  </symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+    <circle cx="12" cy="12" r="3"/>
+  </symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 8V4H8"/>
+    <rect width="16" height="12" x="4" y="8" rx="2"/>
+    <path d="M2 14h2"/><path d="M20 14h2"/>
+    <path d="M15 13v2"/><path d="M9 13v2"/>
+  </symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+  </symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+    <path d="m9 11 3 3L22 4"/>
+  </symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+  </symbol>
+  <symbol id="i-linkedin" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+  </symbol>
+  <symbol id="i-github" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+  </symbol>
+</svg>
+
+<!-- ============================================================ NAV -->
+<nav class="nav" id="main-nav" role="navigation" aria-label="Main navigation">
+  <a href="/" class="nav__logo">SS</a>
+
+  <ul class="nav__links" id="nav-links" role="list">
+    <li><a href="/#about"      class="nav__link">About</a></li>
+    <li><a href="/#experience" class="nav__link">Experience</a></li>
+    <li><a href="/#education"  class="nav__link">Education</a></li>
+    <li><a href="/#skills"     class="nav__link">Skills</a></li>
+    <li><a href="/ai-engineering" class="nav__link">AI Engineering</a></li>
+    <li><a href="/testing" class="nav__link">Quality Suite</a></li>
+    <li><a href="/writing" class="nav__link" aria-current="page">Writing</a></li>
+    <li>
+      <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="nav__cta btn btn--primary">
+        Connect&nbsp;<svg width="16" height="16" aria-hidden="true"><use href="#i-linkedin"/></svg>
+      </a>
+    </li>
+  </ul>
+
+  <div class="nav__actions">
+    <button class="nav__theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false">
+      <svg class="nav__theme-icon nav__theme-icon--sun" width="19" height="19" aria-hidden="true"><use href="#i-sun"/></svg>
+      <svg class="nav__theme-icon nav__theme-icon--moon" width="19" height="19" aria-hidden="true"><use href="#i-moon"/></svg>
+    </button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============================================================ POST -->
+<article class="post" aria-labelledby="post-heading">
+  <header class="section tq-hero post__header">
+    <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
+    <div class="hero__orb hero__orb--2" aria-hidden="true"></div>
+
+    <div class="container post__container">
+      <p class="section__label"><a href="/writing" class="post__back">Writing</a> &middot; CI/CD &middot; AWS</p>
+      <h1 id="post-heading" class="tq-hero__title post__title">Automatic rollback for a static S3 + CloudFront site</h1>
+      <p class="tq-hero__sub">
+        This site restores its previous version when live tests fail after a deploy. For three and a
+        half months that rollback could not run, because of one line of GitHub Actions configuration.
+        This is how the pipeline works, how the bug hid, and how I fixed and tested it.
+      </p>
+      <p class="post__meta">
+        By Siddharth Salunke &middot; <time datetime="2026-11-11">11 November 2026</time>
+      </p>
+    </div>
+  </header>
+
+  <div class="section tq-stage post__body-section">
+    <div class="container post__container post__body">
+
+      <h2>The setup</h2>
+      <p>
+        The site is plain HTML, CSS and JavaScript in a private S3 bucket, served through CloudFront.
+        A merge to <code>master</code> triggers a GitHub Actions workflow that syncs the files to S3,
+        invalidates the CloudFront cache and runs a Playwright suite against the live domain.
+        GitHub authenticates to AWS with a short-lived OIDC token, so there are no stored access keys.
+      </p>
+      <p>
+        A static site has no deployment slots, no blue/green switch and no traffic splitting.
+        <code>aws s3 sync</code> overwrites the files in place, and from that moment every visitor
+        gets the new version. If the new version is broken, the only fix is to put the old files back.
+        I wanted the pipeline to do that without me.
+      </p>
+
+      <h2>The design: deploy, verify, restore</h2>
+      <p>The workflow has three jobs that matter here.</p>
+
+      <h3>1. Deploy, and remember what was live</h3>
+      <p>
+        Before it uploads anything, the deploy job records the commit that is currently live. On a
+        branch where every merge is one commit, that is the parent of the commit being deployed.
+      </p>
+<pre><code>- uses: actions/checkout@v4
+  with:
+    fetch-depth: 2  # need HEAD and HEAD~1 for rollback
+
+- name: Record pre-deploy commit SHA
+  id: prev-sha
+  run: echo "sha=$(git rev-parse HEAD~1)" &gt;&gt; $GITHUB_OUTPUT</code></pre>
+      <p>
+        The job exposes that SHA as an output, so a later job can read it.
+      </p>
+
+      <h3>2. Wait for the CDN, then test the live site</h3>
+      <p>
+        After the sync, the job creates a CloudFront invalidation and blocks until it completes.
+      </p>
+<pre><code>- name: Wait for CloudFront invalidation to complete
+  run: |
+    aws cloudfront wait invalidation-completed \
+      --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+      --id ${{ steps.invalidation.outputs.id }}</code></pre>
+      <p>
+        This step is easy to leave out, and without it the check is meaningless. If the tests start
+        while edge locations still hold the old files, they pass against the previous version and
+        tell you nothing about the one you just shipped.
+      </p>
+      <p>
+        The <code>e2e-live</code> job then runs the same Playwright suite that runs on pull requests,
+        pointed at the production URL. It covers navigation, SEO markup, accessibility, the security
+        response headers, and that files such as <code>robots.txt</code> and the sitemap are really
+        being served. Some of those can only fail in production. A wrong <code>Content-Type</code> on an
+        image or a file missing from the sync allowlist never shows up against a local server.
+      </p>
+
+      <h3>3. Restore the previous commit if the tests fail</h3>
+      <p>
+        The rollback job checks out the recorded SHA, runs the same sync commands as the deploy,
+        invalidates the cache again and then exits non-zero, so the workflow shows red.
+      </p>
+<pre><code>rollback:
+  needs: [deploy, e2e-live]
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ needs.deploy.outputs.previous-sha }}
+    # ...same aws s3 sync steps as the deploy job...
+    # ...invalidate CloudFront and wait...
+    - name: Fail workflow to signal bad deployment was rolled back
+      run: exit 1</code></pre>
+      <p>
+        Rolling back by redeploying an old commit means the rollback uses the same code path as every
+        normal deploy. There is no second mechanism to maintain.
+      </p>
+
+      <h2>The bug: the rollback job could never run</h2>
+      <p>
+        I added the rollback on 25 July 2026. The same day, a deploy failed its live tests. The
+        rollback job did not run. GitHub reported it as <em>skipped</em>, and the version that had failed its tests stayed
+        live.
+      </p>
+      <p>The condition on the job looked correct:</p>
+<pre><code>rollback:
+  needs: [deploy, e2e-live]
+  if: needs.e2e-live.result == 'failure'</code></pre>
+      <p>
+        The cause is a rule in GitHub Actions that is documented but easy to miss. If a job&rsquo;s
+        <code>if</code> contains no status function (<code>success()</code>, <code>failure()</code>,
+        <code>always()</code> or <code>cancelled()</code>), GitHub adds <code>success() &amp;&amp;</code>
+        to the front of it. <code>success()</code> is false as soon as any job in <code>needs</code>
+        has failed. So the real condition was:
+      </p>
+<pre><code>if: success() &amp;&amp; needs.e2e-live.result == 'failure'</code></pre>
+      <p>
+        Those two halves cannot both be true. The job was skipped in the one situation it was written
+        for. The fix is to state the status function explicitly:
+      </p>
+<pre><code>if: always() &amp;&amp; needs.deploy.result == 'success' &amp;&amp; needs.e2e-live.result == 'failure'</code></pre>
+      <p>
+        The check on <code>needs.deploy.result</code> matters once <code>always()</code> is there.
+        Without it, a deploy that failed before uploading anything could still trigger a rollback of
+        files that never changed.
+      </p>
+
+      <h3>Why nothing caught it</h3>
+      <p>
+        A skipped job is grey, not red. The workflow was already red because the tests had failed,
+        which is what a correct rollback run looks like too. And the failure path almost never ran:
+        nearly every deploy passes its live tests, so the broken job sat unused. The suite tested the
+        site thoroughly and did not test the safety net at all.
+      </p>
+      <p>
+        I added a unit test that reads the workflow file and asserts that the rollback condition
+        contains a status function. It is a blunt check, but it runs on every pull request and it
+        fails if someone simplifies the line back to the broken form.
+      </p>
+
+      <h2>Testing the rollback</h2>
+      <p>
+        A fix to a recovery path is not finished until the recovery has been seen to work. There is
+        no staging copy of this site, and the deploy role can only be assumed from <code>master</code>,
+        so the only honest test was a drill in production. I designed it so that a failed drill would
+        cost nothing.
+      </p>
+      <p>The drill change had two parts:</p>
+      <ul>
+        <li>
+          An invisible marker in the homepage, <code>&lt;meta name="rollback-drill"&gt;</code>. It
+          changes nothing a visitor can see or use.
+        </li>
+        <li>
+          A test that fails when the live homepage contains the marker. It is skipped unless the suite
+          is pointed at the production URL, so it passed pull-request checks and could be merged.
+        </li>
+      </ul>
+      <p>
+        If the rollback worked, the marker would disappear from production without anyone touching it.
+        If it did not, the worst outcome was a stray meta tag until I reverted the change.
+      </p>
+
+      <h3>What happened</h3>
+      <p>I merged the drill on 11 November 2026. Times are UTC.</p>
+      <ul class="post__timeline">
+        <li><strong>18:39:01</strong> &mdash; drill change merged to <code>master</code>.</li>
+        <li><strong>18:39:34</strong> &mdash; marker first seen on the live homepage.</li>
+        <li><strong>18:39:45</strong> &mdash; deploy job finished, CloudFront invalidation complete.</li>
+        <li><strong>18:41:40</strong> &mdash; live tests finished: 161 passed, 1 failed. The failure was the drill test, on all three attempts.</li>
+        <li><strong>18:41:43</strong> &mdash; rollback job started. For the first time, it was not skipped.</li>
+        <li><strong>18:41:56</strong> &mdash; marker gone from the live homepage.</li>
+        <li><strong>18:42:14</strong> &mdash; rollback job finished and marked the workflow as failed, as designed.</li>
+      </ul>
+      <p>
+        The change that failed its tests was live for about two minutes and twenty seconds. Most of
+        that was the test suite running. The rollback itself, from job start to the previous version
+        being served again, took under fifteen seconds for the files and about thirty seconds including
+        the wait for the second invalidation.
+      </p>
+      <p>
+        One thing I did not expect: while polling the homepage every ten seconds, I twice saw the old
+        version come back briefly after the new one had appeared, once after the invalidation was
+        reported complete. I have not investigated the cause. It did not affect the result, because the
+        live tests retry and the drill test failed on every attempt, but it is a reminder that
+        &ldquo;invalidation complete&rdquo; and &ldquo;every request sees the new version&rdquo; are
+        not quite the same statement.
+      </p>
+      <p>
+        Afterwards I reverted the drill change, which removed the marker and the test from the
+        repository, and that deploy passed its live tests normally.
+      </p>
+
+      <h2>What this does not cover</h2>
+      <ul>
+        <li>
+          <strong>The bad version is live for a few minutes.</strong> This is deploy-then-verify, not a
+          canary that exposes a small share of traffic first. Visitors can see the broken version
+          between the sync and the end of the rollback.
+        </li>
+        <li>
+          <strong>The repository is not reverted.</strong> Production goes back to the previous
+          commit, but <code>master</code> still contains the bad one. The next merge would deploy it
+          again, so a revert or a fix has to follow.
+        </li>
+        <li>
+          <strong>It assumes the previous commit was good.</strong> <code>HEAD~1</code> is only the
+          last known-good version if every earlier deploy passed.
+        </li>
+        <li>
+          <strong>Infrastructure is out of scope.</strong> CloudFront functions, response headers
+          and cache settings are managed with Terraform and are not touched by a rollback.
+        </li>
+        <li>
+          <strong>It only catches what the tests check.</strong> A regression that the live suite does
+          not look for deploys without complaint.
+        </li>
+      </ul>
+
+      <h2>What I took from it</h2>
+      <ul>
+        <li>Test the failure path on purpose. A recovery mechanism that has never run is a guess. A harmless marker and a test that fails on it is enough to run the drill safely in production.</li>
+        <li>In GitHub Actions, any job meant to run after a failure needs <code>always()</code> or <code>failure()</code> in its condition.</li>
+        <li>Wait for the CDN invalidation before testing a deploy, or the tests check the old version.</li>
+        <li>Treat a skipped job as a signal. Grey in a pipeline is not the same as green.</li>
+      </ul>
+
+      <p class="post__footer-links">
+        The full workflow is in
+        <a href="https://github.com/sidsalunke/serverless-portfolio/blob/master/.github/workflows/deploy.yml" target="_blank" rel="noopener noreferrer">deploy.yml</a>
+        in the site&rsquo;s repository. The rest of the test pipeline is described on the
+        <a href="/testing">Quality Suite</a> page.
+      </p>
+    </div>
+  </div>
+</article>
+
+</main>
+
+<!-- ============================================================ FOOTER -->
+<footer class="footer" role="contentinfo">
+  <div class="container footer__inner">
+    <div class="footer__socials">
+      <a href="https://www.linkedin.com/in/sidsalunke/" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="LinkedIn">
+        <svg width="20" height="20" aria-hidden="true"><use href="#i-linkedin"/></svg>
+      </a>
+      <a href="https://github.com/sidsalunke" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="GitHub">
+        <svg width="20" height="20" aria-hidden="true"><use href="#i-github"/></svg>
+      </a>
+    </div>
+    <p class="footer__name">Siddharth Salunke</p>
+    <p class="footer__copy">&copy; <span id="footer-year"></span> &middot; Built with HTML, CSS &amp; Vanilla JS</p>
+  </div>
+</footer>
+
+<script src="/js/app.js" fetchpriority="high" defer></script>
+</body>
+</html>

@@ -9,6 +9,8 @@ Static portfolio site (HTML, CSS, vanilla JS — no framework), deployed on AWS 
 - [Home](https://portfolio.sidsalunke.info/): Profile, work experience, education, and technical skills.
 - [AI Engineering](https://portfolio.sidsalunke.info/ai-engineering): How Claude Code and other AI tools are used in daily engineering work, plus tools built with them.
 - [Quality Suite](https://portfolio.sidsalunke.info/testing): The test automation, accessibility, security, and performance-testing practices used to build and verify this site.
+- [Writing](https://portfolio.sidsalunke.info/writing): Engineering write-ups on test automation, CI/CD pipelines and quality engineering.
+- [Automatic rollback for a static S3 + CloudFront site](https://portfolio.sidsalunke.info/writing/rollback-static-site-s3-cloudfront): How the deploy pipeline restores the previous version when live tests fail, and the GitHub Actions bug that stopped it running.
 
 ## Contact
 

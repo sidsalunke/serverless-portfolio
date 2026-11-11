@@ -211,13 +211,14 @@ resource "aws_cloudfront_response_headers_policy" "security" {
   }
 }
 
-# Rewrites clean URLs (/testing, /ai-engineering) to their underlying .html
-# S3 objects, and 301-redirects the old .html/index.html URLs to the clean
-# form. See infra/functions/clean-urls.js for the full explanation.
+# Rewrites any extensionless clean URL (/testing, /writing/some-post) to its
+# underlying .html S3 object, and 301-redirects .html and trailing-slash URLs
+# to the clean form. The rules are generic, so adding a page needs no change
+# here. See infra/functions/clean-urls.js for the full explanation.
 resource "aws_cloudfront_function" "clean_urls" {
   name    = "portfolio-clean-urls"
   runtime = "cloudfront-js-2.0"
-  comment = "Clean URL rewrite/redirect for /testing and /ai-engineering"
+  comment = "Generic clean URL rewrite/redirect for extensionless paths"
   publish = true
   code    = file("${path.module}/functions/clean-urls.js")
 }

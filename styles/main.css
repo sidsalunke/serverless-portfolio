@@ -1843,3 +1843,107 @@ button.exp__header {
   color: var(--accent);
   opacity: 0.8;
 }
+
+/* ============================================================
+   WRITING — article pages and the post index
+   Long-form reading layout: a narrow measure, larger body text and
+   scrollable code blocks. Uses the same tokens as the rest of the
+   site, so light and dark themes need no extra rules.
+   ============================================================ */
+.post__container { max-width: 78rem; }
+
+.post__header { padding-bottom: 5.6rem; }
+
+.post__title { font-size: clamp(3.2rem, 5.2vw, 5rem); line-height: 1.1; }
+
+/* The label holds a link back to /writing. The site-wide label size scales
+   down with the root font on phones (to under 11px), which is too small for
+   something tappable, so it gets a pixel floor here. */
+.post__header .section__label { font-size: max(1.2rem, 12px); }
+
+.post__back { color: inherit; text-decoration: underline; text-underline-offset: 0.3rem; }
+.post__back:hover { color: var(--text-1); }
+
+.post__meta { font-size: 1.4rem; color: var(--text-4); }
+
+.post__body-section { padding-top: 6.4rem; }
+
+.post__body { font-size: 1.75rem; line-height: 1.75; color: var(--text-2); }
+.post__body p,
+.post__body ul,
+.post__body pre { margin-bottom: 2.4rem; }
+
+.post__body h2 {
+  font-size: clamp(2.4rem, 3vw, 3rem);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+  margin: 6.4rem 0 2rem;
+}
+.post__body h2:first-of-type { margin-top: 0; }
+
+.post__body h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-1);
+  margin: 4rem 0 1.4rem;
+}
+
+.post__body ul { padding-left: 2.4rem; list-style: disc; }
+.post__body li { margin-bottom: 1.2rem; }
+.post__body strong { color: var(--text-1); font-weight: 700; }
+
+.post__body a { color: var(--accent); text-decoration: underline; text-underline-offset: 0.3rem; }
+.post__body a:hover { color: var(--accent-dark); }
+.post__body a:focus-visible,
+.post__back:focus-visible,
+.post-list__title a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+.post__body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.88em;
+  background: var(--tint-06);
+  border-radius: 6px;
+  padding: 0.15em 0.4em;
+  color: var(--text-1);
+}
+
+.post__body pre {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 2rem 2.2rem;
+  overflow-x: auto;
+  line-height: 1.6;
+  tab-size: 2;
+}
+.post__body pre code { background: none; padding: 0; font-size: 1.4rem; white-space: pre; }
+
+.post__body .post__timeline { list-style: none; padding-left: 0; border-left: 2px solid var(--border); }
+.post__body .post__timeline li { padding-left: 2rem; }
+.post__body .post__timeline strong { font-variant-numeric: tabular-nums; }
+
+.post__footer-links { margin-top: 5.6rem; padding-top: 3.2rem; border-top: 1px solid var(--border); }
+
+/* ── Post index ────────────────────────────────────────────── */
+.post-list-section .section__heading { margin-bottom: 3.2rem; }
+
+.post-list { list-style: none; max-width: 78rem; }
+
+.post-list__item { padding: 3.2rem 0; border-top: 1px solid var(--border); }
+.post-list__item:last-child { border-bottom: 1px solid var(--border); }
+
+.post-list__meta { font-size: 1.35rem; color: var(--text-4); margin-bottom: 0.8rem; }
+
+.post-list__title { font-size: clamp(2rem, 2.6vw, 2.6rem); font-weight: 700; line-height: 1.3; margin-bottom: 1rem; }
+.post-list__title a { color: var(--text-1); }
+.post-list__title a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 0.4rem; }
+
+.post-list__summary { font-size: 1.65rem; line-height: 1.65; color: var(--text-3); }
+
+@media (max-width: 640px) {
+  .post__body { font-size: 1.65rem; }
+  .post__body pre { padding: 1.6rem; border-radius: var(--radius-sm); }
+}

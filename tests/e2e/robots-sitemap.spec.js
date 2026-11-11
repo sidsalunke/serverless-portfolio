@@ -33,7 +33,7 @@ test.describe('robots.txt, sitemap_index.xml, and the IndexNow key file are depl
     const body = await (await request.get('/sitemap_index.xml')).text();
     const urls = body.match(/<url>/g) || [];
     const lastmods = body.match(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g) || [];
-    expect(urls.length).toBe(3);
+    expect(urls.length).toBe(5);
     expect(lastmods.length).toBe(urls.length);
   });
 
@@ -80,6 +80,24 @@ test.describe('clean URLs', () => {
     const res = await request.get('/ai-engineering.html', { maxRedirects: 0 });
     expect(res.status()).toBe(301);
     expect(res.headers()['location']).toBe('/ai-engineering');
+  });
+
+  test('/writing serves the writing index', async ({ request }) => {
+    const res = await request.get('/writing');
+    expect(res.status()).toBe(200);
+    expect(await res.text()).toContain('All posts');
+  });
+
+  test('/writing/rollback-static-site-s3-cloudfront serves the article', async ({ request }) => {
+    const res = await request.get('/writing/rollback-static-site-s3-cloudfront');
+    expect(res.status()).toBe(200);
+    expect(await res.text()).toContain('Automatic rollback for a static S3 + CloudFront site');
+  });
+
+  test('article .html URL redirects permanently to the clean URL', async ({ request }) => {
+    const res = await request.get('/writing/rollback-static-site-s3-cloudfront.html', { maxRedirects: 0 });
+    expect(res.status()).toBe(301);
+    expect(res.headers()['location']).toBe('/writing/rollback-static-site-s3-cloudfront');
   });
 
   // The exact redirect chain for /index.html differs between environments
