@@ -223,12 +223,6 @@
   <div class="section tq-stage post__body-section">
     <div class="container post__container post__body">
 
-      <!-- DRAFT NOTE: remove before publishing. -->
-      <p class="post__draft-note">
-        <strong>Draft.</strong> The section &ldquo;Testing the rollback&rdquo; is waiting on the
-        production drill. Do not publish until it is filled in.
-      </p>
-
       <h2>The setup</h2>
       <p>
         The site is plain HTML, CSS and JavaScript in a private S3 bucket, served through CloudFront.
@@ -347,13 +341,56 @@
       </p>
 
       <h2>Testing the rollback</h2>
-      <!-- DRAFT: fill in from the production drill. Planned method below. -->
-      <p class="post__draft-note">
-        <strong>To be written after the drill.</strong> Planned method: merge a change that is
-        harmless to visitors (an invisible marker in the page) together with a live-only test that
-        fails when it sees the marker. The deploy should succeed, the live tests should fail, the
-        rollback should run, and the marker should be gone from production afterwards. Record here:
-        the run link, how long the marker was live, and anything that did not go to plan.
+      <p>
+        A fix to a recovery path is not finished until the recovery has been seen to work. There is
+        no staging copy of this site, and the deploy role can only be assumed from <code>master</code>,
+        so the only honest test was a drill in production. I designed it so that a failed drill would
+        cost nothing.
+      </p>
+      <p>The drill change had two parts:</p>
+      <ul>
+        <li>
+          An invisible marker in the homepage, <code>&lt;meta name="rollback-drill"&gt;</code>. It
+          changes nothing a visitor can see or use.
+        </li>
+        <li>
+          A test that fails when the live homepage contains the marker. It is skipped unless the suite
+          is pointed at the production URL, so it passed pull-request checks and could be merged.
+        </li>
+      </ul>
+      <p>
+        If the rollback worked, the marker would disappear from production without anyone touching it.
+        If it did not, the worst outcome was a stray meta tag until I reverted the change.
+      </p>
+
+      <h3>What happened</h3>
+      <p>I merged the drill on 11 November 2026. Times are UTC.</p>
+      <ul class="post__timeline">
+        <li><strong>18:39:01</strong> &mdash; drill change merged to <code>master</code>.</li>
+        <li><strong>18:39:34</strong> &mdash; marker first seen on the live homepage.</li>
+        <li><strong>18:39:45</strong> &mdash; deploy job finished, CloudFront invalidation complete.</li>
+        <li><strong>18:41:40</strong> &mdash; live tests finished: 161 passed, 1 failed. The failure was the drill test, on all three attempts.</li>
+        <li><strong>18:41:43</strong> &mdash; rollback job started. For the first time, it was not skipped.</li>
+        <li><strong>18:41:56</strong> &mdash; marker gone from the live homepage.</li>
+        <li><strong>18:42:14</strong> &mdash; rollback job finished and marked the workflow as failed, as designed.</li>
+      </ul>
+      <p>
+        The change that failed its tests was live for about two minutes and twenty seconds. Most of
+        that was the test suite running. The rollback itself, from job start to the previous version
+        being served again, took under fifteen seconds for the files and about thirty seconds including
+        the wait for the second invalidation.
+      </p>
+      <p>
+        One thing I did not expect: while polling the homepage every ten seconds, I twice saw the old
+        version come back briefly after the new one had appeared, once after the invalidation was
+        reported complete. I have not investigated the cause. It did not affect the result, because the
+        live tests retry and the drill test failed on every attempt, but it is a reminder that
+        &ldquo;invalidation complete&rdquo; and &ldquo;every request sees the new version&rdquo; are
+        not quite the same statement.
+      </p>
+      <p>
+        Afterwards I reverted the drill change, which removed the marker and the test from the
+        repository, and that deploy passed its live tests normally.
       </p>
 
       <h2>What this does not cover</h2>
@@ -384,7 +421,7 @@
 
       <h2>What I took from it</h2>
       <ul>
-        <li>Test the failure path on purpose. A recovery mechanism that has never run is a guess.</li>
+        <li>Test the failure path on purpose. A recovery mechanism that has never run is a guess. A harmless marker and a test that fails on it is enough to run the drill safely in production.</li>
         <li>In GitHub Actions, any job meant to run after a failure needs <code>always()</code> or <code>failure()</code> in its condition.</li>
         <li>Wait for the CDN invalidation before testing a deploy, or the tests check the old version.</li>
         <li>Treat a skipped job as a signal. Grey in a pipeline is not the same as green.</li>
