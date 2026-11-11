@@ -10,7 +10,10 @@
 //   2. Rewrites a clean-URL request to the underlying .html object name
 //      so S3 (which only has the .html objects) can still serve it.
 //
-// Only the two real content pages need this — index.html is already served
+// Each new page (e.g. an article under /writing/) needs an entry in both
+// maps below; an unlisted path falls through to S3 and returns a real 404.
+//
+// Only the real content pages need this — index.html is already served
 // extension-free via CloudFront's default_root_object, and 404.html is only
 // ever reached through the distribution's custom_error_response, never a
 // direct link, so neither needs an entry here.
@@ -21,7 +24,10 @@ function handler(event) {
   var fileToClean = {
     "/index.html": "/",
     "/testing.html": "/testing",
-    "/ai-engineering.html": "/ai-engineering"
+    "/ai-engineering.html": "/ai-engineering",
+    "/writing.html": "/writing",
+    "/writing/": "/writing",
+    "/writing/rollback-static-site-s3-cloudfront.html": "/writing/rollback-static-site-s3-cloudfront"
   };
 
   if (fileToClean[uri]) {
@@ -47,7 +53,9 @@ function handler(event) {
 
   var cleanToFile = {
     "/testing": "/testing.html",
-    "/ai-engineering": "/ai-engineering.html"
+    "/ai-engineering": "/ai-engineering.html",
+    "/writing": "/writing.html",
+    "/writing/rollback-static-site-s3-cloudfront": "/writing/rollback-static-site-s3-cloudfront.html"
   };
 
   if (cleanToFile[uri]) {

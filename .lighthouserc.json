@@ -4,7 +4,9 @@
       "url": [
         "https://portfolio.sidsalunke.info",
         "https://portfolio.sidsalunke.info/testing",
-        "https://portfolio.sidsalunke.info/ai-engineering"
+        "https://portfolio.sidsalunke.info/ai-engineering",
+        "https://portfolio.sidsalunke.info/writing",
+        "https://portfolio.sidsalunke.info/writing/rollback-static-site-s3-cloudfront"
       ],
       "numberOfRuns": 3
     },
