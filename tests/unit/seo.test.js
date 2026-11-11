@@ -508,3 +508,31 @@ describe('Quality Suite page — Document structure (SEO signals)', () => {
     expect(testingDoc.querySelectorAll('title').length).toBe(1);
   });
 });
+
+// ── Social image metadata + ProfilePage schema ───────────────────────────────
+
+describe('og:image metadata', () => {
+  test.each([
+    ['index.html', () => doc],
+    ['ai-engineering.html', () => aiDoc],
+    ['testing.html', () => testingDoc],
+  ])('%s declares og:image width, height and alt', (_name, getDoc) => {
+    const get = (p) => getDoc().querySelector(`meta[property="og:image:${p}"]`);
+    expect(get('width').getAttribute('content')).toBe('1200');
+    expect(get('height').getAttribute('content')).toBe('1200');
+    expect(get('alt').getAttribute('content').length).toBeGreaterThan(10);
+  });
+});
+
+describe('ProfilePage schema (index.html)', () => {
+  test('a ProfilePage block references the Person by @id', () => {
+    const blocks = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'))
+      .map((el) => JSON.parse(el.textContent));
+    const person = blocks.find((b) => b['@type'] === 'Person');
+    const profile = blocks.find((b) => b['@type'] === 'ProfilePage');
+    expect(profile).toBeDefined();
+    expect(person['@id']).toBeTruthy();
+    expect(profile.mainEntity['@id']).toBe(person['@id']);
+    expect(profile.dateModified).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});
