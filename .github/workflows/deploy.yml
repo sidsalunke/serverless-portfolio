@@ -79,7 +79,7 @@ jobs:
             --exclude "*" \
             --include "styles/*" \
             --include "js/app.js" \
-            --cache-control "public, max-age=3600" \
+            --cache-control "public, max-age=60" \
             --delete
 
       - name: Sync images and fonts to S3 (long client cache)
@@ -280,7 +280,7 @@ jobs:
             --exclude "*" \
             --include "styles/*" \
             --include "js/app.js" \
-            --cache-control "public, max-age=3600" \
+            --cache-control "public, max-age=60" \
             --delete
 
       - name: Restore previous images and fonts to S3 (long client cache)
