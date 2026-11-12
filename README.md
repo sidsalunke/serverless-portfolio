@@ -136,7 +136,7 @@ sbom (parallel with deploy)   └──► (fail) rollback
 
 **`e2e-live`** — runs the Playwright suite against `https://portfolio.sidsalunke.info` to verify the live deployment. Acts as the canary gate.
 
-**`rollback`** — triggered only if `e2e-live` fails. Checks out the `HEAD~1` SHA captured before deploy, re-syncs S3, and re-invalidates CloudFront — reverting users to the previous version within ~1–3 minutes. Exits non-zero so the workflow is visibly red.
+**`rollback`** — triggered only if `e2e-live` fails. Checks out the last commit that passed live tests (the `last-good-deploy` tag, moved by the `mark-good` job after every green deploy), re-syncs S3, and re-invalidates CloudFront — reverting users to the previous version within ~1–3 minutes. Exits non-zero so the workflow is visibly red.
 
 **`update-badges`** — triggered only if `e2e-live` succeeds. Runs unit tests with coverage, then runs Lighthouse CI (3 runs) against the live site, generates SVG badges via `badge-maker`, and commits them to the unprotected `badges` orphan branch with `[skip ci]` (master stays behind branch protection).
 

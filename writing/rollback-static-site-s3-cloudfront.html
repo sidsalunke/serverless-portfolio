@@ -245,7 +245,7 @@
         Before it uploads anything, the deploy job records the commit that is currently live. On a
         branch where every merge is one commit, that is the parent of the commit being deployed.
       </p>
-<pre><code>- uses: actions/checkout@v4
+<pre tabindex="0"><code>- uses: actions/checkout@v4
   with:
     fetch-depth: 2  # need HEAD and HEAD~1 for rollback
 
@@ -260,7 +260,7 @@
       <p>
         After the sync, the job creates a CloudFront invalidation and blocks until it completes.
       </p>
-<pre><code>- name: Wait for CloudFront invalidation to complete
+<pre tabindex="0"><code>- name: Wait for CloudFront invalidation to complete
   run: |
     aws cloudfront wait invalidation-completed \
       --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
@@ -283,7 +283,7 @@
         The rollback job checks out the recorded SHA, runs the same sync commands as the deploy,
         invalidates the cache again and then exits non-zero, so the workflow shows red.
       </p>
-<pre><code>rollback:
+<pre tabindex="0"><code>rollback:
   needs: [deploy, e2e-live]
   steps:
     - uses: actions/checkout@v4
@@ -305,7 +305,7 @@
         live.
       </p>
       <p>The condition on the job looked correct:</p>
-<pre><code>rollback:
+<pre tabindex="0"><code>rollback:
   needs: [deploy, e2e-live]
   if: needs.e2e-live.result == 'failure'</code></pre>
       <p>
@@ -315,12 +315,12 @@
         to the front of it. <code>success()</code> is false as soon as any job in <code>needs</code>
         has failed. So the real condition was:
       </p>
-<pre><code>if: success() &amp;&amp; needs.e2e-live.result == 'failure'</code></pre>
+<pre tabindex="0"><code>if: success() &amp;&amp; needs.e2e-live.result == 'failure'</code></pre>
       <p>
         Those two halves cannot both be true. The job was skipped in the one situation it was written
         for. The fix is to state the status function explicitly:
       </p>
-<pre><code>if: always() &amp;&amp; needs.deploy.result == 'success' &amp;&amp; needs.e2e-live.result == 'failure'</code></pre>
+<pre tabindex="0"><code>if: always() &amp;&amp; needs.deploy.result == 'success' &amp;&amp; needs.e2e-live.result == 'failure'</code></pre>
       <p>
         The check on <code>needs.deploy.result</code> matters once <code>always()</code> is there.
         Without it, a deploy that failed before uploading anything could still trigger a rollback of

@@ -4,6 +4,12 @@ on:
   pull_request:
     branches: [master]
 
+# Least privilege: the token is read-only unless a job below asks for more.
+# Without this block every job inherits the repository default, which was
+# read-write.
+permissions:
+  contents: read
+
 jobs:
   # ── Job 1: fast static tests (no browser needed) ────────────────────────
   static-tests:
@@ -16,11 +22,11 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -43,7 +49,7 @@ jobs:
       # Upload the full HTML coverage report as a workflow artifact so reviewers
       # can drill into uncovered lines directly from the PR checks tab.
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-report-pr-${{ github.event.pull_request.number }}
           path: coverage/
@@ -53,7 +59,7 @@ jobs:
       # jq extracts lines/statements/functions/branches from the json-summary.
       # The comment is updated on subsequent pushes (find-comment + upsert).
       - name: Post coverage comment to PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const fs = require('fs');
@@ -118,15 +124,20 @@ jobs:
     name: Security Scan (SAST · SCA · Secrets)
     runs-on: ubuntu-latest
 
+    # Gitleaks lists the PR's commits through the API to decide what to scan.
+    permissions:
+      contents: read
+      pull-requests: read
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Gitleaks needs full history to scan all commits on the PR branch
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -142,23 +153,26 @@ jobs:
       # Semgrep's p/javascript ruleset catches common JS anti-patterns:
       # dangerouslySetInnerHTML, eval(), prototype pollution, etc.
       # --error exits non-zero on any finding, which fails the job.
+      #
+      # This runs the Semgrep CLI directly at a pinned version. The
+      # semgrep/semgrep-action wrapper used before is archived and was
+      # referenced by a movable tag. The old config also listed p/html, a
+      # ruleset the Semgrep registry does not serve (HTTP 404). The current
+      # CLI rejects an unknown ruleset, so it is dropped here.
       - name: SAST scan (Semgrep)
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: >-
-            p/javascript
-            p/html
-            p/secrets
-        env:
-          # SEMGREP_APP_TOKEN is optional; omitting it uses the OSS engine only.
-          # Add the secret to enable Semgrep Cloud dashboard visibility.
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        run: |
+          pipx install --quiet semgrep==1.184.0
+          semgrep scan --error --metrics=off \
+            --config p/javascript \
+            --config p/secrets \
+            --exclude node_modules \
+            .
 
       # ── Secret scanning: detect credentials in the commit history ─────────
       # Scans the diff between HEAD~N and HEAD on this PR so it only covers
       # new commits, not the entire repo history on every run.
       - name: Secret scan (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # GITLEAKS_LICENSE is required for org repos on the paid plan.
@@ -185,14 +199,14 @@ jobs:
           - { name: security,   pattern: tests/e2e/security.spec.js }
           - { name: seo,        pattern: tests/e2e/seo.spec.js tests/e2e/robots-sitemap.spec.js }
           - { name: visual,     pattern: tests/e2e/visual.spec.js }
-          - { name: functional, pattern: tests/e2e/navigation.spec.js tests/e2e/experience.spec.js tests/e2e/education.spec.js tests/e2e/quality-suite.spec.js tests/e2e/ai-engineering.spec.js }
+          - { name: functional, pattern: tests/e2e/navigation.spec.js tests/e2e/experience.spec.js tests/e2e/education.spec.js tests/e2e/quality-suite.spec.js tests/e2e/ai-engineering.spec.js tests/e2e/writing.spec.js }
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -202,7 +216,7 @@ jobs:
       # (~100+ MB Chromium download); caching them keyed on the installed
       # version means most runs skip straight to the OS-deps step below.
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
@@ -222,7 +236,7 @@ jobs:
         # every file in this group, same as the unsplit suite did.
 
       - name: Upload Playwright report on failure
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: playwright-report-pr-${{ matrix.group.name }}
@@ -245,11 +259,11 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Run Lighthouse CI against a local server
         run: |
@@ -259,7 +273,7 @@ jobs:
             --upload.outputDir=.lighthouseci-report
 
       - name: Upload Lighthouse reports on failure
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: lighthouse-report-pr-${{ github.event.pull_request.number }}

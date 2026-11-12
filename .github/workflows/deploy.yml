@@ -17,6 +17,12 @@ concurrency:
   group: deploy-production
   cancel-in-progress: false
 
+# Least privilege: the token is read-only unless a job below asks for more.
+# Without this block every job inherits the repository default, which was
+# read-write.
+permissions:
+  contents: read
+
 jobs:
   # ── Job 1: push files to S3 ─────────────────────────────────────────────
   deploy:
@@ -27,25 +33,39 @@ jobs:
       id-token: write
       contents: read
 
-    # Expose the pre-deploy commit SHA so the rollback job can restore it
-    # if the live E2E tests fail.
+    # Expose the last known-good commit SHA so the rollback job can restore
+    # it if the live E2E tests fail.
     outputs:
       previous-sha: ${{ steps.prev-sha.outputs.sha }}
       invalidation-id: ${{ steps.invalidation.outputs.id }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 2  # need HEAD and HEAD~1 for rollback
+          fetch-depth: 2  # HEAD~1 is the fallback rollback target
 
-      # Record the commit that is currently live before we overwrite it.
-      # If E2E fails after deploy, the rollback job checks out this SHA
-      # and re-syncs it to S3, restoring the last known-good state.
-      - name: Record pre-deploy commit SHA
+      # Record the commit to restore if the live E2E tests fail.
+      #
+      # This used to be HEAD~1, which is only right when the previous deploy
+      # was good. After a rollback, master still contains the bad commit, so
+      # the next merge would record that bad commit as its rollback target.
+      # A manual re-run has the same problem. Instead, the mark-good job
+      # below moves the last-good-deploy tag every time live tests pass, and
+      # that tag is the rollback target. HEAD~1 is used only until the tag
+      # exists for the first time.
+      - name: Record last known-good commit SHA
         id: prev-sha
-        run: echo "sha=$(git rev-parse HEAD~1)" >> $GITHUB_OUTPUT
+        run: |
+          if git fetch --quiet --no-tags origin "+refs/tags/last-good-deploy:refs/tags/last-good-deploy" 2>/dev/null; then
+            sha=$(git rev-parse "refs/tags/last-good-deploy^{commit}")
+            echo "Rollback target: last-good-deploy tag ($sha)"
+          else
+            sha=$(git rev-parse HEAD~1)
+            echo "Rollback target: HEAD~1 ($sha); the last-good-deploy tag does not exist yet"
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           aws-region: us-east-1
@@ -181,11 +201,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -198,7 +218,7 @@ jobs:
         run: cyclonedx-npm --output-format JSON --output-file sbom.json
 
       - name: Upload SBOM artefact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sbom-${{ github.sha }}
           path: sbom.json
@@ -213,11 +233,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -237,7 +257,7 @@ jobs:
         # present in the HTML meta tags.
 
       - name: Upload report on failure
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: e2e-live-report
@@ -251,8 +271,8 @@ jobs:
   # invalidates the CDN — users see the old version within ~1-3 minutes.
   #
   # Flow:
-  #   deploy (records HEAD~1 SHA) ──► e2e-live ──► (pass) done
-  #                                              └──► (fail) rollback ──► re-deploy HEAD~1
+  #   deploy (records last-good SHA) ──► e2e-live ──► (pass) mark-good ──► tag moves
+  #                                                 └──► (fail) rollback ──► re-deploy last-good
   rollback:
     name: Rollback to previous commit
     needs: [deploy, e2e-live]
@@ -269,13 +289,13 @@ jobs:
       contents: read
 
     steps:
-      # Check out the commit that was live before this deploy.
-      # git rev-parse HEAD~1 in the deploy job captured this SHA.
-      - uses: actions/checkout@v4
+      # Check out the last commit that passed live tests. The deploy job
+      # read this SHA from the last-good-deploy tag.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.deploy.outputs.previous-sha }}
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ secrets.DEPLOY_ROLE_ARN }}
           aws-region: us-east-1
@@ -338,7 +358,31 @@ jobs:
           echo "::error::Live E2E tests failed. Rolled back to commit ${{ needs.deploy.outputs.previous-sha }}. Check the e2e-live-report artefact for details."
           exit 1
 
-  # ── Job 5: update metric badges and commit to master ────────────────────
+  # ── Job 5: mark this commit as the last known-good deploy ───────────────
+  #
+  # Runs only after the live E2E tests pass. Moves the last-good-deploy tag
+  # to this commit; the next deploy reads it as its rollback target. A tag
+  # push made with GITHUB_TOKEN does not start another workflow run, and this
+  # workflow only triggers on branch pushes anyway.
+  mark-good:
+    name: Mark deploy as last known-good
+    needs: [deploy, e2e-live]
+    if: needs.deploy.result == 'success' && needs.e2e-live.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    permissions:
+      contents: write   # needed to move the tag
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Move last-good-deploy tag to this commit
+        run: |
+          git tag --force last-good-deploy "$GITHUB_SHA"
+          git push --force origin refs/tags/last-good-deploy
+
+  # ── Job 6: update metric badges and commit to master ────────────────────
   #
   # Runs only after live E2E tests pass (i.e., the deploy is confirmed good).
   # Generates fresh SVG badges for test coverage and Lighthouse scores,
@@ -360,14 +404,14 @@ jobs:
       contents: write   # needed to push the badge commit
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Fetch full history so the [skip ci] commit lands on master correctly
           ref: master
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies

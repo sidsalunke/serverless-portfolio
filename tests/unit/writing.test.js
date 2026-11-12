@@ -36,6 +36,12 @@ describe.each(PAGES)('$file', ({ file, url, type }) => {
     expect(doc.title.length).toBeLessThanOrEqual(60);
   });
 
+  // A scrollable region must be reachable by keyboard (WCAG 2.1.1). Code
+  // blocks scroll sideways on narrow screens, so each one is focusable.
+  test('code blocks are keyboard focusable', () => {
+    doc.querySelectorAll('pre').forEach((pre) => expect(pre.getAttribute('tabindex')).toBe('0'));
+  });
+
   test('meta description is 50-160 characters', () => {
     const len = doc.querySelector('meta[name="description"]').getAttribute('content').length;
     expect(len).toBeGreaterThanOrEqual(50);
