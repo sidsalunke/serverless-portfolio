@@ -42,3 +42,52 @@ describe('deploy.yml rollback job', () => {
     expect(condition).toContain("needs.deploy.result == 'success'");
   });
 });
+
+/**
+ * The rollback target. HEAD~1 is only "the last good version" when the
+ * previous deploy was good; after a rollback it is the bad commit. The
+ * deploy job reads the last-good-deploy tag instead, and mark-good moves
+ * that tag only after live tests pass.
+ */
+describe('deploy.yml rollback target', () => {
+  test('deploy reads the last-good-deploy tag, falling back to HEAD~1', () => {
+    const deploy = jobBlock('deploy');
+    expect(deploy).toContain('refs/tags/last-good-deploy');
+    expect(deploy).toContain('git rev-parse HEAD~1');
+    expect(deploy).toMatch(/previous-sha: \$\{\{ steps\.prev-sha\.outputs\.sha \}\}/);
+  });
+
+  test('rollback checks out the recorded SHA', () => {
+    expect(jobBlock('rollback')).toMatch(/ref: \$\{\{ needs\.deploy\.outputs\.previous-sha \}\}/);
+  });
+
+  test('mark-good moves the tag only after live tests pass', () => {
+    const markGood = jobBlock('mark-good');
+    expect(markGood).toMatch(/^    if: .*needs\.e2e-live\.result == 'success'/m);
+    expect(markGood).toMatch(/needs: \[deploy, e2e-live\]/);
+    expect(markGood).toContain('git push --force origin refs/tags/last-good-deploy');
+    expect(markGood).toMatch(/permissions:\s+contents: write/);
+  });
+});
+
+/**
+ * Supply-chain and privilege guardrails for every workflow.
+ */
+describe.each(['deploy.yml', 'pr.yml', 'update-snapshots.yml'])('workflow hardening: %s', (file) => {
+  const text = fs.readFileSync(path.join(__dirname, '../../.github/workflows', file), 'utf8').replace(/\r\n/g, '\n');
+
+  test('default token permission is read-only', () => {
+    expect(text).toMatch(/^permissions:\n  contents: read$/m);
+  });
+
+  test('every action is pinned to a full commit SHA', () => {
+    const uses = [...text.matchAll(/^\s*(?:- )?uses: (\S+)/gm)].map((m) => m[1]);
+    expect(uses.length).toBeGreaterThan(0);
+    uses.forEach((ref) => expect(ref).toMatch(/@[0-9a-f]{40}$/));
+  });
+
+  test('does not use an end-of-life Node.js version', () => {
+    const versions = [...text.matchAll(/node-version: '(\d+)'/g)].map((m) => Number(m[1]));
+    versions.forEach((v) => expect(v).toBeGreaterThanOrEqual(22));
+  });
+});

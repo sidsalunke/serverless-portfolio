@@ -7,6 +7,8 @@ const PAGES = [
   { name: 'index',           path: '/' },
   { name: 'testing',         path: '/testing' },
   { name: 'ai-engineering',  path: '/ai-engineering' },
+  { name: 'writing',         path: '/writing' },
+  { name: 'writing-article', path: '/writing/rollback-static-site-s3-cloudfront' },
 ];
 
 for (const { name, path } of PAGES) {

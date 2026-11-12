@@ -20,6 +20,12 @@ on:
         required: false
         default: ''
 
+# Least privilege: the token is read-only unless a job below asks for more.
+# Without this block every job inherits the repository default, which was
+# read-write.
+permissions:
+  contents: read
+
 jobs:
   update-snapshots:
     name: Regenerate Linux visual baselines
@@ -34,7 +40,7 @@ jobs:
       pull-requests: write   # remove the label after running (label trigger only)
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # label trigger: use the PR head branch
           # workflow_dispatch: use the input branch, or fall back to the triggering ref
@@ -45,9 +51,9 @@ jobs:
                 || (github.event.inputs.branch != '' && github.event.inputs.branch || github.ref)
             }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -82,7 +88,7 @@ jobs:
       # if needed, and to keep the PR label list tidy.
       - name: Remove update-snapshots label
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             await github.rest.issues.removeLabel({

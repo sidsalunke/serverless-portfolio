@@ -1925,6 +1925,9 @@ button.exp__header {
   line-height: 1.6;
   tab-size: 2;
 }
+/* Code blocks scroll sideways, so they take keyboard focus (tabindex="0" in
+   the markup): without it a keyboard user cannot reach the clipped part. */
+.post__body pre:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .post__body pre code { background: none; padding: 0; font-size: max(1.4rem, 13px); white-space: pre; }
 
 .post__body .post__timeline { list-style: none; padding-left: 0; border-left: 2px solid var(--border); }
