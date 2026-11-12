@@ -60,6 +60,26 @@ function initPortfolio() {
       syncThemeToggleLabel();
       try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
     });
+
+    /* Follow the operating system while the visitor has not chosen a theme
+       with the toggle. theme-init.js applies the system preference on load;
+       this keeps the page in step if the system switches (for example an
+       automatic light/dark schedule) while the page is open. A stored choice
+       always wins, so it is left alone. */
+    var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    if (systemDark && systemDark.addEventListener) {
+      systemDark.addEventListener('change', function (e) {
+        var stored = null;
+        try { stored = localStorage.getItem('theme'); } catch (err) {}
+        if (stored) return;
+        if (e.matches) {
+          root.setAttribute('data-theme', 'dark');
+        } else {
+          root.removeAttribute('data-theme');
+        }
+        syncThemeToggleLabel();
+      });
+    }
   }
 
   /* ── Nav: hamburger / mobile drawer ──

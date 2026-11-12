@@ -66,7 +66,8 @@ describe.each(PAGES)('$file', ({ file, url, type }) => {
   // Pages can live below the site root, so a relative asset path would 404.
   test('stylesheet, script and favicon use root-relative URLs', () => {
     expect(doc.querySelector('link[rel="stylesheet"]').getAttribute('href')).toBe('/styles/main.css');
-    expect(doc.querySelector('script[src]').getAttribute('src')).toBe('/js/app.js');
+    expect([...doc.querySelectorAll('script[src]')].map((s) => s.getAttribute('src')))
+      .toEqual(['/js/theme-init.js', '/js/app.js']);
     expect(doc.querySelector('link[rel="icon"]').getAttribute('href')).toBe('/favicon.svg');
   });
 

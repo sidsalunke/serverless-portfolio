@@ -210,7 +210,7 @@ Commit the updated files in `tests/e2e/visual.spec.js-snapshots/`.
 
 ### Infrastructure
 
-Requires [Terraform](https://developer.hashicorp.com/terraform/downloads) 1.5+ and AWS credentials with sufficient permissions.
+Requires [Terraform](https://developer.hashicorp.com/terraform/downloads) 1.10+ and AWS credentials with sufficient permissions.
 
 ```bash
 cd infra

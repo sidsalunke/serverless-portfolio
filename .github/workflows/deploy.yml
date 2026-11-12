@@ -112,7 +112,7 @@ jobs:
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "styles/*" \
-            --include "js/app.js" \
+            --include "js/*" \
             --cache-control "public, max-age=60, s-maxage=86400" \
             --delete
 
@@ -313,7 +313,7 @@ jobs:
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "styles/*" \
-            --include "js/app.js" \
+            --include "js/*" \
             --cache-control "public, max-age=60, s-maxage=86400" \
             --delete
 
