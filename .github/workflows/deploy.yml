@@ -10,6 +10,13 @@ on:
       - 'tests/e2e/visual.spec.js-snapshots/**'
   workflow_dispatch:  # allows manual triggering from the Actions tab
 
+# One deploy at a time. Two merges in quick succession would otherwise sync
+# to S3 concurrently, and one run's rollback could overwrite the other run's
+# deploy. A queued run waits instead of being cancelled part-way through.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   # ── Job 1: push files to S3 ─────────────────────────────────────────────
   deploy:
@@ -65,12 +72,19 @@ jobs:
       # "no-cache" and showed X-Cache: Miss on every request, ~900ms-1.5s+
       # TTFB instead of a fast edge hit. Use a short max-age, never
       # "no-cache", for anything CloudFront should still edge-cache.
+      #
+      # s-maxage applies to shared caches only: browsers keep revalidating
+      # after 60 seconds (max-age), while CloudFront keeps its copy for a day.
+      # With max-age alone the edge copy also expired after 60 seconds, so on
+      # a low-traffic site nearly every request was an edge miss. The
+      # invalidation below clears the edge on every deploy and rollback, so a
+      # long s-maxage never serves a stale release.
       - name: Sync HTML to S3 (short client cache)
         run: |
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "*.html" \
-            --cache-control "public, max-age=60" \
+            --cache-control "public, max-age=60, s-maxage=86400" \
             --delete
 
       - name: Sync CSS/JS to S3 (short client cache)
@@ -79,7 +93,7 @@ jobs:
             --exclude "*" \
             --include "styles/*" \
             --include "js/app.js" \
-            --cache-control "public, max-age=60" \
+            --cache-control "public, max-age=60, s-maxage=86400" \
             --delete
 
       - name: Sync images and fonts to S3 (long client cache)
@@ -100,7 +114,7 @@ jobs:
             --include "sitemap_index.xml" \
             --include "llms.txt" \
             --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
-            --cache-control "public, max-age=60" \
+            --cache-control "public, max-age=60, s-maxage=86400" \
             --delete
         # Note: --acl public-read is intentionally omitted from every sync
         # above. CloudFront OAC (configured in the console, codified in
@@ -271,7 +285,7 @@ jobs:
           aws s3 sync . s3://portfolio.sidsalunke.info \
             --exclude "*" \
             --include "*.html" \
-            --cache-control "public, max-age=60" \
+            --cache-control "public, max-age=60, s-maxage=86400" \
             --delete
 
       - name: Restore previous CSS/JS to S3 (short client cache)
@@ -280,7 +294,7 @@ jobs:
             --exclude "*" \
             --include "styles/*" \
             --include "js/app.js" \
-            --cache-control "public, max-age=60" \
+            --cache-control "public, max-age=60, s-maxage=86400" \
             --delete
 
       - name: Restore previous images and fonts to S3 (long client cache)
@@ -301,7 +315,7 @@ jobs:
             --include "sitemap_index.xml" \
             --include "llms.txt" \
             --include "d6a69049b7ef3ef62df1b7ead257a870.txt" \
-            --cache-control "public, max-age=60" \
+            --cache-control "public, max-age=60, s-maxage=86400" \
             --delete
 
       - name: Invalidate CloudFront after rollback
@@ -369,9 +383,10 @@ jobs:
       # Run Lighthouse CI against the live site (already confirmed up by e2e-live).
       # lhci autorun writes JSON results to .lighthouseci/ which generate-badges.js reads.
       - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli
+        run: npm install -g @lhci/cli@0.15.1
 
       - name: Run Lighthouse CI against live site
+        id: lhci
         # URLs (all 3 pages) and numberOfRuns come from .lighthouserc.json —
         # not passed here, so every page gets audited, not just the homepage.
         run: |
@@ -379,8 +394,10 @@ jobs:
             --upload.target=filesystem \
             --upload.outputDir=.lighthouseci
         continue-on-error: true
-        # continue-on-error: if Lighthouse fails (e.g. network hiccup), we still
-        # commit coverage badges. generate-badges.js emits "unknown" for missing data.
+        # continue-on-error: if Lighthouse fails (a network hiccup, or a score
+        # below the budget in .lighthouserc.json), we still commit the badges so
+        # they show the real numbers. The last step of this job then fails the
+        # workflow, so a score regression is never silent.
 
       # ── Generate SVG files ───────────────────────────────────────────────
       - name: Generate badge SVGs
@@ -419,3 +436,14 @@ jobs:
             git commit -m "chore: update metric badges [skip ci]"
             git push origin badges
           fi
+
+      # Guardrail: the Lighthouse step above is allowed to fail so that badges
+      # still update, which used to mean a score regression went unnoticed.
+      # Fail here instead. This does not roll the deploy back: the live E2E
+      # tests already passed, so the site works; the red run is the signal to
+      # fix the regression.
+      - name: Fail if Lighthouse scores are below budget
+        if: steps.lhci.outcome == 'failure'
+        run: |
+          echo "::error::Lighthouse scores on the live site are below the budget in .lighthouserc.json (performance 0.9; accessibility, best practices and SEO 1.0)."
+          exit 1

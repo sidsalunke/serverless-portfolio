@@ -28,7 +28,7 @@
   <!-- ── Fonts (self-hosted; see main.css for why) ───────────────────────────── -->
   <link rel="preload" href="/fonts/outfit-variable.woff2" as="font" type="font/woff2" crossorigin>
 
-  <link rel="preload" href="js/app.js" as="script" fetchpriority="high">
+  <link rel="preload" href="/js/app.js" as="script" fetchpriority="high">
   <!--
     Theme init — applies a stored "dark" preference before first paint so a
     returning dark-mode user never sees a flash of the light default. Inline
@@ -47,8 +47,8 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="styles/main.css">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
 
@@ -132,6 +132,6 @@
   </div>
 </footer>
 
-<script src="js/app.js" fetchpriority="high" defer></script>
+<script src="/js/app.js" fetchpriority="high" defer></script>
 </body>
 </html>
