@@ -214,11 +214,18 @@ describe('local static server', () => {
     expect(pkg.devDependencies.serve).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
+  // `lhci autorun` treats a script named serve:lhci as its server command
+  // whenever the config sets none. The post-deploy run audits the live site
+  // with no server, so that name made it try to start one and fail (#88).
+  test('no npm script uses the name Lighthouse CI auto-detects', () => {
+    expect(pkg.scripts['serve:lhci']).toBeUndefined();
+  });
+
   test('Playwright and Lighthouse start it through npm scripts', () => {
     expect(pkg.scripts.start).toMatch(/^serve /);
-    expect(pkg.scripts['serve:lhci']).toMatch(/^serve -l 4173 /);
+    expect(pkg.scripts['lhci:server']).toMatch(/^serve -l 4173 /);
     expect(read('playwright.config.js')).toMatch(/command: 'npm start'/);
-    expect(JSON.parse(read('.lighthouserc.pr.json')).ci.collect.startServerCommand).toBe('npm run serve:lhci');
+    expect(JSON.parse(read('.lighthouserc.pr.json')).ci.collect.startServerCommand).toBe('npm run lhci:server');
   });
 });
 

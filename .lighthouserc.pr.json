@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "startServerCommand": "npm run serve:lhci",
+      "startServerCommand": "npm run lhci:server",
       "startServerReadyPattern": "Accepting connections",
       "url": [
         "http://localhost:4173/",

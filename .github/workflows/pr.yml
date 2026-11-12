@@ -267,7 +267,7 @@ jobs:
           cache: 'npm'
 
       # Installs the pinned static server (serve) that .lighthouserc.pr.json
-      # starts through `npm run serve:lhci`.
+      # starts through `npm run lhci:server`.
       - name: Install dependencies
         run: npm ci
 

@@ -4,7 +4,7 @@
   "description": "Siddharth Salunke – Professional Portfolio",
   "scripts": {
     "start": "serve -p 3000 .",
-    "serve:lhci": "serve -l 4173 .",
+    "lhci:server": "serve -l 4173 .",
     "test": "jest",
     "test:unit": "jest tests/unit",
     "test:a11y": "jest tests/a11y",
