@@ -209,6 +209,18 @@ resource "aws_cloudfront_response_headers_policy" "security" {
       override                = true
     }
   }
+
+  # Permissions-Policy has no dedicated block in security_headers_config, so
+  # it is sent as a custom header. The pages also carry it as a <meta> tag,
+  # but browsers only honour this policy as a real response header. The site
+  # uses none of these device APIs, so every one is switched off.
+  custom_headers_config {
+    items {
+      header   = "Permissions-Policy"
+      value    = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+      override = true
+    }
+  }
 }
 
 # Rewrites any extensionless clean URL (/testing, /writing/some-post) to its
@@ -228,7 +240,13 @@ resource "aws_cloudfront_distribution" "site" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
   aliases             = [var.domain_name]
-  price_class         = "PriceClass_100" # US, Canada, Europe – cheapest tier
+  # All edge locations. PriceClass_100 (US, Canada, Europe) left visitors in
+  # the Middle East and Australia, where most of this site's audience is, on
+  # a long round trip to Europe. PriceClass_200 adds the Middle East and Asia
+  # but still excludes Australia. At this site's traffic the difference in
+  # cost is cents per month, and the budget alarm below covers surprises.
+  price_class         = "PriceClass_All"
+  http_version        = "http2and3" # HTTP/3 (QUIC) for clients that support it
 
   origin {
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
