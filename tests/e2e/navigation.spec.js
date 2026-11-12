@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+// On a phone-width project the links live in a drawer that is hidden
+// (visibility: hidden) until the hamburger opens it.
+async function revealNavLinks(page) {
+  const hamburger = page.getByRole('button', { name: 'Toggle navigation menu' });
+  if (await hamburger.isVisible()) await hamburger.click();
+}
+
 test.describe('Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
@@ -13,6 +20,7 @@ test.describe('Navigation', () => {
 
   test('nav contains expected section links', async ({ page }) => {
     const nav = page.getByRole('navigation', { name: 'Main navigation' });
+    await revealNavLinks(page);
     for (const label of ['About', 'Experience', 'Education', 'Skills']) {
       await expect(nav.getByRole('link', { name: label, exact: true })).toBeVisible();
     }
@@ -70,6 +78,7 @@ for (const { name, path, currentLabel } of SUB_PAGES) {
 
     test('nav contains expected links, pointing back at the homepage sections', async ({ page }) => {
       const nav = page.getByRole('navigation', { name: 'Main navigation' });
+      await revealNavLinks(page);
       for (const label of ['About', 'Experience', 'Education', 'Skills']) {
         const link = nav.getByRole('link', { name: label, exact: true });
         await expect(link).toBeVisible();
@@ -94,6 +103,40 @@ for (const { name, path, currentLabel } of SUB_PAGES) {
       const nav = page.getByRole('navigation', { name: 'Main navigation' });
       await nav.getByRole('link', { name: 'SS' }).click();
       await expect(page).toHaveURL(/\/$/);
+    });
+  });
+}
+
+// ── Skip link (WCAG 2.4.1 Bypass Blocks) ──
+for (const path of ['/', '/testing', '/ai-engineering', '/writing', '/writing/rollback-static-site-s3-cloudfront']) {
+  test.describe(`Skip link — ${path}`, () => {
+    test('is the first Tab stop, becomes visible, and jumps past the nav', async ({ page }) => {
+      await page.goto(path);
+      const skip = page.getByRole('link', { name: 'Skip to main content' });
+
+      // Off screen until it has focus.
+      await expect(skip).not.toBeInViewport();
+
+      await page.keyboard.press('Tab');
+      await expect(skip).toBeFocused();
+      await expect(skip).toBeInViewport();
+
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL(/#main-content$/);
+
+      // The next Tab stop is past the navigation: inside <main>, or after it
+      // on a page whose <main> has nothing focusable.
+      await page.keyboard.press('Tab');
+      const where = await page.evaluate(() => {
+        const el = document.activeElement;
+        const main = document.querySelector('main');
+        return {
+          inNav: !!el.closest('nav'),
+          atOrAfterMain: main.contains(el) ||
+            !!(main.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING),
+        };
+      });
+      expect(where).toEqual({ inNav: false, atOrAfterMain: true });
     });
   });
 }

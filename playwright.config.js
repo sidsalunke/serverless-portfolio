@@ -25,7 +25,7 @@ module.exports = defineConfig({
   // Start a static file server automatically when running locally/on PR.
   // Skipped when BASE_URL is set (live-site E2E run after deploy).
   webServer: isLive ? undefined : {
-    command: 'npx serve -p 3000 .',
+    command: 'npm start',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 10_000,

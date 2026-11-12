@@ -73,7 +73,7 @@ describe('deploy.yml rollback target', () => {
 /**
  * Supply-chain and privilege guardrails for every workflow.
  */
-describe.each(['deploy.yml', 'pr.yml', 'update-snapshots.yml'])('workflow hardening: %s', (file) => {
+describe.each(['deploy.yml', 'pr.yml', 'update-snapshots.yml', 'smoke.yml'])('workflow hardening: %s', (file) => {
   const text = fs.readFileSync(path.join(__dirname, '../../.github/workflows', file), 'utf8').replace(/\r\n/g, '\n');
 
   test('default token permission is read-only', () => {
@@ -84,6 +84,18 @@ describe.each(['deploy.yml', 'pr.yml', 'update-snapshots.yml'])('workflow harden
     const uses = [...text.matchAll(/^\s*(?:- )?uses: (\S+)/gm)].map((m) => m[1]);
     expect(uses.length).toBeGreaterThan(0);
     uses.forEach((ref) => expect(ref).toMatch(/@[0-9a-f]{40}$/));
+  });
+
+  // `npm install` may resolve newer versions than package-lock.json records;
+  // `npm ci` installs exactly the lockfile and fails if it is out of date.
+  test('installs dependencies from the lockfile with npm ci', () => {
+    expect(text).toMatch(/run: npm ci$/m);
+    expect(text).not.toMatch(/run: npm install$/m);
+  });
+
+  test('global tool installs name an exact version', () => {
+    const globals = [...text.matchAll(/npm install -g (\S+)/g)].map((m) => m[1]);
+    globals.forEach((spec) => expect(spec).toMatch(/@\d+\.\d+\.\d+$/));
   });
 
   test('does not use an end-of-life Node.js version', () => {

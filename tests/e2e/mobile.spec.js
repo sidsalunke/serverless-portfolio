@@ -55,6 +55,33 @@ for (const { name, path } of PAGES) {
       await expect(hamburger).toHaveAttribute('aria-expanded', 'false');
     });
 
+    test('keyboard: opening moves focus into the drawer, Escape closes it', async ({ page }) => {
+      const hamburger = page.getByRole('button', { name: 'Toggle navigation menu' });
+      const firstLink = page.getByRole('navigation', { name: 'Main navigation' })
+        .getByRole('list')
+        .getByRole('link')
+        .first();
+
+      await hamburger.focus();
+      await page.keyboard.press('Enter');
+      await expect(hamburger).toHaveAttribute('aria-expanded', 'true');
+      await expect(firstLink).toBeFocused();
+
+      await page.keyboard.press('Escape');
+      await expect(hamburger).toHaveAttribute('aria-expanded', 'false');
+      await expect(hamburger).toBeFocused();
+      await expect(page.getByTestId('nav-backdrop')).toHaveCount(0);
+    });
+
+    test('keyboard: closed drawer links are not in the tab order', async ({ page }) => {
+      // The drawer is off screen while closed; its links must not take focus.
+      const drawer = page.locator('#nav-links');
+      await expect(drawer).toHaveCSS('visibility', 'hidden');
+
+      await page.getByRole('button', { name: 'Toggle navigation menu' }).click();
+      await expect(drawer).toHaveCSS('visibility', 'visible');
+    });
+
     test('content is readable without horizontal scroll', async ({ page }) => {
       const scrollWidth  = await page.evaluate(() => document.body.scrollWidth);
       const clientWidth  = await page.evaluate(() => document.body.clientWidth);

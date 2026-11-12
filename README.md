@@ -66,7 +66,8 @@ Beyond being a personal portfolio, this repo is intended as a reference for prod
 │       └── visual.spec.js
 ├── .github/workflows/
 │   ├── pr.yml                  # Checks that run on every pull request
-│   └── deploy.yml              # Deploy + post-deploy verification on merge to master
+│   ├── deploy.yml              # Deploy + post-deploy verification on merge to master
+│   └── smoke.yml               # Daily smoke test of the live site; opens an issue on failure
 ├── jest.config.js
 └── playwright.config.js
 ```
@@ -121,7 +122,7 @@ security-scan ─┘
 - Semgrep (`p/javascript`, `p/html`, `p/secrets`) — SAST for insecure code patterns
 - Gitleaks — secret scanning across all commits on the branch
 
-**`playwright`** — full 64-test Playwright suite against a local `npx serve` server (started automatically by `playwright.config.js`).
+**`playwright`** — full 64-test Playwright suite against a local `serve` server (started automatically by `playwright.config.js`).
 
 ### On merge to master (`deploy.yml`)
 
