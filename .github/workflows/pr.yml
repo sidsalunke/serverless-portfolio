@@ -228,3 +228,40 @@ jobs:
           name: playwright-report-pr-${{ matrix.group.name }}
           path: playwright-report/
           retention-days: 7
+
+  # ── Job 4: Lighthouse budget (SEO, accessibility, best practices, speed) ──
+  #
+  # Guardrail against score regressions. Lighthouse used to run only after a
+  # deploy, with warnings nobody saw, so a change that hurt SEO or speed could
+  # merge and ship. This runs the same audit against a local server on every
+  # PR and fails below the budget in .lighthouserc.pr.json. The median of
+  # three runs is asserted, so one slow run on a busy runner does not fail it.
+  lighthouse:
+    name: Lighthouse budget
+    needs: static-tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Lighthouse CI against a local server
+        run: |
+          npx --yes @lhci/cli@0.15.1 autorun \
+            --config=.lighthouserc.pr.json \
+            --upload.target=filesystem \
+            --upload.outputDir=.lighthouseci-report
+
+      - name: Upload Lighthouse reports on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: lighthouse-report-pr-${{ github.event.pull_request.number }}
+          path: .lighthouseci-report/
+          retention-days: 7

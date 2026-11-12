@@ -103,3 +103,7 @@ infra/.terraform/
 tfplan
 *.tfvars
 *.tfvars.json
+
+# Lighthouse CI working directories (local runs and CI reports)
+.lighthouseci/
+.lighthouseci-report/
