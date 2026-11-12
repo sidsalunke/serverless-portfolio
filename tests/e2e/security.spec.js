@@ -100,3 +100,35 @@ for (const { name, path } of PAGES) {
     });
   });
 }
+
+/**
+ * Real response headers, set by CloudFront (infra/main.tf). The tests above
+ * check <meta> tags, which is all a local static server can offer, but
+ * browsers ignore several policies unless they arrive as HTTP headers
+ * (Permissions-Policy, frame-ancestors, HSTS). These run against the live
+ * site only: BASE_URL is set by the e2e-live job after each deploy.
+ */
+const LIVE_PATHS = ['/', '/testing', '/ai-engineering', '/writing', '/writing/rollback-static-site-s3-cloudfront'];
+
+for (const path of LIVE_PATHS) {
+  test.describe(`Response headers from the CDN — ${path}`, () => {
+    test.skip(!process.env.BASE_URL, 'response headers are set by CloudFront; live site only');
+
+    test('security headers are sent', async ({ request }) => {
+      const headers = (await request.get(path)).headers();
+
+      expect(headers['content-security-policy']).toContain("default-src 'none'");
+      expect(headers['content-security-policy']).toContain("frame-ancestors 'none'");
+      expect(headers['strict-transport-security']).toMatch(/max-age=31536000/);
+      expect(headers['x-content-type-options']).toBe('nosniff');
+      expect(headers['x-frame-options']).toBe('DENY');
+      expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+
+      const permissions = headers['permissions-policy'];
+      expect(permissions).toBeTruthy();
+      for (const feature of ['camera', 'microphone', 'geolocation', 'payment']) {
+        expect(permissions).toContain(`${feature}=()`);
+      }
+    });
+  });
+}
