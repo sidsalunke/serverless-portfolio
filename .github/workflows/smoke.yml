@@ -1,0 +1,106 @@
+name: Scheduled smoke test
+
+# Uptime check. The deploy workflow only tests the live site right after a
+# merge, so an outage between merges (expired certificate, DNS change, broken
+# CloudFront function, a manual change in AWS) went unnoticed until someone
+# visited the site. This runs a browser smoke test against production once a
+# day and opens an issue when it fails.
+#
+# It never deploys or rolls back: it has no AWS credentials.
+#
+# GitHub disables scheduled workflows in a public repository after 60 days
+# without repository activity. Re-enable it from the Actions tab if that
+# happens.
+on:
+  schedule:
+    # 02:23 UTC daily. Off the hour, when scheduled runs start late less often.
+    - cron: '23 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke-production
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Smoke test — live site
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # issues: write lets the job report a failure as an issue.
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # Functional, SEO and security-header specs only. The visual snapshot
+      # spec is left out: a font-rendering difference is not an outage.
+      - name: Smoke test — live site
+        run: >
+          npx playwright test --project=chromium
+          tests/e2e/navigation.spec.js
+          tests/e2e/writing.spec.js
+          tests/e2e/seo.spec.js
+          tests/e2e/robots-sitemap.spec.js
+          tests/e2e/security.spec.js
+        env:
+          BASE_URL: https://portfolio.sidsalunke.info
+
+      - name: Upload report on failure
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: smoke-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 14
+
+      # One open issue at a time: a repeat failure adds a comment instead of
+      # opening a new issue every day.
+      - name: Open or update an issue on failure
+        if: failure()
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const title = 'Scheduled smoke test is failing on the live site';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = `The scheduled smoke test failed against https://portfolio.sidsalunke.info.\n\nRun: ${runUrl}\n\nThe Playwright report is attached to that run as an artifact.`;
+
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+            const existing = open.find((i) => !i.pull_request && i.title === title);
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+              });
+            }

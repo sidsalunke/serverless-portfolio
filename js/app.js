@@ -106,6 +106,36 @@ function initPortfolio() {
     navLinks.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', closeMenu);
     });
+
+    /* Keyboard support for the drawer.
+       - Opening moves focus to the first link. The hamburger sits after the
+         links in the DOM, so without this the next Tab would leave the nav
+         and skip the menu that was just opened.
+       - Escape closes the drawer and returns focus to the hamburger.
+       - Tabbing out of the nav closes the drawer, so it never stays open
+         over content that has focus behind it. */
+    var isOpen = function () {
+      return navLinks.classList.contains('nav__links--open');
+    };
+
+    hamburger.addEventListener('click', function () {
+      if (!isOpen()) return;
+      var firstLink = navLinks.querySelector('a');
+      if (firstLink) firstLink.focus();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen()) {
+        closeMenu();
+        hamburger.focus();
+      }
+    });
+
+    if (nav) {
+      nav.addEventListener('focusout', function (e) {
+        if (isOpen() && e.relatedTarget && !nav.contains(e.relatedTarget)) closeMenu();
+      });
+    }
   }
 
   /* ── Pipeline: interactive nodes (testing.html) ── */

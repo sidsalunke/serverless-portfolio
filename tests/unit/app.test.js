@@ -128,6 +128,28 @@ describe('Hamburger menu', () => {
     document.querySelector('.nav__link').click();
     expect(document.getElementById('nav-links').classList).not.toContain('nav__links--open');
   });
+
+  test('moves focus to the first link when opened', () => {
+    document.getElementById('nav-hamburger').click();
+    expect(document.activeElement).toBe(document.querySelector('.nav__link'));
+  });
+
+  test('Escape closes the drawer and returns focus to the hamburger', () => {
+    const btn = document.getElementById('nav-hamburger');
+    btn.click();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(document.getElementById('nav-links').classList).not.toContain('nav__links--open');
+    expect(btn.getAttribute('aria-expanded')).toBe('false');
+    expect(document.querySelector('.nav__backdrop')).toBeNull();
+    expect(document.activeElement).toBe(btn);
+  });
+
+  test('Escape does nothing while the drawer is closed', () => {
+    const btn = document.getElementById('nav-hamburger');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(btn.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).not.toBe(btn);
+  });
 });
 
 // ── Nav scroll ─────────────────────────────────────────────────

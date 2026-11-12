@@ -1041,10 +1041,18 @@ button.exp__header {
     padding: 4rem 3.2rem;
     gap: 2.4rem;
     transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* visibility: hidden takes the closed drawer's links out of the tab
+       order; without it a keyboard user tabs through links that are off
+       screen. The delay keeps the drawer visible while it slides out. */
+    visibility: hidden;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.3s;
     z-index: 1000;
   }
-  .nav__links--open { transform: translateX(0); }
+  .nav__links--open {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s;
+  }
   .nav__link {
     font-size: 2rem;
     width: 100%;
@@ -1153,6 +1161,26 @@ button.exp__header {
   outline-offset: 3px;
   border-radius: var(--radius-sm);
 }
+
+/* Skip link: the first focusable element on every page. Off-screen until a
+   keyboard user tabs to it, then it sits above the fixed nav. Lets keyboard
+   and screen-reader users jump past the navigation (WCAG 2.4.1). */
+.skip-link {
+  position: fixed;
+  top: 0.8rem;
+  left: 0.8rem;
+  z-index: 2000;
+  padding: 1.2rem 1.8rem;
+  background: var(--bg-1);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: max(1.6rem, 16px);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-250%);
+}
+.skip-link:focus { transform: translateY(0); }
 
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce) {

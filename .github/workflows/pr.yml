@@ -30,7 +30,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Unit tests
         run: npm run test:unit
@@ -141,7 +141,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       # ── Software Composition Analysis: known CVEs in dependencies ─────────
       # --audit-level=high blocks on High/Critical only; Medium is reported but
@@ -210,7 +210,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       # Browser binaries are the slow part of "install Playwright browsers"
       # (~100+ MB Chromium download); caching them keyed on the installed
@@ -264,6 +264,12 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
+          cache: 'npm'
+
+      # Installs the pinned static server (serve) that .lighthouserc.pr.json
+      # starts through `npm run serve:lhci`.
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run Lighthouse CI against a local server
         run: |

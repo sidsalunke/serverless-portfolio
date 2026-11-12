@@ -190,6 +190,60 @@ describe('Lighthouse budgets', () => {
   });
 });
 
+// The skip link must be the first focusable element, and its target must
+// exist, on every page including the 404 page.
+describe('skip link', () => {
+  const pages = [...sitemapUrls.map(fileFor), '404.html'];
+
+  test.each(pages)('%s: first focusable element skips to <main>', (file) => {
+    const doc = parse(file);
+    const first = doc.body.querySelector('a[href], button, input, select, textarea, [tabindex]');
+    expect(first.getAttribute('class')).toBe('skip-link');
+    expect(first.getAttribute('href')).toBe('#main-content');
+    expect(first.textContent.trim()).toBe('Skip to main content');
+    expect(doc.querySelectorAll('main#main-content').length).toBe(1);
+  });
+});
+
+// The local static server is a pinned devDependency, so PR checks do not
+// download whatever `npx serve` resolves to on the day.
+describe('local static server', () => {
+  const pkg = JSON.parse(read('package.json'));
+
+  test('serve is pinned to an exact version', () => {
+    expect(pkg.devDependencies.serve).toMatch(/^\d+\.\d+\.\d+$/);
+  });
+
+  test('Playwright and Lighthouse start it through npm scripts', () => {
+    expect(pkg.scripts.start).toMatch(/^serve /);
+    expect(pkg.scripts['serve:lhci']).toMatch(/^serve -l 4173 /);
+    expect(read('playwright.config.js')).toMatch(/command: 'npm start'/);
+    expect(JSON.parse(read('.lighthouserc.pr.json')).ci.collect.startServerCommand).toBe('npm run serve:lhci');
+  });
+});
+
+describe('smoke.yml', () => {
+  const workflow = read('.github/workflows/smoke.yml').replace(/\r\n/g, '\n');
+
+  test('runs on a daily schedule against production', () => {
+    expect(workflow).toMatch(/schedule:\n(?:\s*#.*\n)*\s*- cron: '\d+ \d+ \* \* \*'/);
+    expect(workflow).toMatch(/BASE_URL: https:\/\/portfolio\.sidsalunke\.info/);
+  });
+
+  test('every spec it names exists, and the visual spec is not one of them', () => {
+    const specs = [...workflow.matchAll(/tests\/e2e\/[\w-]+\.spec\.js/g)].map((m) => m[0]);
+    expect(specs.length).toBeGreaterThan(0);
+    specs.forEach((spec) => expect(fs.existsSync(path.join(root, spec))).toBe(true));
+    expect(specs).not.toContain('tests/e2e/visual.spec.js');
+  });
+
+  test('reports a failure as an issue and holds no AWS credentials', () => {
+    expect(workflow).toMatch(/issues: write/);
+    expect(workflow).toMatch(/issues\.create\(/);
+    expect(workflow).not.toMatch(/configure-aws-credentials|id-token/);
+  });
+});
+
 describe('deploy.yml', () => {
   const workflow = read('.github/workflows/deploy.yml').replace(/\r\n/g, '\n');
   const cacheHeaders = (block) => [...block.matchAll(/--cache-control "([^"]+)"/g)].map((m) => m[1]);
