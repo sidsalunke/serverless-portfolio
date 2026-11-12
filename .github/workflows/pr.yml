@@ -159,8 +159,8 @@ jobs:
       # referenced by a movable tag.
       - name: SAST scan (Semgrep)
         run: |
-          python3 -m pip install --quiet --user semgrep==1.184.0
-          python3 -m semgrep scan --error --metrics=off \
+          pipx install --quiet semgrep==1.184.0
+          semgrep scan --error --metrics=off \
             --config p/javascript \
             --config p/html \
             --config p/secrets \
