@@ -1855,18 +1855,26 @@ button.exp__header {
    ============================================================ */
 .post__container { max-width: 78rem; }
 
-.post__header { padding-bottom: 5.6rem; }
+/* .tq-hero and .container both add side padding. Stacked, they indent the
+   header twice as far as the article body below it, which is most visible
+   on phones. The container's padding alone keeps the two aligned. */
+.post__header { padding-left: 0; padding-right: 0; padding-bottom: 5.6rem; }
+
+/* Reading text is floored in px: the root font-size drops to 56.25% on
+   small screens, which would otherwise take rem-sized body copy below a
+   comfortable 16px. */
+.post__header .tq-hero__sub { font-size: max(1.75rem, 16px); line-height: 1.7; margin-bottom: 3.2rem; }
 
 .post__title { font-size: clamp(3.2rem, 5.2vw, 5rem); line-height: 1.1; }
 
 .post__back { color: inherit; text-decoration: underline; text-underline-offset: 0.3rem; }
 .post__back:hover { color: var(--text-1); }
 
-.post__meta { font-size: 1.4rem; color: var(--text-4); }
+.post__meta { font-size: max(1.4rem, 13px); color: var(--text-4); }
 
 .post__body-section { padding-top: 6.4rem; }
 
-.post__body { font-size: 1.75rem; line-height: 1.75; color: var(--text-2); }
+.post__body { font-size: max(1.75rem, 16px); line-height: 1.75; color: var(--text-2); }
 .post__body p,
 .post__body ul,
 .post__body pre { margin-bottom: 2.4rem; }
@@ -1917,7 +1925,7 @@ button.exp__header {
   line-height: 1.6;
   tab-size: 2;
 }
-.post__body pre code { background: none; padding: 0; font-size: 1.4rem; white-space: pre; }
+.post__body pre code { background: none; padding: 0; font-size: max(1.4rem, 13px); white-space: pre; }
 
 .post__body .post__timeline { list-style: none; padding-left: 0; border-left: 2px solid var(--border); }
 .post__body .post__timeline li { padding-left: 2rem; }
@@ -1933,15 +1941,17 @@ button.exp__header {
 .post-list__item { padding: 3.2rem 0; border-top: 1px solid var(--border); }
 .post-list__item:last-child { border-bottom: 1px solid var(--border); }
 
-.post-list__meta { font-size: 1.35rem; color: var(--text-4); margin-bottom: 0.8rem; }
+.post-list__meta { font-size: max(1.35rem, 13px); line-height: 1.6; color: var(--text-4); margin-bottom: 0.8rem; }
 
 .post-list__title { font-size: clamp(2rem, 2.6vw, 2.6rem); font-weight: 700; line-height: 1.3; margin-bottom: 1rem; }
 .post-list__title a { color: var(--text-1); }
 .post-list__title a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 0.4rem; }
 
-.post-list__summary { font-size: 1.65rem; line-height: 1.65; color: var(--text-3); }
+.post-list__summary { font-size: max(1.65rem, 16px); line-height: 1.65; color: var(--text-3); }
 
 @media (max-width: 640px) {
-  .post__body { font-size: 1.65rem; }
+  .post__body h2 { font-size: 2.6rem; margin-top: 5.6rem; }
+  .post__body h3 { font-size: 2.1rem; }
+  .post-list__title { font-size: 2.2rem; }
   .post__body pre { padding: 1.6rem; border-radius: var(--radius-sm); }
 }
