@@ -1853,10 +1853,6 @@ button.exp__header {
    scrollable code blocks. Uses the same tokens as the rest of the
    site, so light and dark themes need no extra rules.
    ============================================================ */
-.tq-card__link { color: var(--accent); text-decoration: underline; text-underline-offset: 0.3rem; }
-.tq-card__link:hover { color: var(--accent-dark); }
-.tq-card__link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-
 .post__container { max-width: 78rem; }
 
 /* .tq-hero and .container both add side padding. Stacked, they indent the
