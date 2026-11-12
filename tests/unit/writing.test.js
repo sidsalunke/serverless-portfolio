@@ -29,8 +29,11 @@ describe.each(PAGES)('$file', ({ file, url, type }) => {
     doc = new DOMParser().parseFromString(fs.readFileSync(path.join(root, file), 'utf8'), 'text/html');
   });
 
-  test('title includes the author name', () => {
-    expect(doc.title).toMatch(/Siddharth Salunke/);
+  // Long article headlines drop the author suffix so the title fits the
+  // width search results display; the author is in the byline and schema.
+  test('title is 30-60 characters', () => {
+    expect(doc.title.length).toBeGreaterThanOrEqual(30);
+    expect(doc.title.length).toBeLessThanOrEqual(60);
   });
 
   test('meta description is 50-160 characters', () => {

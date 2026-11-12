@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "undersized-ui-text",
+        "value": "*",
+        "files": [
+          "writing.html"
+        ],
+        "createdAt": "2026-11-11T22:06:11.690Z",
+        "reason": "agent: false positive. Detector reads the mobile root font-size (html 56.25% = 9px) as each element's size; it reports 9px even for the h1. Rendered text measured with Playwright at 320-1280px is 12px minimum after PR #81."
+      }
+    ]
+  }
+}

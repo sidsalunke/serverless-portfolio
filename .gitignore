@@ -83,6 +83,10 @@ skills-lock.json
 # Claude Code
 .claude/
 
+# impeccable design-lint: config.json (shared ignore rules) is tracked,
+# the per-machine scan cache is not.
+.impeccable/hook.cache.json
+
 # Generated badge SVGs — committed only to the `badges` orphan branch
 # (README pulls them via raw.githubusercontent.com/.../badges/...), never
 # tracked on master. Keeping them untracked here avoids update-badges in
