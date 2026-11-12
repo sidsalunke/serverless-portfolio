@@ -52,7 +52,7 @@
   <!-- ── CSP (same policy as index.html) ──────────────────────────────────── -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'none';
-                 script-src 'self' 'sha256-ohlc98rSlXyE4og+4moML50wS+X2XKr5tqySt8ujkeE=';
+                 script-src 'self';
                  style-src 'self' 'unsafe-inline';
                  font-src 'self';
                  img-src 'self' data:;
@@ -68,23 +68,14 @@
 
   <link rel="preload" href="js/app.js" as="script" fetchpriority="high">
   <!--
-    Theme init — applies a stored "dark" preference before first paint so a
-    returning dark-mode user never sees a flash of the light default. Inline
-    and synchronous (not in app.js, which loads with `defer`) specifically so
-    it runs before the stylesheet below paints anything. CSP allows it via
-    the sha256 hash on script-src (see the meta tag above); if this script's
-    contents change, the hash must be recomputed and updated there and in
-    infra/main.tf.
+    Theme init: applies the stored theme, or the system preference when
+    nothing is stored, before first paint, so a dark-mode visitor never sees
+    a flash of the light default. Synchronous and in <head> on purpose
+    (app.js loads with `defer`, which would be too late). It is an external
+    file, not an inline script, so the CSP needs no hash for it and its
+    contents can change without touching the policy.
   -->
-  <script>
-    (function () {
-      try {
-        if (localStorage.getItem('theme') === 'dark') {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        }
-      } catch (e) {}
-    })();
-  </script>
+  <script src="/js/theme-init.js"></script>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>

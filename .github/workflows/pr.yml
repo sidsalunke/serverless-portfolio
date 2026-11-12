@@ -179,6 +179,37 @@ jobs:
           # For public/personal repos the free tier covers this.
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
+  # ── Terraform: formatting and validity ───────────────────────────────────
+  #
+  # Terraform is applied by hand, not by CI, so a syntax error or an invalid
+  # argument in infra/ used to surface only at the next manual apply. This
+  # checks formatting and validates the configuration on every PR. It needs
+  # no AWS credentials: `init -backend=false` skips the S3 state backend and
+  # `validate` never contacts AWS.
+  terraform:
+    name: Terraform fmt / validate
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: '1.15.8'
+          terraform_wrapper: false
+
+      - name: Check formatting
+        run: terraform -chdir=infra fmt -check -diff
+
+      - name: Initialise providers (no backend)
+        run: terraform -chdir=infra init -backend=false -input=false
+
+      - name: Validate configuration
+        run: terraform -chdir=infra validate -no-color
+
   # ── Job 3: Playwright (only if static tests AND security scan pass) ──────
   #
   # Split by named spec-group (not Playwright's numeric --shard) so each
