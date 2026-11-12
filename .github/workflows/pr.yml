@@ -156,13 +156,14 @@ jobs:
       #
       # This runs the Semgrep CLI directly at a pinned version. The
       # semgrep/semgrep-action wrapper used before is archived and was
-      # referenced by a movable tag.
+      # referenced by a movable tag. The old config also listed p/html, a
+      # ruleset the Semgrep registry does not serve (HTTP 404). The current
+      # CLI rejects an unknown ruleset, so it is dropped here.
       - name: SAST scan (Semgrep)
         run: |
           pipx install --quiet semgrep==1.184.0
           semgrep scan --error --metrics=off \
             --config p/javascript \
-            --config p/html \
             --config p/secrets \
             --exclude node_modules \
             .
