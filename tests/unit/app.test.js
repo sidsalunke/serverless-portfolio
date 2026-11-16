@@ -90,6 +90,48 @@ describe('Theme toggle', () => {
   });
 });
 
+// ── Theme: following the system preference ────────────────────
+describe('Theme follows the system preference while nothing is stored', () => {
+  let fireSystemChange;
+
+  beforeEach(() => {
+    window.matchMedia = jest.fn().mockReturnValue({
+      matches: false,
+      addEventListener: (type, handler) => { fireSystemChange = handler; },
+    });
+    jest.resetModules();
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.clear();
+    document.body.innerHTML = MINIMAL_DOM;
+    ({ initPortfolio } = require('../../js/app.js'));
+    initPortfolio();
+  });
+
+  afterEach(() => { delete window.matchMedia; });
+
+  test('system switches to dark: page goes dark and the toggle reflects it', () => {
+    fireSystemChange({ matches: true });
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    expect(document.getElementById('theme-toggle').getAttribute('aria-pressed')).toBe('true');
+    expect(localStorage.getItem('theme')).toBeNull();
+  });
+
+  test('system switches back to light: page goes light', () => {
+    fireSystemChange({ matches: true });
+    fireSystemChange({ matches: false });
+    expect(document.documentElement.getAttribute('data-theme')).toBeNull();
+    expect(document.getElementById('theme-toggle').getAttribute('aria-pressed')).toBe('false');
+  });
+
+  test('a choice made with the toggle is not overridden by the system', () => {
+    const btn = document.getElementById('theme-toggle');
+    btn.click(); // dark, stored
+    btn.click(); // light, stored
+    fireSystemChange({ matches: true });
+    expect(document.documentElement.getAttribute('data-theme')).toBeNull();
+  });
+});
+
 // ── Hamburger menu ─────────────────────────────────────────────
 describe('Hamburger menu', () => {
   test('opens nav drawer on click', () => {

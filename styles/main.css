@@ -1,11 +1,11 @@
 /* ============================================================
    DESIGN TOKENS
-   Light is the default theme (see the toggle in the nav); dark is an
-   explicit opt-in via [data-theme="dark"] on <html>, set by js/app.js
-   and persisted to localStorage. The theme-init inline <script> in
-   <head> (ahead of this stylesheet) applies a stored "dark" choice
-   before first paint, so returning dark-mode users don't see a flash
-   of light before it switches.
+   Light is the base theme; dark is [data-theme="dark"] on <html>.
+   js/theme-init.js, loaded in <head> ahead of this stylesheet, sets
+   that attribute before first paint from the visitor's stored choice
+   or, when nothing is stored, the system preference
+   (prefers-color-scheme), so nobody sees a flash of the wrong theme.
+   js/app.js wires up the toggle and persists the choice.
    ============================================================ */
 :root {
   --bg-0:          #ffffff;

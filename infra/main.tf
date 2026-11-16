@@ -103,8 +103,8 @@ resource "aws_s3_bucket" "site" {
   bucket = var.domain_name
 
   tags = {
-    Project     = "portfolio"
-    ManagedBy   = "terraform"
+    Project   = "portfolio"
+    ManagedBy = "terraform"
   }
 }
 
@@ -245,8 +245,8 @@ resource "aws_cloudfront_distribution" "site" {
   # a long round trip to Europe. PriceClass_200 adds the Middle East and Asia
   # but still excludes Australia. At this site's traffic the difference in
   # cost is cents per month, and the budget alarm below covers surprises.
-  price_class         = "PriceClass_All"
-  http_version        = "http2and3" # HTTP/3 (QUIC) for clients that support it
+  price_class  = "PriceClass_All"
+  http_version = "http2and3" # HTTP/3 (QUIC) for clients that support it
 
   origin {
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
@@ -372,8 +372,8 @@ resource "aws_s3_bucket_policy" "site" {
 # The thumbprint is GitHub's well-known TLS certificate fingerprint, published
 # at https://docs.github.com/en/actions/deployment/security-hardening-your-deployments
 resource "aws_iam_openid_connect_provider" "github" {
-  url             = "https://token.actions.githubusercontent.com"
-  client_id_list  = ["sts.amazonaws.com"]
+  url            = "https://token.actions.githubusercontent.com"
+  client_id_list = ["sts.amazonaws.com"]
 
   # SHA-1 thumbprint of the GitHub OIDC TLS certificate.
   # AWS uses this to verify tokens are genuinely from GitHub.
@@ -448,7 +448,7 @@ data "aws_iam_policy_document" "github_actions_deploy" {
 
     actions = [
       "cloudfront:CreateInvalidation",
-      "cloudfront:GetInvalidation",  # required for `aws cloudfront wait invalidation-completed`
+      "cloudfront:GetInvalidation", # required for `aws cloudfront wait invalidation-completed`
     ]
 
     resources = [aws_cloudfront_distribution.site.arn]

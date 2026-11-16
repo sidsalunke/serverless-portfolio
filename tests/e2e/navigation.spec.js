@@ -107,6 +107,46 @@ for (const { name, path, currentLabel } of SUB_PAGES) {
   });
 }
 
+// ── Theme: stored choice first, then the system preference ──
+// The theme is set by /js/theme-init.js before first paint. A failure here
+// can also mean the script did not load (path, deploy sync or CSP).
+test.describe('Theme on first paint', () => {
+  const theme = (page) => page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+
+  test('system dark, nothing stored: dark', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/writing');
+    expect(await theme(page)).toBe('dark');
+    await expect(page.getByRole('button', { name: 'Switch to light theme' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('system light, nothing stored: light', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/writing');
+    expect(await theme(page)).toBeNull();
+  });
+
+  test('a stored light choice wins over a dark system, across pages', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Switch to light theme' }).click();
+    expect(await theme(page)).toBeNull();
+
+    await page.goto('/writing/rollback-static-site-s3-cloudfront');
+    expect(await theme(page)).toBeNull();
+  });
+
+  test('no script is blocked by the Content Security Policy', async ({ page }) => {
+    const violations = [];
+    page.on('console', (msg) => {
+      if (/Content Security Policy/i.test(msg.text())) violations.push(msg.text());
+    });
+    await page.goto('/');
+    await page.goto('/writing/rollback-static-site-s3-cloudfront');
+    expect(violations).toEqual([]);
+  });
+});
+
 // ── Skip link (WCAG 2.4.1 Bypass Blocks) ──
 for (const path of ['/', '/testing', '/ai-engineering', '/writing', '/writing/rollback-static-site-s3-cloudfront']) {
   test.describe(`Skip link — ${path}`, () => {
